@@ -5,9 +5,10 @@ class BotCommand:
     
     def as_dict(self):
         return {"name": self.name, "description": self.description}
+    
 
 class PhotoAttachmentRequestPayload:
-    def __init__(self, url: str | None):
+    def __init__(self, url: "str | None"):
         self.url = url
     
     def as_dict(self):
