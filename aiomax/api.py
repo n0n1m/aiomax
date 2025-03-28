@@ -1,45 +1,135 @@
-import requests
-from . import classes
+import asyncio
+from typing import *
+import aiohttp
+from .classes import *
 
 class Bot:
-    def __init__(self, access_token: str):
+    def __init__(self,
+        access_token: str,
+        command_prefixes: "str | list[str]" = "/",
+        mention_prefix: bool = True,
+        case_sensitive: bool = True
+    ):
         '''
         Bot init
         '''
-        self.session = requests.Session()
-        self.session.params = {
-            "access_token": access_token
+        self.access_token: str = access_token
+        self.session = None
+        self.polling = False
+        self.handlers: dict[str, list] = {
+            'message_created': [],
+            'on_ready': []
         }
+        self.commands: dict[str, list] = {}
+        self.command_prefixes: "str | list[str]" = command_prefixes
+        self.mention_prefix: bool = mention_prefix
+        self.case_sensitive: bool = case_sensitive
+        
+        self.id: "int | None" = None
+        self.username: "str | None" = None
+        self.name: "str | None" = None
     
 
     async def get(self, *args, **kwargs):
         '''
         Sends a GET request to the API.
         '''
-        return self.session.get(*args, **kwargs)
+        if self.session == None:
+            raise Exception("Session is not initialized")
+        
+        params = kwargs.get('params', {})
+        params['access_token'] = self.access_token
+        if 'params' in kwargs:
+            del kwargs['params']
+        return await self.session.get(*args, params=params, **kwargs)
     
     
     async def post(self, *args, **kwargs):
         '''
         Sends a POST request to the API.
         '''
-        return self.session.post(*args, **kwargs)
+        if self.session == None:
+            raise Exception("Session is not initialized")
+        
+        params = kwargs.get('params', {})
+        params['access_token'] = self.access_token
+        if 'params' in kwargs:
+            del kwargs['params']
+        return await self.session.post(*args, params=params, **kwargs)
+    
+    
+    async def patch(self, *args, **kwargs):
+        '''
+        Sends a PATCH request to the API.
+        '''
+        if self.session == None:
+            raise Exception("Session is not initialized")
+        
+        params = kwargs.get('params', {})
+        params['access_token'] = self.access_token
+        if 'params' in kwargs:
+            del kwargs['params']
+        return await self.session.patch(*args, params=params, **kwargs)
     
 
-    async def me(self):
+    # decorators
+
+    def on_message(self):
+        '''
+        Decorator for receiving messages.
+        '''
+        def decorator(func): 
+            self.handlers["message_created"].append(func)
+            return func
+        return decorator
+    
+
+    def on_ready(self):
+        '''
+        Decorator for receiving messages.
+        '''
+        def decorator(func): 
+            self.handlers["on_ready"].append(func)
+            return func
+        return decorator
+    
+
+    def on_command(self, name: str):
+        '''
+        Decorator for receiving messages.
+        '''
+        def decorator(func): 
+            check_name = name.lower() if not self.case_sensitive else name
+            if check_name not in self.commands:
+                self.commands[check_name] = []
+            self.commands[check_name].append(func)
+            return func
+        return decorator
+        
+
+    # send requests
+
+    async def me(self) -> User:
         '''
         Returns info about the bot.
         '''
-        request = await self.get(f"https://botapi.max.ru/me")
-        return request.json()
-    
+        response = await self.get(f"https://botapi.max.ru/me")
+        user = await response.json()
+        user = User.from_json(user)
+
+        # caching info
+        self.id = user.user_id
+        self.username = user.username
+        self.name = user.name
+        return user
+
 
     async def patch_me(
         self,
         name: "str | None" = None,
         description: "str | None" = None,
-        commands: "list[classes.BotCommand] | None" = None,
-        photo: classes.PhotoAttachmentRequestPayload = None
+        commands: "list[BotCommand] | None" = None,
+        photo: PhotoAttachmentRequestPayload = None
     ):
         '''
         Allows you to change info about the bot. Fill in only the fields that
@@ -63,9 +153,13 @@ class Bot:
             "photo": photo
         }
         payload = {k: v for k, v in payload.items() if v}
+        
+        # caching info
+        if 'name' in payload:
+            self.name = payload['name']
 
-        response = self.session.patch(f"https://botapi.max.ru/me", json=payload)
-        return response.json()
+        response = await self.patch(f"https://botapi.max.ru/me", json=payload)
+        return await response.json()
     
     
     async def get_chats(self, count: "int | None" = None, marker: "int | None" = None):
@@ -85,7 +179,7 @@ class Bot:
 
         response = await self.get("https://botapi.max.ru/chats", params=params)
 
-        return response.json()
+        return await response.json()
     
     
     async def get_chat(self, chatId: int):
@@ -94,15 +188,15 @@ class Bot:
 
         :param chatId: The ID of the chat.
         '''
-        response = await self.get("https://botapi.max.ru/chats", params={"chatId": chatId})
+        response = await self.get(f"https://botapi.max.ru/chats/{chatId}")
 
-        return response.json()
+        return await response.json()
     
 
     async def patch_chat(
         self,
         chatId: int,
-        icon: classes.PhotoAttachmentRequestPayload | None = None,
+        icon: PhotoAttachmentRequestPayload | None = None,
         title: str | None = None,
         pin: str | None = None,
         notify: bool | None = None
@@ -126,15 +220,16 @@ class Bot:
         }
         payload = {k: v for k, v in payload.items() if v}
 
-        response = self.session.patch(
+        response = await self.patch(
             f"https://botapi.max.ru/chats/{chatId}", json=payload
         )
-        return response.json()
+        return await response.json()
 
 
     async def post_action(self, chatId: int, action: str):
         '''
-        Allows you to show a badge about performing an action in a chat, like "typing".
+        Allows you to show a badge about performing an action in a chat, like
+        "typing". Also allows for marking messages as read.
         
         :param chatId: ID of the chat to do the action in
         :param action: Constant from aiomax.types.Actions
@@ -142,4 +237,152 @@ class Bot:
 
         response = await self.post(f"https://botapi.max.ru/chats/{chatId}/actions", json={"action": action})
 
-        return response.json()
+        return await response.json()
+
+
+    async def send_message(self,
+        text: str,
+        chatId: "int | None" = None,
+        userId: "int | None" = None,
+        format: "Literal['markdown', 'html'] | None" = None,
+        reply_to: "int | None" = None,
+        notify: bool = True,
+        disable_link_preview: bool = True
+        # todo attachments
+    ) -> Message:
+        '''
+        Allows you to send a message to a user or in a chat.
+        
+        :param chatId: Chat ID to send the message in.
+        :param userId: User ID to send the message to.
+        :param action: Constant from aiomax.types.Actions
+        '''
+        # error checking
+        assert len(text) < 4000, "Message must be less than 4000 characters"
+        assert chatId or userId, "Either chatId or userId must be provided"
+        assert not (chatId and userId), "Both chatId and userId cannot be provided"
+
+        # sending
+        params = {
+            "chat_id": chatId,
+            "user_id": userId,
+            "disable_link_preview": str(disable_link_preview).lower()
+        }
+        body = {
+            "text": text,
+            "format": format,
+            "notify": notify
+        }
+        params = {k: v for k, v in params.items() if v}
+
+        # replying
+        if reply_to:
+            body['link'] = {
+                "type": 'reply',
+                "mid": reply_to
+            }
+
+        response = await self.post(
+            f"https://botapi.max.ru/messages", params=params, json=body
+        )
+        if response.status != 200:
+            raise Exception(await response.text())
+        
+        return Message.from_json(await response.json())
+
+
+    async def get_updates(self, limit: int = 100, marker: "int | None" = None) -> tuple[int, dict]:
+        '''
+        Get bot updates / events. If `marker` is provided, will return updates
+        newer than it. If not, will return all updates since last time this was called.
+        
+        :param marker: Pointer to the next page of data.
+        '''
+        payload = {
+            "limit": limit,
+            "marker": marker
+        }
+        payload = {k: v for k, v in payload.items() if v}
+
+        response = await self.get(
+            f"https://botapi.max.ru/updates", params=payload
+        )
+
+        return await response.json()
+    
+
+    async def handle_update(self, update: dict):
+        '''
+        Handles an update.
+        '''
+        update_type = update['update_type']
+
+        if update_type == "message_created":
+            message = Message.from_json(update["message"])
+            message.user_locale = update.get('user_locale', None)
+
+            for i in self.handlers[update_type]:
+                await i(message)
+
+            # handling commands
+            prefixes = self.command_prefixes if\
+                hasattr(self.command_prefixes, '__iter__') else\
+                [self.command_prefixes]
+            prefixes = list(prefixes)
+
+            if self.mention_prefix:
+                prefixes.append(f'@{self.username} ')
+                prefixes.append(f'@{self.username}')
+
+            for prefix in prefixes:
+                if len(message.body.text) <= len(prefix):
+                    continue
+
+                prefix = prefix if self.case_sensitive else prefix.lower()
+                if not message.body.text.startswith(prefix):
+                    continue
+                
+                command = message.body.text[len(prefix):]
+                name = command.split()[0]
+                check_name = name if self.case_sensitive else name.lower()
+                args = ' '.join(command.split()[1:])
+                
+                if check_name not in self.commands:
+                    continue
+                
+                for i in self.commands[check_name]:
+                    await i(message, name, args)
+                    return
+    
+
+    async def start_polling(self):
+        '''
+        Starts polling.
+
+        Cannot be called twice.
+        '''
+        self.polling = True
+
+        async with aiohttp.ClientSession() as session:
+            self.session = session
+
+            # self info (this will cache the info automatically)
+            await self.me()
+            
+            # ready event
+            for i in self.handlers['on_ready']:
+                await i()
+
+            while self.polling:
+                try:
+                    updates = await self.get_updates()
+
+                    for update in updates["updates"]:
+                        await self.handle_update(update)
+
+                except Exception as e:
+                    print(f'Error while handling updates: {e}')
+                    await asyncio.sleep(3)
+
+        self.session = None
+        self.polling = False
