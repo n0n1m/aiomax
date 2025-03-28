@@ -85,6 +85,20 @@ class Bot:
             del kwargs['params']
         return await self.session.put(*args, params=params, **kwargs)
     
+    
+    async def delete(self, *args, **kwargs):
+        '''
+        Sends a DELETE request to the API.
+        '''
+        if self.session == None:
+            raise Exception("Session is not initialized")
+        
+        params = kwargs.get('params', {})
+        params['access_token'] = self.access_token
+        if 'params' in kwargs:
+            del kwargs['params']
+        return await self.session.delete(*args, params=params, **kwargs)
+    
 
     # decorators
 
@@ -319,7 +333,7 @@ class Bot:
         # todo attachments
     ) -> Message:
         '''
-        Allows you to send a message to a user or in a chat.
+        Allows you to edit a message.
         
         :param messageId: ID of the message to edit
         :param text: Message text. Up to 4000 characters
@@ -349,6 +363,30 @@ class Bot:
 
         response = await self.put(
             f"https://botapi.max.ru/messages", params=params, json=body
+        )
+        if response.status != 200:
+            raise Exception(await response.text())
+        
+        json = await response.json()
+        if not json['success']:
+            raise Exception(json['message'])
+
+
+    async def delete_message(self,
+        messageId: int
+    ) -> Message:
+        '''
+        Allows you to delete a message in chat.
+        
+        :param messageId: ID of the message to delete
+        '''
+        # editing
+        params = {
+            "message_id": messageId
+        }
+
+        response = await self.delete(
+            f"https://botapi.max.ru/messages", params=params
         )
         if response.status != 200:
             raise Exception(await response.text())
