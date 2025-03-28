@@ -396,6 +396,29 @@ class Bot:
             raise Exception(json['message'])
 
 
+    # async def get_message(self,
+    #     messageId: int
+    # ) -> Message:
+    #     '''
+    #     Allows you to fetch message's info.
+        
+    #     :param messageId: ID of the message to get info of
+    #     '''
+    #     assert messageId.startswith('mid.'), "Message ID invalid"
+
+    #     messageId = messageId[4:]
+
+    #     # editing
+    #     response = await self.get(
+    #         f"https://botapi.max.ru/messages/{messageId}"
+    #     )
+    #     if response.status != 200:
+    #         raise Exception(await response.text())
+        
+    #     return Message.from_json(await response.json())
+    # fix - for some reason API replies with "invalid message_id"
+
+
     async def get_updates(self, limit: int = 100, marker: "int | None" = None) -> tuple[int, dict]:
         '''
         Get bot updates / events. If `marker` is provided, will return updates
