@@ -71,6 +71,20 @@ class Bot:
             del kwargs['params']
         return await self.session.patch(*args, params=params, **kwargs)
     
+    
+    async def put(self, *args, **kwargs):
+        '''
+        Sends a PUT request to the API.
+        '''
+        if self.session == None:
+            raise Exception("Session is not initialized")
+        
+        params = kwargs.get('params', {})
+        params['access_token'] = self.access_token
+        if 'params' in kwargs:
+            del kwargs['params']
+        return await self.session.put(*args, params=params, **kwargs)
+    
 
     # decorators
 
@@ -247,15 +261,19 @@ class Bot:
         format: "Literal['markdown', 'html'] | None" = None,
         reply_to: "int | None" = None,
         notify: bool = True,
-        disable_link_preview: bool = True
+        disable_link_preview: bool = False
         # todo attachments
     ) -> Message:
         '''
         Allows you to send a message to a user or in a chat.
         
+        :param text: Message text. Up to 4000 characters
         :param chatId: Chat ID to send the message in.
         :param userId: User ID to send the message to.
-        :param action: Constant from aiomax.types.Actions
+        :param format: Message format. None by default
+        :param reply_to: ID of the message to reply to. Optional
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link embedding in messages. True by default
         '''
         # error checking
         assert len(text) < 4000, "Message must be less than 4000 characters"
@@ -288,7 +306,56 @@ class Bot:
         if response.status != 200:
             raise Exception(await response.text())
         
-        return Message.from_json(await response.json())
+        json = await response.json()
+        return Message.from_json(json['message'])
+
+
+    async def edit_message(self,
+        messageId: int,
+        text: str,
+        format: "Literal['markdown', 'html'] | None" = None,
+        reply_to: "int | None" = None,
+        notify: bool = True,
+        # todo attachments
+    ) -> Message:
+        '''
+        Allows you to send a message to a user or in a chat.
+        
+        :param messageId: ID of the message to edit
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. None by default
+        :param reply_to: ID of the message to reply to. Optional
+        :param notify: Whether to notify users about the message. True by default.
+        '''
+        # error checking
+        assert len(text) < 4000, "Message must be less than 4000 characters"
+
+        # editing
+        params = {
+            "message_id": messageId
+        }
+        body = {
+            "text": text,
+            "format": format,
+            "notify": notify
+        }
+
+        # replying
+        if reply_to:
+            body['link'] = {
+                "type": 'reply',
+                "mid": reply_to
+            }
+
+        response = await self.put(
+            f"https://botapi.max.ru/messages", params=params, json=body
+        )
+        if response.status != 200:
+            raise Exception(await response.text())
+        
+        json = await response.json()
+        if not json['success']:
+            raise Exception(json['message'])
 
 
     async def get_updates(self, limit: int = 100, marker: "int | None" = None) -> tuple[int, dict]:
