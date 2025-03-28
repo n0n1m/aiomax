@@ -412,3 +412,26 @@ class Message:
             url = data.get("url", None),
             constructor = User.from_json(data.get("constructor", None)),
         )
+    
+
+class BotStartPayload:
+    def __init__(self,
+        chat_id: int,
+        user: User,
+        payload: "str | None",
+        user_locale: "str | None"
+    ):
+        self.chat_id: int = chat_id
+        self.user: User = user
+        self.payload: "str | None" = payload
+        self.user_locale: "str | None" = user_locale
+
+
+    @staticmethod
+    def from_json(data: dict) -> "BotStartPayload":
+        return BotStartPayload(
+            chat_id = data["chat_id"],
+            user = User.from_json(data["user"]),
+            payload = data.get('payload', None),
+            user_locale = data.get('user_locale', None)
+        )

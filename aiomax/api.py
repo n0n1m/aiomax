@@ -8,7 +8,8 @@ class Bot:
         access_token: str,
         command_prefixes: "str | list[str]" = "/",
         mention_prefix: bool = True,
-        case_sensitive: bool = True
+        case_sensitive: bool = True,
+        default_format: "str | None" = None
     ):
         '''
         Bot init
@@ -18,16 +19,19 @@ class Bot:
         self.polling = False
         self.handlers: dict[str, list] = {
             'message_created': [],
-            'on_ready': []
+            'on_ready': [],
+            'bot_started': []
         }
         self.commands: dict[str, list] = {}
         self.command_prefixes: "str | list[str]" = command_prefixes
         self.mention_prefix: bool = mention_prefix
         self.case_sensitive: bool = case_sensitive
+        self.default_format: "str | None" = default_format
         
         self.id: "int | None" = None
         self.username: "str | None" = None
         self.name: "str | None" = None
+        self.bot_commands: list[BotCommand] = None
     
 
     async def get(self, *args, **kwargs):
@@ -110,6 +114,16 @@ class Bot:
             self.handlers["message_created"].append(func)
             return func
         return decorator
+
+
+    def on_bot_start(self):
+        '''
+        Decorator for receiving messages.
+        '''
+        def decorator(func): 
+            self.handlers["bot_started"].append(func)
+            return func
+        return decorator
     
 
     def on_ready(self):
@@ -149,6 +163,7 @@ class Bot:
         self.id = user.user_id
         self.username = user.username
         self.name = user.name
+        self.bot_commands = user.commands
         return user
 
 
@@ -181,13 +196,17 @@ class Bot:
             "photo": photo
         }
         payload = {k: v for k, v in payload.items() if v}
-        
-        # caching info
-        if 'name' in payload:
-            self.name = payload['name']
 
         response = await self.patch(f"https://botapi.max.ru/me", json=payload)
-        return await response.json()
+        data = await response.json()
+    
+        # caching info
+        if name:
+            self.name = name
+        if commands:
+            self.bot_commands = commands
+
+        return data
     
     
     async def get_chats(self, count: "int | None" = None, marker: "int | None" = None):
@@ -272,7 +291,7 @@ class Bot:
         text: str,
         chatId: "int | None" = None,
         userId: "int | None" = None,
-        format: "Literal['markdown', 'html'] | None" = None,
+        format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
         disable_link_preview: bool = False
@@ -284,7 +303,7 @@ class Bot:
         :param text: Message text. Up to 4000 characters
         :param chatId: Chat ID to send the message in.
         :param userId: User ID to send the message to.
-        :param format: Message format. None by default
+        :param format: Message format. Bot.default_format by default
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link embedding in messages. True by default
@@ -300,6 +319,8 @@ class Bot:
             "user_id": userId,
             "disable_link_preview": str(disable_link_preview).lower()
         }
+        if format == 'default':
+            format = self.default_format
         body = {
             "text": text,
             "format": format,
@@ -324,10 +345,34 @@ class Bot:
         return Message.from_json(json['message'])
 
 
+    async def reply(self,
+        text: str,
+        message: Message,
+        format: "Literal['markdown', 'html', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False
+        # todo attachments
+    ) -> Message:
+        '''
+        Allows you to reply to a message easily.
+        
+        :param text: Message text. Up to 4000 characters
+        :param message: Message to reply to
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link embedding in messages. True by default
+        '''
+        return await self.send_message(
+            text, message.recipient.chat_id, format=format,
+            reply_to=message.body.message_id, notify=notify,
+            disable_link_preview=disable_link_preview
+        )
+
+
     async def edit_message(self,
         messageId: int,
         text: str,
-        format: "Literal['markdown', 'html'] | None" = None,
+        format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
         # todo attachments
@@ -337,7 +382,7 @@ class Bot:
         
         :param messageId: ID of the message to edit
         :param text: Message text. Up to 4000 characters
-        :param format: Message format. None by default
+        :param format: Message format. Bot.default_format by default
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
         '''
@@ -348,6 +393,8 @@ class Bot:
         params = {
             "message_id": messageId
         }
+        if format == 'default':
+            format = self.default_format
         body = {
             "text": text,
             "format": format,
@@ -481,6 +528,10 @@ class Bot:
                 for i in self.commands[check_name]:
                     await i(message, name, args)
                     return
+                
+        if update_type == 'bot_started':
+            for i in self.handlers[update_type]:
+                await i(BotStartPayload.from_json(update))
     
 
     async def start_polling(self):
