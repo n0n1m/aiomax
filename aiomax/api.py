@@ -506,8 +506,7 @@ class Bot:
             prefixes = list(prefixes)
 
             if self.mention_prefix:
-                prefixes.append(f'@{self.username} ')
-                prefixes.append(f'@{self.username}')
+                prefixes.extend([f'@{self.username} {i}' for i in prefixes])
 
             for prefix in prefixes:
                 if len(message.body.text) <= len(prefix):
