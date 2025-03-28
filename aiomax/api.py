@@ -26,5 +26,11 @@ class Bot:
         info = await self.get(f"https://botapi.max.ru/me")
         return info.json()
     
-    async def patch_me(self):
-        self.session.patch(f"https://botapi.max.ru/me")
+    async def patch_me(self, **kwargs):
+        '''
+        Allows you to change information about the current bot. Fill in only those fields that need to be updated. All others will remain unchanged.
+        :param name: Bot display name
+        :param description: Bot description
+        '''
+        response = self.session.patch(f"https://botapi.max.ru/me", json=kwargs)
+        return response.json()
