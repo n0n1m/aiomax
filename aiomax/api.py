@@ -189,7 +189,7 @@ class Bot:
         name: "str | None" = None,
         description: "str | None" = None,
         commands: "list[BotCommand] | None" = None,
-        photo: PhotoAttachmentRequestPayload = None
+        photo: "PhotoAttachmentRequestPayload | None" = None
     ) -> User:
         '''
         Allows you to change info about the bot. Fill in only the fields that
