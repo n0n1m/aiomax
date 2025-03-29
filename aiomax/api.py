@@ -12,7 +12,7 @@ class Bot:
         command_prefixes: "str | list[str]" = "/",
         mention_prefix: bool = True,
         case_sensitive: bool = True,
-        default_format: "str | None" = None
+        default_format: "Literal['markdown', 'html'] | None" = None
     ):
         '''
         Bot init
@@ -572,7 +572,7 @@ class Bot:
             while self.polling:
                 try:
                     updates = await self.get_updates()
-
+                    
                     for update in updates["updates"]:
                         await self.handle_update(update)
 
