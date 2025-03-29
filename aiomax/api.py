@@ -503,9 +503,8 @@ class Bot:
                 await i(message)
 
             # handling commands
-            prefixes = self.command_prefixes if\
-                hasattr(self.command_prefixes, '__iter__') else\
-                [self.command_prefixes]
+            prefixes = self.command_prefixes if type(self.command_prefixes) != str\
+                else [self.command_prefixes]
             prefixes = list(prefixes)
 
             if self.mention_prefix:
@@ -549,9 +548,8 @@ class Bot:
 
             # self info (this will cache the info automatically)
             await self.me()
-            
 
-            bot_logger.info(f"Started polling for bot @{self.username} ({self.id}) - {self.name}")
+            bot_logger.info(f"Started polling with bot @{self.username} ({self.id}) - {self.name}")
 
             # ready event
             for i in self.handlers['on_ready']:
