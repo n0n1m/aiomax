@@ -121,7 +121,7 @@ class Bot:
 
     def on_bot_start(self):
         '''
-        Decorator for receiving messages.
+        Decorator for handling bot start.
         '''
         def decorator(func): 
             self.handlers["bot_started"].append(func)
@@ -141,7 +141,7 @@ class Bot:
 
     def on_command(self, name: str, aliases: list[str] = []):
         '''
-        Decorator for receiving messages.
+        Decorator for receiving commands.
         '''
         def decorator(func): 
             # command name
@@ -166,7 +166,7 @@ class Bot:
 
     # send requests
 
-    async def me(self) -> User:
+    async def get_me(self) -> User:
         '''
         Returns info about the bot.
         '''
@@ -188,7 +188,7 @@ class Bot:
         description: "str | None" = None,
         commands: "list[BotCommand] | None" = None,
         photo: PhotoAttachmentRequestPayload = None
-    ):
+    ) -> User:
         '''
         Allows you to change info about the bot. Fill in only the fields that
         need to be updated.
@@ -220,8 +220,11 @@ class Bot:
             self.name = name
         if commands:
             self.bot_commands = commands
-
-        return data
+        
+        if response.status == 200:
+            return User.from_json(data)
+        else:
+            bot_logger.error(f"Failed to update bot info: {data}. ")
     
     
     async def get_chats(self, count: "int | None" = None, marker: "int | None" = None):
@@ -561,7 +564,7 @@ class Bot:
             self.session = session
 
             # self info (this will cache the info automatically)
-            await self.me()
+            await self.get_me()
 
             bot_logger.info(f"Started polling with bot @{self.username} ({self.id}) - {self.name}")
 
