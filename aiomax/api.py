@@ -307,6 +307,23 @@ class Bot:
         response = await self.post(f"https://botapi.max.ru/chats/{chatId}/actions", json={"action": action})
 
         return await response.json()
+    
+
+    async def upload(self, data: IO | str, type: str):
+        '''
+        Uploads a file to the server.
+
+        :param data: File-like object or path to the file
+        :param type: File type
+        '''
+
+        if isinstance(data, str):
+            data = open(data, 'rb')
+        
+        url = (await (await self.post('https://botapi.max.ru/uploads', params={"type": type})).json())['url']
+        token = (await (await self.post(url, data={'data': data}, headers={'Content-Type': 'multipart/form-data'})).json())['token']
+
+        return token
 
 
     async def send_message(self,
@@ -316,8 +333,8 @@ class Bot:
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
-        disable_link_preview: bool = False
-        # todo attachments
+        disable_link_preview: bool = False,
+        attachments: "list[Attachment] | None" = None
     ) -> Message:
         '''
         Allows you to send a message to a user or in a chat.
@@ -329,11 +346,16 @@ class Bot:
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link embedding in messages. True by default
+        :param attachments: List of attachments. Optional
         '''
         # error checking
         assert len(text) < 4000, "Message must be less than 4000 characters"
         assert chatId or userId, "Either chatId or userId must be provided"
         assert not (chatId and userId), "Both chatId and userId cannot be provided"
+        for i, at in enumerate(attachments or []):
+            # todo: implement all attachment types in https://github.com/max-messenger/max-bot-api-client-ts/blob/main/examples/attachments-bot.ts
+            assert hasattr(at, 'as_json'), 'Attachment must be an image, a video, an audio or a file'
+            attachments[i] = at.as_json()
 
         # sending
         params = {
@@ -346,7 +368,8 @@ class Bot:
         body = {
             "text": text,
             "format": format,
-            "notify": notify
+            "notify": notify,
+            "attachments": attachments
         }
         params = {k: v for k, v in params.items() if v}
 
