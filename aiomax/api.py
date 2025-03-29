@@ -139,15 +139,27 @@ class Bot:
         return decorator
     
 
-    def on_command(self, name: str):
+    def on_command(self, name: str, aliases: list[str] = []):
         '''
         Decorator for receiving messages.
         '''
         def decorator(func): 
+            # command name
+            assert ' ' not in name, 'Command name cannot contain spaces'
+
             check_name = name.lower() if not self.case_sensitive else name
             if check_name not in self.commands:
                 self.commands[check_name] = []
             self.commands[check_name].append(func)
+
+            # aliases
+            for i in aliases:
+                assert ' ' not in i, 'Command alias cannot contain spaces'
+
+                check_name = i.lower() if not self.case_sensitive else i
+                if check_name not in self.commands:
+                    self.commands[check_name] = []
+                self.commands[check_name].append(func)
             return func
         return decorator
         
@@ -527,7 +539,9 @@ class Bot:
                     continue
                 
                 for i in self.commands[check_name]:
-                    await i(message, name, args)
+                    await i(CommandContext(
+                        self, message, name, args
+                    ))
                     return
                 
         if update_type == 'bot_started':

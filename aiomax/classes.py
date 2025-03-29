@@ -1,4 +1,6 @@
 from .types import *
+from typing import *
+
 
 class BotCommand:
     def __init__(self, name: str, description: str):
@@ -441,4 +443,59 @@ class BotStartPayload:
             user = User.from_json(data["user"]),
             payload = data.get('payload', None),
             user_locale = data.get('user_locale', None)
+        )
+    
+
+class CommandContext:
+    def __init__(self,
+        bot,
+        message: Message,
+        command_name: str,
+        args: str
+    ):
+        self.bot = bot
+        self.message: Message = message
+        self.command_name: str = command_name
+        self.args_raw: str = args
+        self.args: list[str] = args.split()
+
+
+    async def send(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        # todo attachments
+    ):
+        '''
+        Send a message to the chat that the user sent the command.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        '''
+        await self.bot.send_message(
+            text, chatId=self.message.recipient.chat_id,
+            format=format, notify=notify, disable_link_preview=disable_link_preview
+        )
+
+
+    async def reply(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        # todo attachments
+    ):
+        '''
+        Reply to the message that the user sent.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        '''
+        await self.bot.reply(
+            text, self.message, format, notify, disable_link_preview
         )
