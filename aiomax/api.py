@@ -34,6 +34,7 @@ class Bot:
         self.id: "int | None" = None
         self.username: "str | None" = None
         self.name: "str | None" = None
+        self.description: "str | None" = None
         self.bot_commands: list[BotCommand] = None
     
 
@@ -179,6 +180,7 @@ class Bot:
         self.username = user.username
         self.name = user.name
         self.bot_commands = user.commands
+        self.description = user.description
         return user
 
 
@@ -214,12 +216,17 @@ class Bot:
 
         response = await self.patch(f"https://botapi.max.ru/me", json=payload)
         data = await response.json()
+
+        if response.status != 200:
+            raise Exception(data['message'])
     
         # caching info
         if name:
             self.name = name
         if commands:
             self.bot_commands = commands
+        if description:
+            self.description = description
 
         return data
     
