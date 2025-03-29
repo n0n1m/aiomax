@@ -57,6 +57,13 @@ class User:
         if data == None: return None
 
         return User(**data)
+    
+    @property
+    def full_name(self):
+        if self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return self.first_name
 
 
 class Attachment:

@@ -3,6 +3,9 @@ from typing import *
 import aiohttp
 from .classes import *
 
+import logging
+bot_logger = logging.getLogger("aiomax.bot")
+
 class Bot:
     def __init__(self,
         access_token: str,
@@ -547,6 +550,9 @@ class Bot:
             # self info (this will cache the info automatically)
             await self.me()
             
+
+            bot_logger.info(f"Started polling for bot @{self.username} ({self.id}) - {self.name}")
+
             # ready event
             for i in self.handlers['on_ready']:
                 await i()
@@ -559,7 +565,7 @@ class Bot:
                         await self.handle_update(update)
 
                 except Exception as e:
-                    print(f'Error while handling updates: {e}')
+                    bot_logger.error(f"Error while handling updates: {e}")
                     await asyncio.sleep(3)
 
         self.session = None
