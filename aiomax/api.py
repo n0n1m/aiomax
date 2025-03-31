@@ -264,6 +264,44 @@ class Bot:
 
         return await response.json()
     
+    async def get_pin(
+            self,
+            chatId: int
+    ):
+        '''
+        Returns pinned message in the chat. None if there is no pinned message
+
+        :param chatId: The ID of the chat.
+        '''
+
+        response = await self.get(f"https://botapi.max.ru/chats/{chatId}/pin")
+
+        return await response.json()
+
+    async def pin(
+            self,
+            chatId: int,
+            message_id: str,
+            notify: bool | None = None
+    ):
+        '''
+        Pin a message in a chat
+
+        :param chatId: The ID of the chat.
+        :param message_id: The ID of the message to pin.
+        :param notify: Whether to notify users about the pin. True by default.
+        '''
+
+        payload = {
+            "message_id": message_id,
+            "notify": notify
+        }
+        payload = {k: v for k, v in payload.items() if v}
+
+        response = await self.put(
+            f"https://botapi.max.ru/chats/{chatId}/pin", json=payload
+        )
+        return await response.json()
 
     async def patch_chat(
         self,
