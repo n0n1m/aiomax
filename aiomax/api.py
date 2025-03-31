@@ -320,10 +320,37 @@ class Bot:
         if isinstance(data, str):
             data = open(data, 'rb')
         
-        url = (await (await self.post('https://botapi.max.ru/uploads', params={"type": type})).json())['url']
-        token = (await (await self.post(url, data={'data': data}, headers={'Content-Type': 'multipart/form-data'})).json())['token']
+        url_resp = await self.post('https://botapi.max.ru/uploads', params={"type": type})
+        url_json = await url_resp.json()
+        print(url_json)
+        token_resp = await self.session.post(url_json['url'], data={'data': data}, headers={'Content-Type': 'multipart/form-data'})
+        token_json = await token_resp.json()
 
-        return token
+        try:
+            return token_json['token']
+        except:
+            print(token_resp.status)
+            print(token_json)
+    
+
+    async def upload_image(self, data: BinaryIO | str):
+        token = await self.upload(data, 'image')
+        return PhotoAttachment(PhotoPayload(token=token))
+    
+
+    async def upload_video(self, data: BinaryIO | str):
+        token = await self.upload(data, 'video')
+        return VideoAttachment(MediaPayload(token=token))
+    
+
+    async def upload_audio(self, data: BinaryIO | str):
+        token = await self.upload(data, 'audio')
+        return AudioAttachment(MediaPayload(token=token))
+    
+
+    async def upload_file(self, data: IO | str):
+        token = await self.upload(data, 'file')
+        return FileAttachment(MediaPayload(token=token))
 
 
     async def send_message(self,
@@ -354,8 +381,8 @@ class Bot:
         assert not (chatId and userId), "Both chatId and userId cannot be provided"
         for i, at in enumerate(attachments or []):
             # todo: implement all attachment types in https://github.com/max-messenger/max-bot-api-client-ts/blob/main/examples/attachments-bot.ts
-            assert hasattr(at, 'as_json'), 'Attachment must be an image, a video, an audio or a file'
-            attachments[i] = at.as_json()
+            assert hasattr(at, 'as_dict'), 'Attachment must be an image, a video, an audio or a file'
+            attachments[i] = at.as_dict()
 
         # sending
         params = {
@@ -612,3 +639,9 @@ class Bot:
 
         self.session = None
         self.polling = False
+
+    def run(self):
+        '''
+        Shortcut for `asyncio.run(bot.start_polling())`
+        '''
+        asyncio.run(self.start_polling())

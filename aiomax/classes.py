@@ -493,7 +493,7 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ):
         '''
         Send a message to the chat that the user sent the command.
@@ -502,10 +502,11 @@ class CommandContext:
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
+        :param attachments: List of attachments. Optional
         '''
         await self.bot.send_message(
             text, chatId=self.message.recipient.chat_id,
-            format=format, notify=notify, disable_link_preview=disable_link_preview
+            format=format, notify=notify, disable_link_preview=disable_link_preview, attachments=attachments
         )
 
 
