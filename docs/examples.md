@@ -51,3 +51,20 @@ async def send_commands():
 
 asyncio.run(bot.start_polling())
 ```
+
+## Эхо-бот с проверкой на чат
+
+```py
+import aiomax
+import asyncio
+
+bot = aiomax.Bot('TOKEN')
+
+chat_id: int # Идентификатор чата, сообщение в котором должно обрабатыватся
+
+@bot.on_message(lambda message: message.recipient.chat_id == chat_id)
+async def test(message: aiomax.Message):
+    await bot.send_message(message.body.text, message.recipient.chat_id)
+
+asyncio.run(bot.start_polling())
+```
