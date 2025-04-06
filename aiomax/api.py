@@ -303,6 +303,96 @@ class Bot:
         )
         return await response.json()
 
+    async def delete_pin(
+            self,
+            chatId: int
+    ):
+        '''
+        Delete pinned message in the chat
+
+        :param chatId: The ID of the chat.
+        '''
+
+        response = await self.delete(f"https://botapi.max.ru/chats/{chatId}/pin")
+
+        return await response.json()
+    
+    async def my_membership(
+            self,
+            chatId: int
+    ):
+        '''
+        Returns information about the bot's membership in the chat.
+
+        :param chatId: The ID of the chat.
+        '''
+
+        response = await self.get(f"https://botapi.max.ru/chats/{chatId}/members/me")
+
+        return await response.json()
+
+    async def delete_me_from_chat(
+            self,
+            chatId: int
+    ):
+        '''
+        Remove the bot from the chat.
+
+        :param chatId: The ID of the chat.
+        '''
+
+        response = await self.delete(f"https://botapi.max.ru/chats/{chatId}/members/me")
+
+        return await response.json()
+
+    async def get_admins(
+            self,
+            chatId: int
+    ) -> List[User]:
+        '''
+        Returns a list of administrators in the chat.
+
+        :param chatId: The ID of the chat.
+        '''
+
+        response = await self.get(f"https://botapi.max.ru/chats/{chatId}/members/admins")
+
+        users = [User.from_json(i) for i in (await response.json())['members']]
+
+        return users
+    
+    async def get_members(
+            self,
+            chatId: int
+    ) -> List[User]:
+        '''
+        Returns a list of members in the chat.
+
+        :param chatId: The ID of the chat.
+        '''
+
+        response = await self.get(f"https://botapi.max.ru/chats/{chatId}/members")
+
+        users = [User.from_json(i) for i in (await response.json())['members']]
+
+        return users
+    
+    async def add_members(
+            self,
+            chatId: int,
+            users: List[int]
+    ):
+        '''
+        Adds users to the chat.
+
+        :param chatId: The ID of the chat.
+        :param users: List of user IDs to add.
+        '''
+
+        response = await self.post(f"https://botapi.max.ru/chats/{chatId}/members", json={"user_ids": users})
+
+        return await response.json()
+
     async def patch_chat(
         self,
         chatId: int,

@@ -6,10 +6,17 @@ class Actions:
     MARK_SEEN = "mark_seen"
 
 class ChatType:
-    DIALOG = 'dialog'
-    CHAT = 'chat'
-    CHANNEL = 'channel'
+    DIALOG = "dialog"
+    CHAT = "chat"
+    CHANNEL = "channel"
 
 class MessageLinkType:
-    FORWARD = 'forward'
-    REPLY = 'reply'
+    FORWARD = "forward"
+    REPLY = "reply"
+
+class ChatAdminPermission:
+    READ_ALL_MESSAGES = "read_all_messages"
+    ADD_REMOVE_MEMBERS = "add_remove_members"
+    CHANGE_CHAT_INFO = "change_chat_info"
+    PIN_MESSAGE = "pin_message"
+    WRITE = "write"

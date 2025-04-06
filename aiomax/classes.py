@@ -37,7 +37,13 @@ class User:
         description: "str | None" = None,
         avatar_url: "str | None" = None,
         full_avatar_url: "str | None" = None,
-        commands: "list[BotCommand] | None" = None
+        commands: "list[BotCommand] | None" = None,
+        last_access_time: "int | None" = None,
+        is_owner: "bool | None" = None,
+        is_admin: "bool | None" = None,
+        join_time: "int | None" = None,
+        permissions: "List[str] | None" = None
+
     ):
         self.user_id: int = user_id
         self.first_name: str = first_name
@@ -52,6 +58,11 @@ class User:
         self.commands: "list[BotCommand] | None" = [
             BotCommand(**i) for i in commands
         ] if commands else None
+        self.last_access_time: "int | None" = last_access_time
+        self.is_owner: "bool | None" = is_owner
+        self.is_admin: "bool | None" = is_admin
+        self.join_time: "int | None" = join_time
+        self.permissions: "List[str] | None" = permissions
 
 
     @staticmethod
@@ -66,7 +77,6 @@ class User:
             return f"{self.first_name} {self.last_name}"
         else:
             return self.first_name
-
 
 class Attachment:
     def __init__(self, type: str):
