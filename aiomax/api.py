@@ -20,7 +20,7 @@ class Bot:
         self.access_token: str = access_token
         self.session = None
         self.polling = False
-        self.handlers: dict[str, list] = {
+        self.handlers: dict[str, list[Handler]] = {
             'message_created': [],
             'on_ready': [],
             'bot_started': []
@@ -110,12 +110,12 @@ class Bot:
 
     # decorators
 
-    def on_message(self):
+    def on_message(self, filter: "Callable | None" = None):
         '''
         Decorator for receiving messages.
         '''
         def decorator(func): 
-            self.handlers["message_created"].append(func)
+            self.handlers["message_created"].append(Handler(call=func, filter=filter))
             return func
         return decorator
 
@@ -649,8 +649,14 @@ class Bot:
             message = Message.from_json(update["message"])
             message.user_locale = update.get('user_locale', None)
 
-            for i in self.handlers[update_type]:
-                await i(message)
+            for handler in self.handlers['message_created']:
+                if handler.filter:
+                    if handler.filter(message):
+                        await handler.call(message)
+                    else:
+                        continue
+                else:
+                    await handler.call(message)
 
             # handling commands
             prefixes = self.command_prefixes if type(self.command_prefixes) != str\
@@ -708,15 +714,15 @@ class Bot:
                 await i()
 
             while self.polling:
-                try:
-                    updates = await self.get_updates()
-                    
-                    for update in updates["updates"]:
-                        await self.handle_update(update)
+                # try:
+                updates = await self.get_updates()
+                
+                for update in updates["updates"]:
+                    await self.handle_update(update)
 
-                except Exception as e:
-                    bot_logger.error(f"Error while handling updates: {e}")
-                    await asyncio.sleep(3)
+                # except Exception as e:
+                #     bot_logger.error(f"Error while handling updates: {e}")
+                #     await asyncio.sleep(3)
 
         self.session = None
         self.polling = False
