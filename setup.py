@@ -6,6 +6,6 @@ setup(
     description='Max asynchronous API',
     author='oaa dpnspn',
     packages=find_packages(),
-    install_requires=['requests'],
+    install_requires=['aiohttp'],
     zip_safe=False
 )
