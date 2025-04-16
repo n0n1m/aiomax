@@ -236,7 +236,7 @@ class Bot:
     
     async def get_chats(self, count: "int | None" = None, marker: "int | None" = None):
         '''
-        Returns information about the chats the bot is in.
+        Returns chats the bot is in.
         The result includes a list of chats and a marker for moving to the next page.
 
         :param count:  Number of chats requested. 50 by default
@@ -253,7 +253,16 @@ class Bot:
         chats = [Chat.from_json(i) for i in data['chats']]
 
         return chats
-    
+        
+    async def chat_by_link(self, link: str):
+        '''
+        Returns chat by link
+
+        :param link: Public chat link or username.
+        '''
+        response = await self.get(f"https://botapi.max.ru/chats/{link}")
+
+        return Chat.from_json(await response.json())
     
     async def get_chat(self, chat_id: int):
         '''
