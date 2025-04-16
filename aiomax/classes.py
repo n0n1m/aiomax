@@ -520,6 +520,21 @@ class Handler():
         self.call = call
         self.filter = filter
 
+
+class Image:
+    def __init__(self,
+        url: str,
+    ):
+        self.url: str = url
+    
+    
+    @staticmethod
+    def from_json(data: dict) -> "User | None":
+        if data == None: return None
+
+        return User(**data)
+    
+
 class Chat:
     def __init__(self,
         chat_id: int,
@@ -527,10 +542,10 @@ class Chat:
         status: str,
         last_event_time: int,
         participants_count: int,
-        title: "str | None",
-        icon: "Image | None",
         is_public: bool,
-        description: "str | None",
+        title: "str | None" = None,
+        icon: "Image | None" = None,
+        description: "str | None" = None,
         pinned_message: "Message | None" = None,
         owner_id: "int | None" = None,
         participants: "int | None" = None,
@@ -538,7 +553,7 @@ class Chat:
         messages_count: "str | None" = None,
         chat_message_id: "str | None" = None,
         dialog_with_user: "User | None" = None,
-        ):
+    ):
         self.chat_id: int = chat_id
         self.type: str = type
         self.status: str = status
@@ -562,16 +577,3 @@ class Chat:
         if data == None: return None
 
         return Chat(**data)
-
-class Image:
-    def __init__(self,
-        url: str,
-    ):
-        self.url: str = url
-    
-    
-    @staticmethod
-    def from_json(data: dict) -> "User | None":
-        if data == None: return None
-
-        return User(**data)
