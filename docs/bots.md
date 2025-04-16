@@ -104,6 +104,15 @@
 
 - `users: list[int]` - список ID пользователей, которых нужно добавить в чат
 
+### `Bot.kick_member(chat_id: int, users: list[int])`
+
+Удаляет пользователя из чата.
+
+- `chat_id: int` - ID чата
+
+- `user_id: int` - ID пользователя, которого нужно удалить из чата
+- `block: bool | None` - Надо ли блокировать пользователя? False по умолчанию
+
 ### `Bot.patch_chat(chat_id: int, icon: PhotoAttachmentRequestPayload | None = None, title: str | None = None, pin: str | None = None, notify: bool | None = None)`
 
 Изменяет информацию о чате, например имя, иконку или закрепленное сообщение (для последнего также есть `Bot.pin`).

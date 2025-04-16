@@ -378,7 +378,34 @@ class Bot:
         response = await self.post(f"https://botapi.max.ru/chats/{chat_id}/members", json={"user_ids": users})
 
         return await response.json()
-    
+  
+    async def kick_member(
+                self,
+                chatId: int,
+                user_id: int,
+                block: "bool | None" = None
+        ):
+            '''
+            Removes a user from the chat.
+
+            :param chatId: The ID of the chat.
+            :param user_id: The ID of the user to remove.
+            :param block: Whether to block the user. Ignored by default.
+            '''
+
+            params = {
+                "chatId": chatId,
+                "user_id": user_id,
+                "block": block
+            }
+            params = {k: v for k, v in params.items() if v}
+            
+            if block != None:
+                params["block"] = str(block)
+
+            response = await self.delete(f"https://botapi.max.ru/chats/{chatId}/members/", params=params)
+
+            return await response.json()
 
     async def patch_chat(self,
         chat_id: int,

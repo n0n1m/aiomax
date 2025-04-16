@@ -486,7 +486,7 @@ class CommandContext:
         :param disable_link_preview: Whether to disable link preview. False by default
         '''
         await self.bot.send_message(
-            text, chatId=self.message.recipient.chat_id,
+            text, chat_id=self.message.recipient.chat_id,
             format=format, notify=notify, disable_link_preview=disable_link_preview
         )
 
