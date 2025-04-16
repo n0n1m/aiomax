@@ -272,7 +272,7 @@ class Bot:
         '''
         response = await self.get(f"https://botapi.max.ru/chats/{chat_id}")
 
-        return await response.json()
+        return Chat.from_json(await response.json())
     
     
     async def get_pin(self, chat_id: int) -> "Message | None":
@@ -447,8 +447,8 @@ class Bot:
         response = await self.patch(
             f"https://botapi.max.ru/chats/{chat_id}", json=payload
         )
-        # todo
 
+        return Chat.from_json(await response.json())
 
     async def post_action(self, chat_id: int, action: str):
         '''
@@ -640,7 +640,7 @@ class Bot:
     #         raise Exception(await response.text())
         
     #     return Message.from_json(await response.json())
-    # fix - for some reason API replies with "invalid message_id"
+    # todo fix - for some reason API replies with "invalid message_id"
 
 
     async def get_updates(self, limit: int = 100, marker: "int | None" = None) -> tuple[int, dict]:
