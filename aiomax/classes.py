@@ -510,11 +510,12 @@ class CommandContext:
             text, self.message, format, notify, disable_link_preview
         )
 
+
 class Handler():
     def __init__(
-            self,
-            call: Callable,
-            filter: "Callable | None" = None,
+        self,
+        call: Callable,
+        filter: "Callable | None" = None,
     ):
         self.call = call
         self.filter = filter

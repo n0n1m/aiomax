@@ -264,9 +264,10 @@ class Bot:
 
         return await response.json()
     
+    
     async def get_pin(
-            self,
-            chatId: int
+        self,
+        chatId: int
     ):
         '''
         Returns pinned message in the chat. None if there is no pinned message
@@ -278,11 +279,12 @@ class Bot:
 
         return await response.json()
 
+
     async def pin(
-            self,
-            chatId: int,
-            message_id: str,
-            notify: bool | None = None
+        self,
+        chatId: int,
+        message_id: str,
+        notify: bool | None = None
     ):
         '''
         Pin a message in a chat
@@ -303,9 +305,10 @@ class Bot:
         )
         return await response.json()
 
+
     async def delete_pin(
-            self,
-            chatId: int
+        self,
+        chatId: int
     ):
         '''
         Delete pinned message in the chat
@@ -317,9 +320,10 @@ class Bot:
 
         return await response.json()
     
+    
     async def my_membership(
-            self,
-            chatId: int
+        self,
+        chatId: int
     ):
         '''
         Returns information about the bot's membership in the chat.
@@ -331,9 +335,10 @@ class Bot:
 
         return await response.json()
 
-    async def delete_me_from_chat(
-            self,
-            chatId: int
+
+    async def leave_chat(
+        self,
+        chatId: int
     ):
         '''
         Remove the bot from the chat.
@@ -345,9 +350,10 @@ class Bot:
 
         return await response.json()
 
+
     async def get_admins(
-            self,
-            chatId: int
+        self,
+        chatId: int
     ) -> List[User]:
         '''
         Returns a list of administrators in the chat.
@@ -362,8 +368,8 @@ class Bot:
         return users
     
     async def get_members(
-            self,
-            chatId: int
+        self,
+        chatId: int
     ) -> List[User]:
         '''
         Returns a list of members in the chat.
@@ -378,9 +384,9 @@ class Bot:
         return users
     
     async def add_members(
-            self,
-            chatId: int,
-            users: List[int]
+        self,
+        chatId: int,
+        users: List[int]
     ):
         '''
         Adds users to the chat.
@@ -392,6 +398,7 @@ class Bot:
         response = await self.post(f"https://botapi.max.ru/chats/{chatId}/members", json={"user_ids": users})
 
         return await response.json()
+    
 
     async def patch_chat(
         self,
