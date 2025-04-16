@@ -249,8 +249,10 @@ class Bot:
         params = {k: v for k, v in params.items() if v}
 
         response = await self.get("https://botapi.max.ru/chats", params=params)
+        print((await response.json())['chats']) # вот здесь ошибка почему-то мунтр
+        chats = [Chat.from_json(i) for i in (await response.json())['chats']]
 
-        return await response.json()
+        return chats
     
     
     async def get_chat(self, chat_id: int):

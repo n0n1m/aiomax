@@ -519,3 +519,59 @@ class Handler():
     ):
         self.call = call
         self.filter = filter
+
+class Chat:
+    def __init__(self,
+        chat_id: int,
+        type: str,
+        status: str,
+        last_event_time: int,
+        participants_count: int,
+        title: "str | None",
+        icon: "Image | None",
+        is_public: bool,
+        description: "str | None",
+        pinned_message: "Message | None" = None,
+        owner_id: "int | None" = None,
+        participants: "int | None" = None,
+        link: "str | None" = None,
+        messages_count: "str | None" = None,
+        chat_message_id: "str | None" = None,
+        dialog_with_user: "User | None" = None,
+        ):
+        self.chat_id: int = chat_id
+        self.type: str = type
+        self.status: str = status
+        self.last_event_time: int = last_event_time
+        self.participants_count: int = participants_count
+        self.title: "str | None" = title
+        self.icon: "Image | None" = icon
+        self.is_public: bool = is_public
+        self.dialog_with_user: "User | None" = dialog_with_user
+        self.description: "str | None" = description
+        self.pinned_message: "Message | None" = pinned_message
+        self.owner_id: "int | None" = owner_id
+        self.participants: "int | None" = participants
+        self.link: "str | None" = link
+        self.messages_count: "str | None" = messages_count
+        self.chat_message_id: "str | None" = chat_message_id
+
+
+    @staticmethod
+    def from_json(data: dict) -> "Chat | None":
+        if data == None: return None
+
+        return Chat(**data)
+
+class Image:
+    def __init__(self,
+        url: str,
+    ):
+        self.url: str = url
+    
+    
+    @staticmethod
+    def from_json(data: dict) -> "User | None":
+        if data == None: return None
+
+        return User(**data)

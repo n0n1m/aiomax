@@ -20,3 +20,10 @@ class ChatAdminPermission:
     CHANGE_CHAT_INFO = "change_chat_info"
     PIN_MESSAGE = "pin_message"
     WRITE = "write"
+
+class ChatStatus:
+    ACTIVE = "active"
+    REMOVED = "removed"
+    LEFT = "left"
+    CLOSED = "closed"
+    SUSPENDED = "suspended"
