@@ -543,7 +543,7 @@ class CommandContext:
         disable_link_preview: bool = False,
         keyboard: "List[List[Button]] | None" = None,
         # todo attachments
-    ):
+    ) -> Message:
         '''
         Send a message to the chat that the user sent the command.
 
@@ -553,11 +553,11 @@ class CommandContext:
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
         '''
-        await self.bot.send_message(
+        return (await self.bot.send_message(
             text, chat_id=self.message.recipient.chat_id,
             format=format, notify=notify, disable_link_preview=disable_link_preview,
             keyboard=keyboard
-        )
+        ))
 
 
     async def reply(self,
@@ -567,7 +567,7 @@ class CommandContext:
         disable_link_preview: bool = False,
         keyboard: "List[List[Button]] | None" = None,
         # todo attachments
-    ):
+    ) -> Message:
         '''
         Reply to the message that the user sent.
 
@@ -577,9 +577,9 @@ class CommandContext:
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
         '''
-        await self.bot.reply(
+        return (await self.bot.reply(
             text, self.message, format, notify, disable_link_preview, keyboard
-        )
+        ))
 
 
 class Handler():
