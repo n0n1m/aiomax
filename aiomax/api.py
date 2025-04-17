@@ -2,6 +2,7 @@ import asyncio
 from typing import *
 import aiohttp
 from .classes import *
+from json import JSONDecodeError
 
 import logging
 bot_logger = logging.getLogger("aiomax.bot")
@@ -309,7 +310,7 @@ class Bot:
         return await response.json()
     
 
-    async def upload(self, data: IO | str, type: str):
+    async def upload(self, data: IO | str, type: str) -> dict:
         '''
         Uploads a file to the server.
 
@@ -320,36 +321,39 @@ class Bot:
         if isinstance(data, str):
             data = open(data, 'rb')
         
+        form = aiohttp.FormData()
+        form.add_field('data', data)
         url_resp = await self.post('https://botapi.max.ru/uploads', params={"type": type})
         url_json = await url_resp.json()
-        print(url_json)
-        token_resp = await self.session.post(url_json['url'], data={'data': data}, headers={'Content-Type': 'multipart/form-data'})
+        token_resp = await self.session.post(url_json['url'], data=form)
+        if type in {'audio', 'video'}:
+            return url_json
         token_json = await token_resp.json()
 
-        try:
-            return token_json['token']
-        except:
-            print(token_resp.status)
-            print(token_json)
+        return token_json
     
 
     async def upload_image(self, data: BinaryIO | str):
-        token = await self.upload(data, 'image')
+        raw_photo = await self.upload(data, 'image')
+        token = list(raw_photo['photos'].values())[0]['token']
         return PhotoAttachment(PhotoPayload(token=token))
     
 
     async def upload_video(self, data: BinaryIO | str):
-        token = await self.upload(data, 'video')
+        raw_video = await self.upload(data, 'video')
+        token = raw_video['token']
         return VideoAttachment(MediaPayload(token=token))
     
 
     async def upload_audio(self, data: BinaryIO | str):
-        token = await self.upload(data, 'audio')
+        raw_audio = await self.upload(data, 'audio')
+        token = raw_audio['token']
         return AudioAttachment(MediaPayload(token=token))
     
 
     async def upload_file(self, data: IO | str):
-        token = await self.upload(data, 'file')
+        raw_file = await self.upload(data, 'file')
+        token = raw_file['token']
         return FileAttachment(MediaPayload(token=token))
 
 
@@ -379,10 +383,11 @@ class Bot:
         assert len(text) < 4000, "Message must be less than 4000 characters"
         assert chatId or userId, "Either chatId or userId must be provided"
         assert not (chatId and userId), "Both chatId and userId cannot be provided"
-        for i, at in enumerate(attachments or []):
+        attachment_json = []
+        for at in attachments or []:
             # todo: implement all attachment types in https://github.com/max-messenger/max-bot-api-client-ts/blob/main/examples/attachments-bot.ts
             assert hasattr(at, 'as_dict'), 'Attachment must be an image, a video, an audio or a file'
-            attachments[i] = at.as_dict()
+            attachment_json.append(at.as_dict())
 
         # sending
         params = {
@@ -396,7 +401,7 @@ class Bot:
             "text": text,
             "format": format,
             "notify": notify,
-            "attachments": attachments
+            "attachments": attachment_json
         }
         params = {k: v for k, v in params.items() if v}
 
@@ -411,7 +416,19 @@ class Bot:
             f"https://botapi.max.ru/messages", params=params, json=body
         )
         if response.status != 200:
-            raise Exception(await response.text())
+            exception = Exception(await response.text())
+            retry = False
+            try:
+                err_json = await response.json()
+                if err_json['code'] == 'attachment.not.ready':
+                    retry = True
+            except:
+                raise exception
+            if retry:
+                await asyncio.sleep(1)
+                return await self.send_message(text=text, chatId=chatId, userId=userId, format=format, reply_to=reply_to, notify=notify, disable_link_preview=disable_link_preview, attachments=attachments)
+            else:
+                raise exception
         
         json = await response.json()
         return Message.from_json(json['message'])

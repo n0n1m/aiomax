@@ -143,7 +143,7 @@ class PhotoPayload(MediaPayload):
         url: "str | None" = None,
         photo_id: "int | None" = None
     ):
-        super().__init__(url, token)
+        super().__init__(url=url, token=token)
         self.photo_id: "int | None" = photo_id
 
     
@@ -233,21 +233,21 @@ class AudioAttachment(Attachment):
 class FileAttachment(Attachment):
     def __init__(self,
         payload: MediaPayload,
-        filename: str,
-        size: int
+        filename: "str | None" = None,
+        size: "int | None" = None
     ):
         super().__init__("file")
         self.payload: MediaPayload = payload
-        self.filename: str = filename
-        self.size: int = size
+        self.filename: "str | None" = filename
+        self.size: "int | None" = size
 
 
     @staticmethod
     def from_json(data: dict) -> "FileAttachment | None":
         return FileAttachment(
             MediaPayload.from_json(data['payload']),
-            data['filename'],
-            data['size']
+            data.get('filename'),
+            data.get('size')
         )
     
     
