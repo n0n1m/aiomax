@@ -473,6 +473,7 @@ class Message:
         views: "int | None" = None,
         url: "str | None" = None,
         constructor: "User | None" = None,
+        bot = None
     ):
         self.recipient: MessageRecipient = recipient
         self.body: "MessageBody | None" = body
@@ -483,6 +484,7 @@ class Message:
         self.url: "str | None" = url
         self.constructor: "User | None" = constructor
         self.user_locale: "str | None" = None
+        self.bot = bot
 
 
     @staticmethod
@@ -497,6 +499,56 @@ class Message:
             url = data.get("url", None),
             constructor = User.from_json(data.get("constructor", None)),
         )
+
+
+    async def send(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | None" = None,
+        # todo attachments
+    ) -> "Message":
+        '''
+        Send a message to the chat that the message is sent.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        '''
+        if self.bot == None:
+            return
+        return (await self.bot.send_message(
+            text, chat_id=self.recipient.chat_id,
+            format=format, notify=notify, disable_link_preview=disable_link_preview,
+            keyboard=keyboard
+        ))
+
+
+    async def reply(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | None" = None,
+        # todo attachments
+    ) -> "Message":
+        '''
+        Reply to this message.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        '''
+        if self.bot == None:
+            return
+        return (await self.bot.reply(
+            text, self, format, notify, disable_link_preview, keyboard
+        ))
     
 
 class BotStartPayload:
@@ -531,6 +583,8 @@ class CommandContext:
     ):
         self.bot = bot
         self.message: Message = message
+        self.sender: "User | None" = message.sender
+        self.recipient: MessageRecipient = message.recipient
         self.command_name: str = command_name
         self.args_raw: str = args
         self.args: List[str] = args.split()

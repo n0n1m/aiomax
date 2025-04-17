@@ -680,6 +680,7 @@ class Bot:
 
         if update_type == "message_created":
             message = Message.from_json(update["message"])
+            message.bot = self
             message.user_locale = update.get('user_locale', None)
 
             for handler in self.handlers['message_created']:
