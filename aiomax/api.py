@@ -469,7 +469,7 @@ class Bot:
         json = await response.json()
 
         return Chat.from_json(json)
-
+    
 
     async def post_action(self, chat_id: int, action: str):
         '''
@@ -648,7 +648,7 @@ class Bot:
     #         raise Exception(await response.text())
         
     #     return Message.from_json(await response.json())
-    # fix - for some reason API replies with "invalid message_id"
+    # todo fix - for some reason API replies with "invalid message_id"
 
 
     async def get_updates(self, limit: int = 100, marker: "int | None" = None) -> tuple[int, dict]:

@@ -12,7 +12,7 @@
 
 ### `Bot(access_token: str, command_prefixes: str | list[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None)`
 
-Создаёт объект класса `aiomax.Bot`, через который можно управлять ботом.
+Создаёт объект класса `Bot`, через который можно управлять ботом.
 
 - `access_token: str` - токен бота, взятый с [@MasterBot](https://max.ru/masterbot)
 
@@ -24,11 +24,11 @@
 
 - `default_format: 'markdown' | 'html' | None` - какой язык разметки использовать, если не указан в запросе. `None` по умолчанию.
 
-### `Bot.get_me() -> aiomax.User`
+### `Bot.get_me() -> User`
 
 Возвращает объект класса `User` с информацией о профиле текущего бота.
 
-### `Bot.patch_me(name: str | None, description: str | None, commands: list[aiomax.BotCommand] | None, photo: PhotoAttachmentRequestPayload | None) -> aiomax.User`
+### `Bot.patch_me(name: str | None, description: str | None, commands: list[BotCommand] | None, photo: PhotoAttachmentRequestPayload | None) -> User`
 
 Изменяет информацию о боте и принимает параметры `name`, `description`, `commands`, `photo`.
 
@@ -36,17 +36,23 @@
 
 Возвращает объект класса `User` с обновленными данными.
 
-### `Bot.get_chats(count: int | None = None, marker: int | None = None) -> dict`
+### `Bot.get_chats(count: int | None = None, marker: int | None = None) -> Chat`
 
-Возвращает (пока что) словарь с данными чатов, в которых находится бот.
+Возвращает список объектов класса `Chat` с чатами в которых состоит бот.
 
 - `count: int` - максимальное количество чатов на одной странице
 
 - `marker: int` - маркер для смены страницы, который вы получили с другого вызова `get_chats`
 
-### `Bot.get_chat(chat_id: int) -> dict`
+### Bot.chat_by_link(link: str)
 
-Возвращает (пока что) словарь с данными чата с указанным ID.
+Возвращает объект класса `Chat` чата с указанной ссылкой
+
+- `link: str` - ссылка на чат
+
+### `Bot.get_chat(chat_id: int) -> Chat`
+
+Возвращает объект класса `Chat` чата с указанным ID.
 
 - `chat_id: int` - ID чата
 
@@ -118,6 +124,8 @@
 Изменяет информацию о чате, например имя, иконку или закрепленное сообщение (для последнего также есть `Bot.pin`).
 
 Все аргументы, кроме `chat_id`, необязательны.
+
+Возвращает объект класса Chat с обновленными данными о чате
 
 - `chat_id: int` - ID чата
 
