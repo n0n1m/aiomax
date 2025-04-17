@@ -410,20 +410,20 @@ class Bot:
 
     async def kick_member(
         self,
-        chatId: int,
+        chat_id: int,
         user_id: int,
         block: "bool | None" = None
     ):
         '''
         Removes a user from the chat.
 
-        :param chatId: The ID of the chat.
+        :param chat_id: The ID of the chat.
         :param user_id: The ID of the user to remove.
         :param block: Whether to block the user. Ignored by default.
         '''
 
         params = {
-            "chatId": chatId,
+            "chat_id": chat_id,
             "user_id": user_id,
             "block": block
         }
@@ -432,7 +432,7 @@ class Bot:
         if block != None:
             params["block"] = str(block)
 
-        response = await self.delete(f"https://botapi.max.ru/chats/{chatId}/members/", params=params)
+        response = await self.delete(f"https://botapi.max.ru/chats/{chat_id}/members/", params=params)
 
         return await response.json()
     
