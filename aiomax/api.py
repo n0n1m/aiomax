@@ -1,6 +1,8 @@
 import asyncio
 from typing import *
 import aiohttp
+
+from .msgconvert import get_message_body
 from .classes import *
 
 import logging
@@ -23,7 +25,8 @@ class Bot:
         self.handlers: dict[str, list[Handler]] = {
             'message_created': [],
             'on_ready': [],
-            'bot_started': []
+            'bot_started': [],
+            'message_callback': []
         }
         self.commands: dict[str, list] = {}
         self.command_prefixes: "str | list[str]" = command_prefixes
@@ -138,6 +141,16 @@ class Bot:
             self.handlers["on_ready"].append(func)
             return func
         return decorator
+
+
+    def on_button_callback(self, filter: "Callable | None" = None):
+        '''
+        Decorator for receiving button presses.
+        '''
+        def decorator(func): 
+            self.handlers["message_callback"].append(Handler(call=func, filter=filter))
+            return func
+        return decorator
     
 
     def on_command(self, name: str, aliases: list[str] = []):
@@ -234,9 +247,9 @@ class Bot:
             bot_logger.error(f"Failed to update bot info: {data}. ")
     
     
-    async def get_chats(self, count: "int | None" = None, marker: "int | None" = None):
+    async def get_chats(self, count: "int | None" = None, marker: "int | None" = None) -> List[Chat]:
         '''
-        Returns information about the chats the bot is in.
+        Returns the chats the bot is in.
         The result includes a list of chats and a marker for moving to the next page.
 
         :param count:  Number of chats requested. 50 by default
@@ -254,16 +267,29 @@ class Bot:
 
         return chats
     
+
+    async def chat_by_link(self, link: str) -> Chat:
+        '''
+        Returns chat by a link or username.
+ 
+        :param link: Public chat link or username.
+        '''
+        response = await self.get(f"https://botapi.max.ru/chats/{link}")
+        json = await response.json()
+
+        return Chat.from_json(json)
     
-    async def get_chat(self, chat_id: int):
+    
+    async def get_chat(self, chat_id: int) -> Chat:
         '''
         Returns information about a chat.
 
         :param chat_id: The ID of the chat.
         '''
         response = await self.get(f"https://botapi.max.ru/chats/{chat_id}")
+        json = await response.json()
 
-        return await response.json()
+        return Chat.from_json(json)
     
     
     async def get_pin(self, chat_id: int) -> "Message | None":
@@ -381,33 +407,35 @@ class Bot:
 
         return await response.json()
   
+
     async def kick_member(
-                self,
-                chatId: int,
-                user_id: int,
-                block: "bool | None" = None
-        ):
-            '''
-            Removes a user from the chat.
+        self,
+        chatId: int,
+        user_id: int,
+        block: "bool | None" = None
+    ):
+        '''
+        Removes a user from the chat.
 
-            :param chatId: The ID of the chat.
-            :param user_id: The ID of the user to remove.
-            :param block: Whether to block the user. Ignored by default.
-            '''
+        :param chatId: The ID of the chat.
+        :param user_id: The ID of the user to remove.
+        :param block: Whether to block the user. Ignored by default.
+        '''
 
-            params = {
-                "chatId": chatId,
-                "user_id": user_id,
-                "block": block
-            }
-            params = {k: v for k, v in params.items() if v}
-            
-            if block != None:
-                params["block"] = str(block)
+        params = {
+            "chatId": chatId,
+            "user_id": user_id,
+            "block": block
+        }
+        params = {k: v for k, v in params.items() if v}
+        
+        if block != None:
+            params["block"] = str(block)
 
-            response = await self.delete(f"https://botapi.max.ru/chats/{chatId}/members/", params=params)
+        response = await self.delete(f"https://botapi.max.ru/chats/{chatId}/members/", params=params)
 
-            return await response.json()
+        return await response.json()
+    
 
     async def patch_chat(self,
         chat_id: int,
@@ -415,7 +443,7 @@ class Bot:
         title: str | None = None,
         pin: str | None = None,
         notify: bool | None = None
-    ):
+    ) -> Chat:
         '''
         Allows you to edit chat information, like the name,
         icon and pinned message.
@@ -438,7 +466,9 @@ class Bot:
         response = await self.patch(
             f"https://botapi.max.ru/chats/{chat_id}", json=payload
         )
-        # todo
+        json = await response.json()
+
+        return Chat.from_json(json)
 
 
     async def post_action(self, chat_id: int, action: str):
@@ -462,7 +492,8 @@ class Bot:
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
-        disable_link_preview: bool = False
+        disable_link_preview: bool = False,
+        keyboard: "List[List[Button]] | None" = None,
         # todo attachments
     ) -> Message:
         '''
@@ -475,6 +506,7 @@ class Bot:
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link embedding in messages. True by default
+        :param keyboard: An inline keyboard to attach to the message
         '''
         # error checking
         assert len(text) < 4000, "Message must be less than 4000 characters"
@@ -487,21 +519,12 @@ class Bot:
             "user_id": user_id,
             "disable_link_preview": str(disable_link_preview).lower()
         }
-        if format == 'default':
-            format = self.default_format
-        body = {
-            "text": text,
-            "format": format,
-            "notify": notify
-        }
         params = {k: v for k, v in params.items() if v}
 
-        # replying
-        if reply_to:
-            body['link'] = {
-                "type": 'reply',
-                "mid": reply_to
-            }
+        if format == 'default':
+            format = self.default_format
+
+        body = get_message_body(text, format, reply_to, notify, keyboard)
 
         response = await self.post(
             f"https://botapi.max.ru/messages", params=params, json=body
@@ -518,7 +541,8 @@ class Bot:
         message: Message,
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         notify: bool = True,
-        disable_link_preview: bool = False
+        disable_link_preview: bool = False,
+        keyboard: "List[List[Button]] | None" = None,
         # todo attachments
     ) -> Message:
         '''
@@ -529,11 +553,12 @@ class Bot:
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link embedding in messages. True by default
+        :param keyboard: An inline keyboard to attach to the message
         '''
         return await self.send_message(
             text, message.recipient.chat_id, format=format,
             reply_to=message.body.message_id, notify=notify,
-            disable_link_preview=disable_link_preview
+            disable_link_preview=disable_link_preview, keyboard=keyboard
         )
 
 
@@ -543,6 +568,7 @@ class Bot:
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
+        keyboard: "List[List[Button]] | None" = None,
         # todo attachments
     ) -> Message:
         '''
@@ -553,6 +579,7 @@ class Bot:
         :param format: Message format. Bot.default_format by default
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
+        :param keyboard: An inline keyboard to attach to the message
         '''
         # error checking
         assert len(text) < 4000, "Message must be less than 4000 characters"
@@ -563,18 +590,8 @@ class Bot:
         }
         if format == 'default':
             format = self.default_format
-        body = {
-            "text": text,
-            "format": format,
-            "notify": notify
-        }
-
-        # replying
-        if reply_to:
-            body['link'] = {
-                "type": 'reply',
-                "mid": reply_to
-            }
+            
+        body = get_message_body(text, format, reply_to, notify, keyboard)
 
         response = await self.put(
             f"https://botapi.max.ru/messages", params=params, json=body
@@ -660,6 +677,7 @@ class Bot:
         '''
         update_type = update['update_type']
 
+
         if update_type == "message_created":
             message = Message.from_json(update["message"])
             message.user_locale = update.get('user_locale', None)
@@ -668,8 +686,6 @@ class Bot:
                 if handler.filter:
                     if handler.filter(message):
                         await handler.call(message)
-                    else:
-                        continue
                 else:
                     await handler.call(message)
 
@@ -703,9 +719,23 @@ class Bot:
                     ))
                     return
                 
+                
         if update_type == 'bot_started':
             for i in self.handlers[update_type]:
                 await i(BotStartPayload.from_json(update))
+
+                
+        if update_type == 'message_callback':
+            for handler in self.handlers[update_type]:
+                callback = Callback.from_json(
+                    update['callback'], update.get('user_locale', None), self
+                )
+                    
+                if handler.filter:
+                    if handler.filter(callback):
+                        await handler.call(callback)
+                else:
+                    await handler.call(callback)
     
 
     async def start_polling(self):

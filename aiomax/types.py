@@ -27,3 +27,10 @@ class ChatStatus:
     LEFT = "left"
     CLOSED = "closed"
     SUSPENDED = "suspended"
+
+class ButtonType:
+    CALLBACK = "callback"
+    LINK = "link"
+    REQUEST_GEO_LOCATION = "request_geo_location"
+    REQUEST_CONTACT = "request_contact"
+    CHAT = "chat"

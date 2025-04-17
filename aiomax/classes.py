@@ -1,5 +1,7 @@
+from .msgconvert import get_message_body
 from .types import *
 from typing import *
+from .buttons import *
 
 
 class BotCommand:
@@ -101,6 +103,8 @@ class Attachment:
             return ShareAttachment.from_json(data)
         elif data['type'] == 'location':
             return LocationAttachment.from_json(data)
+        elif data['type'] == 'inline_keyboard':
+            return InlineKeyboardAttachment.from_json(data)
         else:
             raise Exception(f"Unknown attachment type: {data['type']}")
 
@@ -322,9 +326,18 @@ class LocationAttachment(Attachment):
 
 
 class InlineKeyboardAttachment(Attachment):
-    def __init__(self):
-        # todo implement inline keyboard
-        raise "Inline Keyboard not implemented yet"
+    def __init__(self,
+        payload: List[List[Button]],
+    ):
+        super().__init__("inline_keyboard")
+        self.payload: List[List[Button]] = payload
+
+
+    @staticmethod
+    def from_json(data: dict) -> "InlineKeyboardAttachment | None":
+        return InlineKeyboardAttachment(
+            [[Button.from_json(j) for j in i] for i in data['payload']]
+        )
 
 
 class MessageRecipient:
@@ -475,6 +488,7 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
+        keyboard: "List[List[Button]] | None" = None,
         # todo attachments
     ):
         '''
@@ -484,10 +498,12 @@ class CommandContext:
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
         '''
         await self.bot.send_message(
             text, chat_id=self.message.recipient.chat_id,
-            format=format, notify=notify, disable_link_preview=disable_link_preview
+            format=format, notify=notify, disable_link_preview=disable_link_preview,
+            keyboard=keyboard
         )
 
 
@@ -496,6 +512,7 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
+        keyboard: "List[List[Button]] | None" = None,
         # todo attachments
     ):
         '''
@@ -505,9 +522,10 @@ class CommandContext:
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
         '''
         await self.bot.reply(
-            text, self.message, format, notify, disable_link_preview
+            text, self.message, format, notify, disable_link_preview, keyboard
         )
 
 
@@ -577,3 +595,69 @@ class Chat:
         if data == None: return None
 
         return Chat(**data)
+    
+
+class Callback:
+    def __init__(self,
+        bot,
+        timestamp: int,
+        callback_id: str,
+        user: User,
+        user_locale: "str | None",
+        payload: "str | None" = None
+    ):
+        self.bot = bot
+        self.timestamp: int = timestamp
+        self.callback_id: str = callback_id
+        self.user: User = user
+        self.payload: "str | None" = payload
+        self.user_locale: "str | None" = user_locale
+
+
+    async def answer(self,
+        notification: "str | None" = None,
+        text: "str | None" = None,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        keyboard: "List[List[Button]] | None" = None,
+        # todo attachments
+    ):
+        '''
+        Answer the callback.
+
+        :param notification: Notification to display to the user
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        '''
+        assert notification != None or text != None,\
+            'Either notification or text must be specified'
+        body = {
+            'notification': notification,
+            'message': None
+        }
+        if text != None:
+            format = self.bot.default_format if format == 'default' else format
+            body['message'] = get_message_body(text, format, notify=notify, keyboard=keyboard)
+
+        out = await self.bot.post(
+            'https://botapi.max.ru/answers', params={'callback_id': self.callback_id},
+            json=body
+        )
+        return await out.json()
+
+
+    @staticmethod
+    def from_json(data: dict, user_locale: "str | None" = None, bot = None) -> "Callback | None":
+        if data == None: return None
+        
+        return Callback(
+            bot,
+            data['timestamp'],
+            data['callback_id'],
+            User.from_json(data['user']),
+            user_locale,
+            data.get('payload', None)
+        )
