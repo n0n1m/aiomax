@@ -1,6 +1,6 @@
 from .types import *
 from typing import *
-from .buttons import *
+from . import buttons
 
 
 def get_message_body(
@@ -8,7 +8,7 @@ def get_message_body(
     format: "Literal['markdown', 'html'] | None" = None,
     reply_to: "int | None" = None,
     notify: bool = True,
-    keyboard: "List[List[Button]] | None" = None,
+    keyboard: "List[List[buttons.Button]] | None" = None,
 ) -> dict:
     '''
     Returns the body of the message as json.
@@ -28,6 +28,8 @@ def get_message_body(
 
     # keyboard
     if keyboard:
+        if isinstance(keyboard, buttons.KeyboardBuilder):
+            keyboard = keyboard.to_list()
         body['attachments'] = [{
             'type': 'inline_keyboard',
             'payload': {'buttons': keyboard}

@@ -493,7 +493,7 @@ class Bot:
         reply_to: "int | None" = None,
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[Button]] | None" = None,
+        keyboard: "List[List[buttons.Button]] | None | buttons.KeyboardBuilder" = None,
         # todo attachments
     ) -> Message:
         '''
@@ -542,7 +542,7 @@ class Bot:
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[Button]] | None" = None,
+        keyboard: "List[List[buttons.Button]] | None" = None,
         # todo attachments
     ) -> Message:
         '''
@@ -568,7 +568,7 @@ class Bot:
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
-        keyboard: "List[List[Button]] | None" = None,
+        keyboard: "List[List[buttons.Button]] | None" = None,
         # todo attachments
     ) -> Message:
         '''

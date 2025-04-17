@@ -1,7 +1,7 @@
 from .utils import get_message_body
 from .types import *
 from typing import *
-from .buttons import *
+from . import buttons
 
 
 class BotCommand:
@@ -327,16 +327,16 @@ class LocationAttachment(Attachment):
 
 class InlineKeyboardAttachment(Attachment):
     def __init__(self,
-        payload: List[List[Button]],
+        payload: List[List[buttons.Button]],
     ):
         super().__init__("inline_keyboard")
-        self.payload: List[List[Button]] = payload
+        self.payload: List[List[buttons.Button]] = payload
 
 
     @staticmethod
     def from_json(data: dict) -> "InlineKeyboardAttachment | None":
         return InlineKeyboardAttachment(
-            [[Button.from_json(j) for j in i] for i in data['payload']]
+            [[buttons.Button.from_json(j) for j in i] for i in data['payload']['buttons']]
         )
 
 
@@ -541,7 +541,7 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[Button]] | None" = None,
+        keyboard: "List[List[buttons.Button]] | None" = None,
         # todo attachments
     ) -> Message:
         '''
@@ -565,7 +565,7 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[Button]] | None" = None,
+        keyboard: "List[List[buttons.Button]] | None" = None,
         # todo attachments
     ) -> Message:
         '''
@@ -672,7 +672,7 @@ class Callback:
         text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
-        keyboard: "List[List[Button]] | None" = None,
+        keyboard: "List[List[buttons.Button]] | None" = None,
         # todo attachments
     ):
         '''
