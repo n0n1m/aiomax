@@ -5,7 +5,7 @@ from .buttons import *
 
 def get_message_body(
     text: str,
-    format: "Literal['markdown', 'html', 'default'] | None" = None,
+    format: "Literal['markdown', 'html'] | None" = None,
     reply_to: "int | None" = None,
     notify: bool = True,
     keyboard: "List[List[Button]] | None" = None,

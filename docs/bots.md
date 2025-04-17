@@ -10,13 +10,13 @@
 
 ## Референс
 
-### `Bot(access_token: str, command_prefixes: str | list[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None)`
+### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None)`
 
 Создаёт объект класса `Bot`, через который можно управлять ботом.
 
 - `access_token: str` - токен бота, взятый с [@MasterBot](https://max.ru/masterbot)
 
-- `command_prefixes: str | list[str]` - префикс (или префиксы) команд бота. `/` по умолчанию
+- `command_prefixes: str | List[str]` - префикс (или префиксы) команд бота. `/` по умолчанию
 
 - `mention_prefix: bool` - будет ли бот реагировать на команды, начинающиеся с его имени пользователя (формата `@username /command`). Без `mention_prefix` бот не будет работать в группах. `True` по умолчанию.
 
@@ -28,7 +28,7 @@
 
 Возвращает объект класса `User` с информацией о профиле текущего бота.
 
-### `Bot.patch_me(name: str | None, description: str | None, commands: list[BotCommand] | None, photo: PhotoAttachmentRequestPayload | None) -> User`
+### `Bot.patch_me(name: str | None, description: str | None, commands: List[BotCommand] | None, photo: PhotoAttachmentRequestPayload | None) -> User`
 
 Изменяет информацию о боте и принимает параметры `name`, `description`, `commands`, `photo`.
 
@@ -90,27 +90,27 @@
 
 - `chat_id: int` - ID чата
 
-### `Bot.get_admins(chat_id: int) -> list[User]`
+### `Bot.get_admins(chat_id: int) -> List[User]`
 
 Возвращает список администраторов чата.
 
 - `chat_id: int` - ID чата
 
-### `Bot.get_members(chat_id: int) -> list[User]`
+### `Bot.get_members(chat_id: int) -> List[User]`
 
 Возвращает список участников чата.
 
 - `chat_id: int` - ID чата
 
-### `Bot.add_members(chat_id: int, users: list[int])`
+### `Bot.add_members(chat_id: int, users: List[int])`
 
 Добавляет в чат определенных пользователей.
 
 - `chat_id: int` - ID чата
 
-- `users: list[int]` - список ID пользователей, которых нужно добавить в чат
+- `users: List[int]` - список ID пользователей, которых нужно добавить в чат
 
-### `Bot.kick_member(chat_id: int, users: list[int])`
+### `Bot.kick_member(chat_id: int, users: List[int])`
 
 Удаляет пользователя из чата.
 

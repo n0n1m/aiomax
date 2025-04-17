@@ -1,4 +1,4 @@
-from .msgconvert import get_message_body
+from .utils import get_message_body
 from .types import *
 from typing import *
 from .buttons import *
@@ -39,7 +39,7 @@ class User:
         description: "str | None" = None,
         avatar_url: "str | None" = None,
         full_avatar_url: "str | None" = None,
-        commands: "list[BotCommand] | None" = None,
+        commands: "List[BotCommand] | None" = None,
         last_access_time: "int | None" = None,
         is_owner: "bool | None" = None,
         is_admin: "bool | None" = None,
@@ -57,7 +57,7 @@ class User:
         self.description: "str | None" = description
         self.avatar_url: "str | None" = avatar_url
         self.full_avatar_url: "str | None" = full_avatar_url
-        self.commands: "list[BotCommand] | None" = [
+        self.commands: "List[BotCommand] | None" = [
             BotCommand(**i) for i in commands
         ] if commands else None
         self.last_access_time: "int | None" = last_access_time
@@ -357,6 +357,57 @@ class MessageRecipient:
             chat_id = data["chat_id"],
             chat_type = data["chat_type"]
         )
+    
+
+class Markup:
+    def __init__(self,
+        type: Literal[
+            'strong', 'emphasized', 'monospaced', 'link', 'strikethrough',
+            'underline', 'user_mention', 'heading', 'highlighted'
+        ],
+        start: int,
+        length: int,
+        user_link: "str | None" = None,
+        user_id: "int | None" = None,
+        url: "str | None" = None
+    ):
+        '''
+        A markup element
+
+        :param type: Markup type
+        :param start: Start position
+        :param length: Length
+        :param user_link: Username. `None` if markup type is not `user_link`
+        :param user_id: User ID. `None` if markup type is not `user_link`
+        :param url: URL. `None` if markup type is not `link`
+        '''
+        self.type: Literal[
+            'strong', 'emphasized', 'monospaced', 'link', 'strikethrough',
+            'underline', 'user_mention', 'heading', 'highlighted'
+        ] = type
+        self.start: int = start
+        self.length: int = length
+
+        self.user_link: "str | None" = user_link
+        self.user_id: "int | None" = user_id
+        self.url: "str | None" = url
+
+
+    @staticmethod
+    def from_json(data: dict) -> "Markup | None":
+        if data == None: return None
+
+        if data['type'] == 'user_mention':
+            return Markup(
+                data['type'], data['from'], data['length'],
+                user_link=data.get('user_link', None), user_id=data.get('user_id', None)
+            )
+        elif data['type'] == 'link':
+            return Markup(
+                data['type'], data['from'], data['length'], url=data['url']
+            )
+
+        return Markup(data['type'], data['from'], data['length'])
 
 
 class MessageBody:
@@ -364,13 +415,14 @@ class MessageBody:
         mid: str,
         seq: int,
         text: "str | None",
-        attachments: "list[Attachment] | None",
-        # todo implement markup
+        attachments: "List[Attachment] | None",
+        markup: "List[Markup] | None" = None
     ):
         self.message_id: str = mid
         self.seq: int = seq
         self.text: "str | None" = text
-        self.attachments: "list[Attachment] | None" = attachments
+        self.attachments: "List[Attachment] | None" = attachments
+        self.markup: "List[Markup] | None" = markup
 
 
     @staticmethod
@@ -381,7 +433,8 @@ class MessageBody:
             mid = data["mid"],
             seq = data["seq"],
             text = data["text"],
-            attachments = [Attachment.from_json(x) for x in data.get('attachments', [])]
+            attachments = [Attachment.from_json(x) for x in data.get('attachments', [])],
+            markup = [Markup.from_json(x) for x in data.get('markup', [])]
         )
 
 
@@ -480,7 +533,7 @@ class CommandContext:
         self.message: Message = message
         self.command_name: str = command_name
         self.args_raw: str = args
-        self.args: list[str] = args.split()
+        self.args: List[str] = args.split()
 
 
     async def send(self,

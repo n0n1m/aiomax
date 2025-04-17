@@ -19,7 +19,7 @@
 
 Декоратор вызывается перед началом долгого опроса (поллинга).
 
-## `Bot.on_command(name: str, aliases = list[str] = [])`
+## `Bot.on_command(name: str, aliases = List[str] = [])`
 
 Декораток для получения команд с префиксом.
 

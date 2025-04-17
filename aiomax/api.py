@@ -2,7 +2,7 @@ import asyncio
 from typing import *
 import aiohttp
 
-from .msgconvert import get_message_body
+from .utils import get_message_body
 from .classes import *
 
 import logging
@@ -11,7 +11,7 @@ bot_logger = logging.getLogger("aiomax.bot")
 class Bot:
     def __init__(self,
         access_token: str,
-        command_prefixes: "str | list[str]" = "/",
+        command_prefixes: "str | List[str]" = "/",
         mention_prefix: bool = True,
         case_sensitive: bool = True,
         default_format: "Literal['markdown', 'html'] | None" = None
@@ -22,14 +22,14 @@ class Bot:
         self.access_token: str = access_token
         self.session = None
         self.polling = False
-        self.handlers: dict[str, list[Handler]] = {
+        self.handlers: dict[str, List[Handler]] = {
             'message_created': [],
             'on_ready': [],
             'bot_started': [],
             'message_callback': []
         }
         self.commands: dict[str, list] = {}
-        self.command_prefixes: "str | list[str]" = command_prefixes
+        self.command_prefixes: "str | List[str]" = command_prefixes
         self.mention_prefix: bool = mention_prefix
         self.case_sensitive: bool = case_sensitive
         self.default_format: "str | None" = default_format
@@ -38,7 +38,7 @@ class Bot:
         self.username: "str | None" = None
         self.name: "str | None" = None
         self.description: "str | None" = None
-        self.bot_commands: list[BotCommand] = None
+        self.bot_commands: List[BotCommand] = None
     
 
     async def get(self, *args, **kwargs):
@@ -153,7 +153,7 @@ class Bot:
         return decorator
     
 
-    def on_command(self, name: str, aliases: list[str] = []):
+    def on_command(self, name: str, aliases: List[str] = []):
         '''
         Decorator for receiving commands.
         '''
@@ -201,7 +201,7 @@ class Bot:
         self,
         name: "str | None" = None,
         description: "str | None" = None,
-        commands: "list[BotCommand] | None" = None,
+        commands: "List[BotCommand] | None" = None,
         photo: "PhotoAttachmentRequestPayload | None" = None
     ) -> User:
         '''
