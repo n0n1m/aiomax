@@ -310,14 +310,14 @@ class ContactAttachment(Attachment):
 
 class ShareAttachment(Attachment):
     def __init__(self,
-        url: str,
         payload: "MediaPayload | None",
+        url: "str | None" = None,
         title: "str | None" = None,
         description: "str | None" = None,
         image_url: "str | None" = None,
     ):
         super().__init__("share")
-        self.url: str = url
+        self.url: "str | None" = url
         self.payload: "MediaPayload | None" = payload
         self.title: "str | None" = title
         self.description: "str | None" = description
@@ -327,8 +327,8 @@ class ShareAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "ShareAttachment | None":
         return ShareAttachment(
-            data['url'],
             MediaPayload.from_json(data.get('payload', None)),
+            data['payload'].get('url', None),
             data.get('title', None),
             data.get('description', None),
             data.get('image_url', None),
