@@ -1,5 +1,7 @@
+from .utils import get_message_body
 from .types import *
 from typing import *
+from . import buttons
 
 
 class BotCommand:
@@ -37,7 +39,13 @@ class User:
         description: "str | None" = None,
         avatar_url: "str | None" = None,
         full_avatar_url: "str | None" = None,
-        commands: "list[BotCommand] | None" = None
+        commands: "List[BotCommand] | None" = None,
+        last_access_time: "int | None" = None,
+        is_owner: "bool | None" = None,
+        is_admin: "bool | None" = None,
+        join_time: "int | None" = None,
+        permissions: "List[str] | None" = None
+
     ):
         self.user_id: int = user_id
         self.first_name: str = first_name
@@ -49,9 +57,14 @@ class User:
         self.description: "str | None" = description
         self.avatar_url: "str | None" = avatar_url
         self.full_avatar_url: "str | None" = full_avatar_url
-        self.commands: "list[BotCommand] | None" = [
+        self.commands: "List[BotCommand] | None" = [
             BotCommand(**i) for i in commands
         ] if commands else None
+        self.last_access_time: "int | None" = last_access_time
+        self.is_owner: "bool | None" = is_owner
+        self.is_admin: "bool | None" = is_admin
+        self.join_time: "int | None" = join_time
+        self.permissions: "List[str] | None" = permissions
 
 
     @staticmethod
@@ -66,7 +79,6 @@ class User:
             return f"{self.first_name} {self.last_name}"
         else:
             return self.first_name
-
 
 class Attachment:
     def __init__(self, type: str):
@@ -91,6 +103,8 @@ class Attachment:
             return ShareAttachment.from_json(data)
         elif data['type'] == 'location':
             return LocationAttachment.from_json(data)
+        elif data['type'] == 'inline_keyboard':
+            return InlineKeyboardAttachment.from_json(data)
         else:
             raise Exception(f"Unknown attachment type: {data['type']}")
 
@@ -340,9 +354,18 @@ class LocationAttachment(Attachment):
 
 
 class InlineKeyboardAttachment(Attachment):
-    def __init__(self):
-        # todo implement inline keyboard
-        raise "Inline Keyboard not implemented yet"
+    def __init__(self,
+        payload: List[List[buttons.Button]],
+    ):
+        super().__init__("inline_keyboard")
+        self.payload: List[List[buttons.Button]] = payload
+
+
+    @staticmethod
+    def from_json(data: dict) -> "InlineKeyboardAttachment | None":
+        return InlineKeyboardAttachment(
+            [[buttons.Button.from_json(j) for j in i] for i in data['payload']['buttons']]
+        )
 
 
 class MessageRecipient:
@@ -362,6 +385,57 @@ class MessageRecipient:
             chat_id = data["chat_id"],
             chat_type = data["chat_type"]
         )
+    
+
+class Markup:
+    def __init__(self,
+        type: Literal[
+            'strong', 'emphasized', 'monospaced', 'link', 'strikethrough',
+            'underline', 'user_mention', 'heading', 'highlighted'
+        ],
+        start: int,
+        length: int,
+        user_link: "str | None" = None,
+        user_id: "int | None" = None,
+        url: "str | None" = None
+    ):
+        '''
+        A markup element
+
+        :param type: Markup type
+        :param start: Start position
+        :param length: Length
+        :param user_link: Username. `None` if markup type is not `user_link`
+        :param user_id: User ID. `None` if markup type is not `user_link`
+        :param url: URL. `None` if markup type is not `link`
+        '''
+        self.type: Literal[
+            'strong', 'emphasized', 'monospaced', 'link', 'strikethrough',
+            'underline', 'user_mention', 'heading', 'highlighted'
+        ] = type
+        self.start: int = start
+        self.length: int = length
+
+        self.user_link: "str | None" = user_link
+        self.user_id: "int | None" = user_id
+        self.url: "str | None" = url
+
+
+    @staticmethod
+    def from_json(data: dict) -> "Markup | None":
+        if data == None: return None
+
+        if data['type'] == 'user_mention':
+            return Markup(
+                data['type'], data['from'], data['length'],
+                user_link=data.get('user_link', None), user_id=data.get('user_id', None)
+            )
+        elif data['type'] == 'link':
+            return Markup(
+                data['type'], data['from'], data['length'], url=data['url']
+            )
+
+        return Markup(data['type'], data['from'], data['length'])
 
 
 class MessageBody:
@@ -369,13 +443,14 @@ class MessageBody:
         mid: str,
         seq: int,
         text: "str | None",
-        attachments: "list[Attachment] | None",
-        # todo implement markup
+        attachments: "List[Attachment] | None",
+        markup: "List[Markup] | None" = None
     ):
         self.message_id: str = mid
         self.seq: int = seq
         self.text: "str | None" = text
-        self.attachments: "list[Attachment] | None" = attachments
+        self.attachments: "List[Attachment] | None" = attachments
+        self.markup: "List[Markup] | None" = markup
 
 
     @staticmethod
@@ -386,7 +461,8 @@ class MessageBody:
             mid = data["mid"],
             seq = data["seq"],
             text = data["text"],
-            attachments = [Attachment.from_json(x) for x in data.get('attachments', [])]
+            attachments = [Attachment.from_json(x) for x in data.get('attachments', [])],
+            markup = [Markup.from_json(x) for x in data.get('markup', [])]
         )
 
 
@@ -425,6 +501,7 @@ class Message:
         views: "int | None" = None,
         url: "str | None" = None,
         constructor: "User | None" = None,
+        bot = None
     ):
         self.recipient: MessageRecipient = recipient
         self.body: "MessageBody | None" = body
@@ -435,6 +512,7 @@ class Message:
         self.url: "str | None" = url
         self.constructor: "User | None" = constructor
         self.user_locale: "str | None" = None
+        self.bot = bot
 
 
     @staticmethod
@@ -449,6 +527,56 @@ class Message:
             url = data.get("url", None),
             constructor = User.from_json(data.get("constructor", None)),
         )
+
+
+    async def send(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | None" = None,
+        # todo attachments
+    ) -> "Message":
+        '''
+        Send a message to the chat that the message is sent.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        '''
+        if self.bot == None:
+            return
+        return (await self.bot.send_message(
+            text, chat_id=self.recipient.chat_id,
+            format=format, notify=notify, disable_link_preview=disable_link_preview,
+            keyboard=keyboard
+        ))
+
+
+    async def reply(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | None" = None,
+        # todo attachments
+    ) -> "Message":
+        '''
+        Reply to this message.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        '''
+        if self.bot == None:
+            return
+        return (await self.bot.reply(
+            text, self, format, notify, disable_link_preview, keyboard
+        ))
     
 
 class BotStartPayload:
@@ -483,9 +611,11 @@ class CommandContext:
     ):
         self.bot = bot
         self.message: Message = message
+        self.sender: "User | None" = message.sender
+        self.recipient: MessageRecipient = message.recipient
         self.command_name: str = command_name
         self.args_raw: str = args
-        self.args: list[str] = args.split()
+        self.args: List[str] = args.split()
 
 
     async def send(self,
@@ -493,8 +623,9 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | None" = None,
         attachments: "list[Attachment] | None" = None
-    ):
+    ) -> Message:
         '''
         Send a message to the chat that the user sent the command.
 
@@ -503,11 +634,13 @@ class CommandContext:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
         :param attachments: List of attachments. Optional
+        :param keyboard: An inline keyboard to attach to the message
         '''
-        await self.bot.send_message(
-            text, chatId=self.message.recipient.chat_id,
-            format=format, notify=notify, disable_link_preview=disable_link_preview, attachments=attachments
-        )
+        return (await self.bot.send_message(
+            text, chat_id=self.message.recipient.chat_id,
+            format=format, notify=notify, disable_link_preview=disable_link_preview,
+            keyboard=keyboard, attachments=attachments
+        ))
 
 
     async def reply(self,
@@ -515,8 +648,9 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | None" = None,
         # todo attachments
-    ):
+    ) -> Message:
         '''
         Reply to the message that the user sent.
 
@@ -524,7 +658,142 @@ class CommandContext:
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
         '''
-        await self.bot.reply(
-            text, self.message, format, notify, disable_link_preview
+        return (await self.bot.reply(
+            text, self.message, format, notify, disable_link_preview, keyboard
+        ))
+
+
+class Handler():
+    def __init__(
+        self,
+        call: Callable,
+        filter: "Callable | None" = None,
+    ):
+        self.call = call
+        self.filter = filter
+
+
+class Image:
+    def __init__(self,
+        url: str,
+    ):
+        self.url: str = url
+    
+    
+    @staticmethod
+    def from_json(data: dict) -> "User | None":
+        if data == None: return None
+
+        return User(**data)
+    
+
+class Chat:
+    def __init__(self,
+        chat_id: int,
+        type: str,
+        status: str,
+        last_event_time: int,
+        participants_count: int,
+        is_public: bool,
+        title: "str | None" = None,
+        icon: "Image | None" = None,
+        description: "str | None" = None,
+        pinned_message: "Message | None" = None,
+        owner_id: "int | None" = None,
+        participants: "int | None" = None,
+        link: "str | None" = None,
+        messages_count: "str | None" = None,
+        chat_message_id: "str | None" = None,
+        dialog_with_user: "User | None" = None,
+    ):
+        self.chat_id: int = chat_id
+        self.type: str = type
+        self.status: str = status
+        self.last_event_time: int = last_event_time
+        self.participants_count: int = participants_count
+        self.title: "str | None" = title
+        self.icon: "Image | None" = icon
+        self.is_public: bool = is_public
+        self.dialog_with_user: "User | None" = dialog_with_user
+        self.description: "str | None" = description
+        self.pinned_message: "Message | None" = pinned_message
+        self.owner_id: "int | None" = owner_id
+        self.participants: "int | None" = participants
+        self.link: "str | None" = link
+        self.messages_count: "str | None" = messages_count
+        self.chat_message_id: "str | None" = chat_message_id
+
+
+    @staticmethod
+    def from_json(data: dict) -> "Chat | None":
+        if data == None: return None
+
+        return Chat(**data)
+    
+
+class Callback:
+    def __init__(self,
+        bot,
+        timestamp: int,
+        callback_id: str,
+        user: User,
+        user_locale: "str | None",
+        payload: "str | None" = None
+    ):
+        self.bot = bot
+        self.timestamp: int = timestamp
+        self.callback_id: str = callback_id
+        self.user: User = user
+        self.payload: "str | None" = payload
+        self.user_locale: "str | None" = user_locale
+
+
+    async def answer(self,
+        notification: "str | None" = None,
+        text: "str | None" = None,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        keyboard: "List[List[buttons.Button]] | None" = None,
+        # todo attachments
+    ):
+        '''
+        Answer the callback.
+
+        :param notification: Notification to display to the user
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        '''
+        assert notification != None or text != None,\
+            'Either notification or text must be specified'
+        body = {
+            'notification': notification,
+            'message': None
+        }
+        if text != None:
+            format = self.bot.default_format if format == 'default' else format
+            body['message'] = get_message_body(text, format, notify=notify, keyboard=keyboard)
+
+        out = await self.bot.post(
+            'https://botapi.max.ru/answers', params={'callback_id': self.callback_id},
+            json=body
+        )
+        return await out.json()
+
+
+    @staticmethod
+    def from_json(data: dict, user_locale: "str | None" = None, bot = None) -> "Callback | None":
+        if data == None: return None
+        
+        return Callback(
+            bot,
+            data['timestamp'],
+            data['callback_id'],
+            User.from_json(data['user']),
+            user_locale,
+            data.get('payload', None)
         )
