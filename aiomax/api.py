@@ -735,17 +735,25 @@ class Bot:
 
                 
         if update_type == 'message_callback':
-            for handler in self.handlers[update_type]:
-                callback = Callback.from_json(
+            HANDLED = False
+
+            callback = Callback.from_json(
                     update['callback'], update.get('user_locale', None), self
                 )
-                    
+
+            for handler in self.handlers[update_type]:     
                 if handler.filter:
                     if handler.filter(callback):
                         await handler.call(callback)
+                        HANDLED = True
                 else:
                     await handler.call(callback)
-    
+                    HANDLED = True
+                
+            if HANDLED:
+                bot_logger.debug(f"Callback \"{callback.payload}\" handled")
+            else:
+                 bot_logger.debug(f"Callback \"{callback.payload}\" not handled")
 
     async def start_polling(self):
         '''
