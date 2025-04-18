@@ -782,12 +782,15 @@ class Bot:
                 await i()
 
             while self.polling:
+                try:
                     updates = await self.get_updates()
                     
                     for update in updates["updates"]:
                         await self.handle_update(update)
 
-
+                except Exception as e:
+                    bot_logger.error(f"Error while handling updates: {e}")
+                    await asyncio.sleep(3)
 
         self.session = None
         self.polling = False
