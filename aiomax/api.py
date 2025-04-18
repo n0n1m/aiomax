@@ -516,6 +516,7 @@ class Bot:
         :param keyboard: An inline keyboard to attach to the message
         '''
         # error checking
+        text = str(text)
         assert len(text) < 4000, "Message must be less than 4000 characters"
         assert chat_id or user_id, "Either chat_id or user_id must be provided"
         assert not (chat_id and user_id), "Both chat_id and user_id cannot be provided"
@@ -781,15 +782,12 @@ class Bot:
                 await i()
 
             while self.polling:
-                try:
                     updates = await self.get_updates()
                     
                     for update in updates["updates"]:
                         await self.handle_update(update)
 
-                except Exception as e:
-                    bot_logger.error(f"Error while handling updates: {e}")
-                    await asyncio.sleep(3)
+
 
         self.session = None
         self.polling = False

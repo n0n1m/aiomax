@@ -500,6 +500,9 @@ class Message:
     def __repr__(self):
         return f"{type(self).__name__}(text={self.body.text!r})"
 
+    def __str__(self):
+        return self.body.text
+
     @staticmethod
     def from_json(data: dict) -> "Message":
         return Message(
