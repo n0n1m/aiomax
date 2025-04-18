@@ -67,6 +67,12 @@ class User:
         self.permissions: "List[str] | None" = permissions
 
 
+    def __repr__(self):
+        return f"{type(self).__name__}(user_id={self.user_id!r}, full_name={self.full_name!r})"
+
+    def __eq__(self, other):
+        return self.user_id == other.user_id
+
     @staticmethod
     def from_json(data: dict) -> "User | None":
         if data == None: return None
@@ -348,6 +354,11 @@ class MessageRecipient:
         self.chat_id: "int | None" = chat_id
         self.chat_type: str = chat_type
 
+    def __repr__(self):
+        return f"{type(self).__name__}(chat_id={self.chat_id!r}, chat_type={self.chat_type!r})"
+    
+    def __eq__(self, other):
+        return self.chat_id == other.chat_id
 
     @staticmethod
     def from_json(data: dict) -> "MessageRecipient":
@@ -642,6 +653,11 @@ class Chat:
         self.messages_count: "str | None" = messages_count
         self.chat_message_id: "str | None" = chat_message_id
 
+    def __eq__(self, other):
+        return self.chat_id == other.chat_id
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(chat_id={self.chat_id!r}, title={self.title!r})"
 
     @staticmethod
     def from_json(data: dict) -> "Chat | None":
