@@ -153,15 +153,19 @@ class Bot:
         return decorator
     
 
-    def on_command(self, name: str, aliases: List[str] = []):
+    def on_command(self, name: "str | None" = None, aliases: List[str] = []):
         '''
         Decorator for receiving commands.
         '''
         def decorator(func): 
             # command name
-            assert ' ' not in name, 'Command name cannot contain spaces'
-
-            check_name = name.lower() if not self.case_sensitive else name
+            if name is None:
+                command_name = func.__name__
+            else:
+                assert ' ' not in name, 'Command name cannot contain spaces'
+                command_name = name
+            
+            check_name = command_name.lower() if not self.case_sensitive else command_name
             if check_name not in self.commands:
                 self.commands[check_name] = []
             self.commands[check_name].append(func)
