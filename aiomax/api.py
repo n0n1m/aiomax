@@ -4,6 +4,7 @@ import aiohttp
 
 from .utils import get_message_body
 from .classes import *
+from json import JSONDecodeError
 
 import logging
 bot_logger = logging.getLogger("aiomax.bot")
@@ -487,6 +488,53 @@ class Bot:
         response = await self.post(f"https://botapi.max.ru/chats/{chat_id}/actions", json={"action": action})
 
         return await response.json()
+    
+
+    async def upload(self, data: IO | str, type: str) -> dict:
+        '''
+        Uploads a file to the server.
+
+        :param data: File-like object or path to the file
+        :param type: File type
+        '''
+
+        if isinstance(data, str):
+            data = open(data, 'rb')
+        
+        form = aiohttp.FormData()
+        form.add_field('data', data)
+        url_resp = await self.post('https://botapi.max.ru/uploads', params={"type": type})
+        url_json = await url_resp.json()
+        token_resp = await self.session.post(url_json['url'], data=form)
+        if type in {'audio', 'video'}:
+            return url_json
+        token_json = await token_resp.json()
+
+        return token_json
+    
+
+    async def upload_image(self, data: BinaryIO | str):
+        raw_photo = await self.upload(data, 'image')
+        token = list(raw_photo['photos'].values())[0]['token']
+        return PhotoAttachment(PhotoPayload(token=token))
+    
+
+    async def upload_video(self, data: BinaryIO | str):
+        raw_video = await self.upload(data, 'video')
+        token = raw_video['token']
+        return VideoAttachment(MediaPayload(token=token))
+    
+
+    async def upload_audio(self, data: BinaryIO | str):
+        raw_audio = await self.upload(data, 'audio')
+        token = raw_audio['token']
+        return AudioAttachment(MediaPayload(token=token))
+    
+
+    async def upload_file(self, data: IO | str):
+        raw_file = await self.upload(data, 'file')
+        token = raw_file['token']
+        return FileAttachment(MediaPayload(token=token))
 
 
     async def send_message(self,
@@ -498,7 +546,7 @@ class Bot:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | None | buttons.KeyboardBuilder" = None,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ) -> Message:
         '''
         Allows you to send a message to a user or in a chat.
@@ -511,6 +559,7 @@ class Bot:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link embedding in messages. True by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         # error checking
         assert len(text) < 4000, "Message must be less than 4000 characters"
@@ -528,13 +577,25 @@ class Bot:
         if format == 'default':
             format = self.default_format
 
-        body = get_message_body(text, format, reply_to, notify, keyboard)
+        body = get_message_body(text, format, reply_to, notify, keyboard, attachments)
 
         response = await self.post(
             f"https://botapi.max.ru/messages", params=params, json=body
         )
         if response.status != 200:
-            raise Exception(await response.text())
+            exception = Exception(await response.text())
+            retry = False
+            try:
+                err_json = await response.json()
+                if err_json['code'] == 'attachment.not.ready':
+                    retry = True
+            except:
+                raise exception
+            if retry:
+                await asyncio.sleep(1)
+                return await self.send_message(text=text, chat_id=chat_id, user_id=user_id, format=format, reply_to=reply_to, notify=notify, disable_link_preview=disable_link_preview, attachments=attachments)
+            else:
+                raise exception
         
         json = await response.json()
         return Message.from_json(json['message'])
@@ -547,7 +608,7 @@ class Bot:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ) -> Message:
         '''
         Allows you to reply to a message easily.
@@ -558,11 +619,12 @@ class Bot:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link embedding in messages. True by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         return await self.send_message(
             text, message.recipient.chat_id, format=format,
             reply_to=message.body.message_id, notify=notify,
-            disable_link_preview=disable_link_preview, keyboard=keyboard
+            disable_link_preview=disable_link_preview, keyboard=keyboard, attachments=attachments
         )
 
 
@@ -790,3 +852,9 @@ class Bot:
 
         self.session = None
         self.polling = False
+
+    def run(self):
+        '''
+        Shortcut for `asyncio.run(bot.start_polling())`
+        '''
+        asyncio.run(self.start_polling())
