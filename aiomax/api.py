@@ -682,13 +682,21 @@ class Bot:
             message = Message.from_json(update["message"])
             message.bot = self
             message.user_locale = update.get('user_locale', None)
+            HANDLED = False
 
             for handler in self.handlers['message_created']:
                 if handler.filter:
                     if handler.filter(message):
                         await handler.call(message)
+                        HANDLED = True
                 else:
                     await handler.call(message)
+                    HANDLED = True
+            
+            if HANDLED:
+                bot_logger.debug(f"Message \"{message.body.text}\" handled")
+            else:
+                 bot_logger.debug(f"Message \"{message.body.text}\" not handled")
 
             # handling commands
             prefixes = self.command_prefixes if type(self.command_prefixes) != str\
