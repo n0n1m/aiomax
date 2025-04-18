@@ -17,8 +17,7 @@ def get_message_body(
     body = {
         "text": text,
         "format": format,
-        "notify": notify,
-        "attachments": []
+        "notify": notify
     }
 
     # replying
@@ -37,10 +36,12 @@ def get_message_body(
             'payload': {'buttons': keyboard}
         }]
     
-    attachment_json = []
-    for at in attachments or []:
-        # todo: implement all attachment types in https://github.com/max-messenger/max-bot-api-client-ts/blob/main/examples/attachments-bot.ts
-        assert hasattr(at, 'as_dict'), 'Attachment must be an image, a video, an audio or a file'
-        attachment_json.append(at.as_dict())
+    if attachments:
+        if 'attachments' not in body:
+            body['attachments'] = []
+        for at in attachments or []:
+            # todo: implement all attachment types in https://github.com/max-messenger/max-bot-api-client-ts/blob/main/examples/attachments-bot.ts
+            assert hasattr(at, 'as_dict'), 'Attachment must be an image, a video, an audio or a file'
+            body['attachments'].append(at.as_dict())
 
     return body

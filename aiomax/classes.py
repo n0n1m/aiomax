@@ -633,8 +633,8 @@ class CommandContext:
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
-        :param attachments: List of attachments. Optional
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         return (await self.bot.send_message(
             text, chat_id=self.message.recipient.chat_id,
@@ -649,7 +649,7 @@ class CommandContext:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ) -> Message:
         '''
         Reply to the message that the user sent.
@@ -659,9 +659,10 @@ class CommandContext:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         return (await self.bot.reply(
-            text, self.message, format, notify, disable_link_preview, keyboard
+            text, self.message, format, notify, disable_link_preview, keyboard, attachments
         ))
 
 
@@ -756,7 +757,7 @@ class Callback:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ):
         '''
         Answer the callback.
@@ -767,6 +768,7 @@ class Callback:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         assert notification != None or text != None,\
             'Either notification or text must be specified'
@@ -776,7 +778,7 @@ class Callback:
         }
         if text != None:
             format = self.bot.default_format if format == 'default' else format
-            body['message'] = get_message_body(text, format, notify=notify, keyboard=keyboard)
+            body['message'] = get_message_body(text, format, notify=notify, keyboard=keyboard, attachments=attachments)
 
         out = await self.bot.post(
             'https://botapi.max.ru/answers', params={'callback_id': self.callback_id},

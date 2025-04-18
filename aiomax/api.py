@@ -573,7 +573,7 @@ class Bot:
         if format == 'default':
             format = self.default_format
 
-        body = get_message_body(text, format, reply_to, notify, keyboard)
+        body = get_message_body(text, format, reply_to, notify, keyboard, attachments)
 
         response = await self.post(
             f"https://botapi.max.ru/messages", params=params, json=body
@@ -604,7 +604,7 @@ class Bot:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ) -> Message:
         '''
         Allows you to reply to a message easily.
@@ -615,11 +615,12 @@ class Bot:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link embedding in messages. True by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         return await self.send_message(
             text, message.recipient.chat_id, format=format,
             reply_to=message.body.message_id, notify=notify,
-            disable_link_preview=disable_link_preview, keyboard=keyboard
+            disable_link_preview=disable_link_preview, keyboard=keyboard, attachments=attachments
         )
 
 
