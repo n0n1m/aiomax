@@ -497,6 +497,8 @@ class Message:
         self.user_locale: "str | None" = None
         self.bot = bot
 
+    def __repr__(self):
+        return f"{type(self).__name__}(text={self.body.text!r})"
 
     @staticmethod
     def from_json(data: dict) -> "Message":
