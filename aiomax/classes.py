@@ -117,16 +117,16 @@ class Attachment:
 
 class MediaPayload:
     def __init__(self,
-        url: str,
         token: str,
+        url: "str | None" = None,
     ):
-        self.url: str = url
+        self.url: "str | None" = url
         self.token: str = token
 
 
     @staticmethod
     def from_json(data: dict) -> "MediaPayload | None":
-        return MediaPayload(data['url'], data['token'])
+        return MediaPayload(url=data.get('url'), token=data.get('token'))
 
 
 class StickerPayload:
@@ -159,17 +159,17 @@ class ContactPayload:
 
 class PhotoPayload(MediaPayload):
     def __init__(self,
-        url: str,
         token: str,
-        photo_id: int
+        url: "str | None" = None,
+        photo_id: "int | None" = None
     ):
-        super().__init__(url, token)
-        self.photo_id: int = photo_id
+        super().__init__(url=url, token=token)
+        self.photo_id: "int | None" = photo_id
 
     
     @staticmethod
     def from_json(data: dict) -> "PhotoPayload | None":
-        return PhotoPayload(data['url'], data['token'], data['photo_id'])
+        return PhotoPayload(url=data.get('url'), token=data.get('token'), photo_id=data.get('photo_id'))
 
 
 class PhotoAttachment(Attachment):
@@ -185,6 +185,13 @@ class PhotoAttachment(Attachment):
         return PhotoAttachment(
             PhotoPayload.from_json(data['payload'])
         )
+    
+    
+    def as_dict(self):
+        return {
+            'type': self.type,
+            'payload': {'token': self.payload.token}
+        }
 
 
 class VideoAttachment(Attachment):
@@ -212,6 +219,13 @@ class VideoAttachment(Attachment):
             data.get('height', None),
             data.get('duration', None),
         )
+    
+    
+    def as_dict(self):
+        return {
+            'type': self.type,
+            'payload': {'token': self.payload.token}
+        }
 
 
 class AudioAttachment(Attachment):
@@ -227,27 +241,41 @@ class AudioAttachment(Attachment):
         return AudioAttachment(
             MediaPayload.from_json(data['payload'])
         )
+    
+    
+    def as_dict(self):
+        return {
+            'type': self.type,
+            'payload': {'token': self.payload.token}
+        }
 
 
 class FileAttachment(Attachment):
     def __init__(self,
         payload: MediaPayload,
-        filename: str,
-        size: int
+        filename: "str | None" = None,
+        size: "int | None" = None
     ):
         super().__init__("file")
         self.payload: MediaPayload = payload
-        self.filename: str = filename
-        self.size: int = size
+        self.filename: "str | None" = filename
+        self.size: "int | None" = size
 
 
     @staticmethod
     def from_json(data: dict) -> "FileAttachment | None":
         return FileAttachment(
             MediaPayload.from_json(data['payload']),
-            data['filename'],
-            data['size']
+            data.get('filename'),
+            data.get('size')
         )
+    
+    
+    def as_dict(self):
+        return {
+            'type': self.type,
+            'payload': {'token': self.payload.token}
+        }
 
 
 class StickerAttachment(Attachment):
@@ -288,14 +316,14 @@ class ContactAttachment(Attachment):
 
 class ShareAttachment(Attachment):
     def __init__(self,
-        url: str,
         payload: "MediaPayload | None",
+        url: "str | None" = None,
         title: "str | None" = None,
         description: "str | None" = None,
         image_url: "str | None" = None,
     ):
         super().__init__("share")
-        self.url: str = url
+        self.url: "str | None" = url
         self.payload: "MediaPayload | None" = payload
         self.title: "str | None" = title
         self.description: "str | None" = description
@@ -305,8 +333,8 @@ class ShareAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "ShareAttachment | None":
         return ShareAttachment(
-            data['url'],
             MediaPayload.from_json(data.get('payload', None)),
+            data['payload'].get('url', None),
             data.get('title', None),
             data.get('description', None),
             data.get('image_url', None),
@@ -612,7 +640,7 @@ class CommandContext:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ) -> Message:
         '''
         Send a message to the chat that the user sent the command.
@@ -622,11 +650,12 @@ class CommandContext:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         return (await self.bot.send_message(
             text, chat_id=self.message.recipient.chat_id,
             format=format, notify=notify, disable_link_preview=disable_link_preview,
-            keyboard=keyboard
+            keyboard=keyboard, attachments=attachments
         ))
 
 
@@ -636,7 +665,7 @@ class CommandContext:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ) -> Message:
         '''
         Reply to the message that the user sent.
@@ -646,9 +675,10 @@ class CommandContext:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         return (await self.bot.reply(
-            text, self.message, format, notify, disable_link_preview, keyboard
+            text, self.message, format, notify, disable_link_preview, keyboard, attachments
         ))
 
 
@@ -748,7 +778,7 @@ class Callback:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        attachments: "list[Attachment] | None" = None
     ):
         '''
         Answer the callback.
@@ -759,6 +789,7 @@ class Callback:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         assert notification != None or text != None,\
             'Either notification or text must be specified'
@@ -768,7 +799,7 @@ class Callback:
         }
         if text != None:
             format = self.bot.default_format if format == 'default' else format
-            body['message'] = get_message_body(text, format, notify=notify, keyboard=keyboard)
+            body['message'] = get_message_body(text, format, notify=notify, keyboard=keyboard, attachments=attachments)
 
         out = await self.bot.post(
             'https://botapi.max.ru/answers', params={'callback_id': self.callback_id},

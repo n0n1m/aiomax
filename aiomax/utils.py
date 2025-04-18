@@ -9,6 +9,7 @@ def get_message_body(
     reply_to: "int | None" = None,
     notify: bool = True,
     keyboard: "List[List[buttons.Button]] | None" = None,
+    attachments: "list[Attachment] | None" = None
 ) -> dict:
     '''
     Returns the body of the message as json.
@@ -34,5 +35,13 @@ def get_message_body(
             'type': 'inline_keyboard',
             'payload': {'buttons': keyboard}
         }]
+    
+    if attachments:
+        if 'attachments' not in body:
+            body['attachments'] = []
+        for at in attachments or []:
+            # todo: implement all attachment types in https://github.com/max-messenger/max-bot-api-client-ts/blob/main/examples/attachments-bot.ts
+            assert hasattr(at, 'as_dict'), 'Attachment must be an image, a video, an audio or a file'
+            body['attachments'].append(at.as_dict())
 
     return body
