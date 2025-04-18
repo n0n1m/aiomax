@@ -113,12 +113,15 @@ class Bot:
 
     # decorators
 
-    def on_message(self, filter: "Callable | None" = None):
+    def on_message(self, filter: "Callable | str | None" = None):
         '''
         Decorator for receiving messages.
         '''
-        def decorator(func): 
-            self.handlers["message_created"].append(Handler(call=func, filter=filter))
+        def decorator(func):
+            new_filter = filter
+            if isinstance(filter, str):
+                new_filter = lambda message: message.body.text == filter
+            self.handlers["message_created"].append(Handler(call=func, filter=new_filter))
             return func
         return decorator
 
