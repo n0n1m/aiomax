@@ -1,7 +1,6 @@
 from .types import *
 from typing import *
 from . import buttons
-from . import classes
 
 def get_message_body(
     text: str,
@@ -9,7 +8,7 @@ def get_message_body(
     reply_to: "int | None" = None,
     notify: bool = True,
     keyboard: "List[List[buttons.Button]] | None" = None,
-    attachments: "list[classes.Attachment] | None" = None
+    attachments: "list[Attachment] | None" = None
 ) -> dict:
     '''
     Returns the body of the message as json.
