@@ -763,15 +763,17 @@ class Bot:
                     await handler.call(message)
                     HANDLED = True
             
+            # handle logs
             if HANDLED:
                 bot_logger.debug(f"Message \"{message.body.text}\" handled")
             else:
-                 bot_logger.debug(f"Message \"{message.body.text}\" not handled")
+                bot_logger.debug(f"Message \"{message.body.text}\" not handled")
 
             # handling commands
             prefixes = self.command_prefixes if type(self.command_prefixes) != str\
                 else [self.command_prefixes]
             prefixes = list(prefixes)
+            HANDLED = False
 
             if self.mention_prefix:
                 prefixes.extend([f'@{self.username} {i}' for i in prefixes])
@@ -783,33 +785,43 @@ class Bot:
                 prefix = prefix if self.case_sensitive else prefix.lower()
                 if not message.body.text.startswith(prefix):
                     continue
-                
+
                 command = message.body.text[len(prefix):]
                 name = command.split()[0]
                 check_name = name if self.case_sensitive else name.lower()
                 args = ' '.join(command.split()[1:])
                 
                 if check_name not in self.commands:
-                    continue
-                
+                    bot_logger.debug(f"Command \"{name}\" not handled")
+                    return
+
+                if len(self.commands[check_name]) == 0:
+                    bot_logger.debug(f"Command \"{name}\" not handled")
+                    return
+
                 for i in self.commands[check_name]:
                     await i(CommandContext(
                         self, message, name, args
                     ))
-                    return
+
+                bot_logger.debug(f"Command \"{name}\" handled")
+                return
                 
                 
         if update_type == 'bot_started':
+            payload = BotStartPayload.from_json(update)
+            bot_logger.debug(f"User \"{payload.user!r}\" started bot")
+
             for i in self.handlers[update_type]:
-                await i(BotStartPayload.from_json(update))
+                await i(payload)
 
                 
         if update_type == 'message_callback':
             HANDLED = False
 
             callback = Callback.from_json(
-                    update['callback'], update.get('user_locale', None), self
-                )
+                update['callback'], update.get('user_locale', None), self
+            )
 
             for handler in self.handlers[update_type]:     
                 if handler.filter:
@@ -823,7 +835,7 @@ class Bot:
             if HANDLED:
                 bot_logger.debug(f"Callback \"{callback.payload}\" handled")
             else:
-                 bot_logger.debug(f"Callback \"{callback.payload}\" not handled")
+                bot_logger.debug(f"Callback \"{callback.payload}\" not handled")
 
     async def start_polling(self):
         '''
