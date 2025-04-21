@@ -751,10 +751,10 @@ class Bot:
             for handler in self.handlers['message_created']:
                 if handler.filter:
                     if handler.filter(message):
-                        await handler.call(message)
+                        asyncio.create_task(handler.call(message))
                         HANDLED = True
                 else:
-                    await handler.call(message)
+                    asyncio.create_task(handler.call(message))
                     HANDLED = True
             
             # handle logs
@@ -794,9 +794,9 @@ class Bot:
                     return
 
                 for i in self.commands[check_name]:
-                    await i(CommandContext(
+                    asyncio.create_task(i(CommandContext(
                         self, message, name, args
-                    ))
+                    )))
 
                 bot_logger.debug(f"Command \"{name}\" handled")
                 return
@@ -807,7 +807,7 @@ class Bot:
             bot_logger.debug(f"User \"{payload.user!r}\" started bot")
 
             for i in self.handlers[update_type]:
-                await i(payload)
+                asyncio.create_task(i(payload))
 
                 
         if update_type == 'message_callback':
@@ -820,10 +820,10 @@ class Bot:
             for handler in self.handlers[update_type]:     
                 if handler.filter:
                     if handler.filter(callback):
-                        await handler.call(callback)
+                        asyncio.create_task(handler.call(callback))
                         HANDLED = True
                 else:
-                    await handler.call(callback)
+                    asyncio.create_task(handler.call(callback))
                     HANDLED = True
                 
             if HANDLED:
@@ -865,6 +865,6 @@ class Bot:
 
     def run(self):
         '''
-        Shortcut for `asyncio.run(bot.start_polling())`
+        Shortcut for `asyncio.run(Bot.start_polling())`
         '''
         asyncio.run(self.start_polling())
