@@ -630,7 +630,7 @@ class Bot:
 
     async def edit_message(self,
         message_id: int,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
@@ -648,7 +648,8 @@ class Bot:
         :param keyboard: An inline keyboard to attach to the message
         '''
         # error checking
-        assert len(text) < 4000, "Message must be less than 4000 characters"
+        if text != None:
+            assert len(text) < 4000, "Message must be less than 4000 characters"
 
         # editing
         params = {

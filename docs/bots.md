@@ -208,13 +208,13 @@
 
 - `attachments: List[Attachment] | None` - список файлов, которые нужно прикрепить к сообщению
 
-### `Bot.edit_message(message_id: int, text: str, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
+### `Bot.edit_message(message_id: int, text: "str | None" = None, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
 
 Изменяет содержимое сообщения.
 
 - `message_id: int` - сообщение для изменения
 
-- `text: str` - текст сообщения. Максимум 4000 символов
+- `text: "str | None"` - текст сообщения. Максимум 4000 символов. Необязательно
 
 - `format: 'markdown' | 'html' | 'default' | None` - режим форматирования сообщения. `None` - без форматирования, `default` - режим форматирования по умолчанию (устанавливается при инициализации `Bot`). Необязательно
 
