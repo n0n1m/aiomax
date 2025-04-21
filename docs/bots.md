@@ -146,7 +146,41 @@
 
 - `action: str` - нужное действие. Все возможные действия - `typing_on`, `sending_photo`, `sending_audio`, `sending_file`, `mark_seen` (также находятся в классе `Actions`)
 
-### `Bot.send_message(text: str, chat_id: int | None = None, user_id: int | None = None, format: 'markdown' | 'html' | 'default' | None = 'default', reply_to: int | None = None, notify: bool = True, disable_link_preview: bool = False)`
+### `Bot.upload(data: IO | str, type: str) -> dict`
+
+Загружает файл с указанным типом на сервер и возвращает сырой JSON-объект, возвращенный сервисом хранения файлов.
+
+**Не используйте эту функцию для загрузки файлов - для этого есть `upload_image`, `upload_video`, `upload_audio` и `upload_file`.**
+
+- `data: IO | str` - Путь к файлу или file-like объект.
+
+- `type: str` - Тип файла. `image`, `video`, `audio` или `file`.
+
+### `Bot.upload_image(data: IO | str) -> PhotoAttachment`
+
+Загружает картинку на сервер. Возвращает `PhotoAttachment`.
+
+- `data: IO | str` - Путь к файлу или file-like объект.
+
+### `Bot.upload_video(data: IO | str) -> VideoAttachment`
+
+Загружает видео на сервер. Возвращает `VideoAttachment`.
+
+- `data: IO | str` - Путь к файлу или file-like объект.
+
+### `Bot.upload_audio(data: IO | str) -> AudioAttachment`
+
+Загружает аудиофайл на сервер. Возвращает `AudioAttachment`.
+
+- `data: IO | str` - Путь к файлу или file-like объект.
+
+### `Bot.upload_file(data: IO | str) -> FileAttachment`
+
+Загружает файл на сервер. Возвращает `FileAttachment`.
+
+- `data: IO | str` - Путь к файлу или file-like объект.
+
+### `Bot.send_message(text: str, chat_id: int | None = None, user_id: int | None = None, format: 'markdown' | 'html' | 'default' | None = 'default', reply_to: int | None = None, notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
 
 Отправляет сообщение в нужный чат.
 
@@ -164,21 +198,11 @@
 
 - `disable_link_preview: bool` - спрятать ли предпросмотр ссылок. `False` по умолчанию
 
-### `Bot.reply(text: str, message: Message, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, disable_link_preview: bool = False)`
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - клавиатура, которую надо прикрепить к сообщению.
 
-Отправляет ответ на сообщение. Сделано как небольшое упрощение ответа на сообщения через `Bot.send_message`.
+- `attachments: List[Attachment] | None` - список файлов, которые нужно прикрепить к сообщению
 
-- `text: str` - текст сообщения. Максимум 4000 символов
-
-- `message: Message` - сообщение, на которое нужно ответить
-
-- `format: 'markdown' | 'html' | 'default' | None` - режим форматирования сообщения. `None` - без форматирования, `default` - режим форматирования по умолчанию (устанавливается при инициализации `Bot`). Необязательно
-
-- `notify: bool` - уведомлять ли пользователей о сообщении. `True` по умолчанию
-
-- `disable_link_preview: bool` - спрятать ли предпросмотр ссылок. `False` по умолчанию
-
-### `Bot.edit_message(message_id: int, text: str, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True)`
+### `Bot.edit_message(message_id: int, text: str, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
 
 Изменяет содержимое сообщения.
 
@@ -194,8 +218,12 @@
 
 - `disable_link_preview: bool` - спрятать ли предпросмотр ссылок. `False` по умолчанию
 
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - новая клавиатура, которую надо прикрепить к сообщению. None не будет менять клавиатуру.
+
+- `attachments: List[Attachment] | None` - список файлов, которые нужно прикрепить к сообщению. None не будет менять список файлов.
+
 ### `Bot.delete_message(message_id: int)`
 
 Удаляет сообщение.
 
-- `message_id: int` - ID сообщение для удаления.
+- `message_id: int` - ID сообщения для удаления.

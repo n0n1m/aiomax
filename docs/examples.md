@@ -60,11 +60,46 @@ import asyncio
 
 bot = aiomax.Bot('TOKEN')
 
-chat_id: int # Идентификатор чата, сообщение в котором должно обрабатыватся
+chat_id: int = 2409 # ID чата, сообщения в котором должны обрабатыватся
 
 @bot.on_message(lambda message: message.recipient.chat_id == chat_id)
-async def test(message: aiomax.Message):
+async def echo(message: aiomax.Message):
     await bot.send_message(message.body.text, message.recipient.chat_id)
+
+asyncio.run(bot.start_polling())
+```
+
+## Простой счётчик со сбросом
+
+```py
+import aiomax
+import asyncio
+
+bot = aiomax.Bot('TOKEN')
+taps = 0
+
+# Команда отправляющая сообщение с кнопками
+@bot.on_command('tap')
+async def tap_command(ctx: aiomax.CommandContext):
+    kb = aiomax.buttons.KeyboardBuilder()
+    kb.add(aiomax.buttons.CallbackButton('Тап', 'tap'))
+    kb.row(aiomax.buttons.CallbackButton('Сбросить', 'reset'))
+
+    await ctx.reply(f'Тапов: {taps}', keyboard=kb)
+
+# Обработчик кнопки "Тап" (увеличение счетчика)
+@bot.on_button_callback(lambda data: data.payload == 'tap')
+async def tap(cb: aiomax.Callback):
+    global taps
+    taps += 1
+    await cb.answer(text=f'Тапов: {taps}', format='markdown')
+
+# Обработчик кнопки "Сбросить" (сброс счетчика)
+@bot.on_button_callback(lambda data: data.payload == 'reset')
+async def reset(cb: aiomax.Callback):
+    global taps
+    taps = 0
+    await cb.answer('Вы сбросили все тапы!', text=f'Тапов: {taps}')
 
 asyncio.run(bot.start_polling())
 ```

@@ -210,7 +210,7 @@ class Bot:
         name: "str | None" = None,
         description: "str | None" = None,
         commands: "List[BotCommand] | None" = None,
-        photo: "PhotoAttachmentRequestPayload | None" = None
+        photo: "Image | None" = None
     ) -> User:
         '''
         Allows you to change info about the bot. Fill in only the fields that
@@ -447,7 +447,7 @@ class Bot:
 
     async def patch_chat(self,
         chat_id: int,
-        icon: PhotoAttachmentRequestPayload | None = None,
+        icon: Image | None = None,
         title: str | None = None,
         pin: str | None = None,
         notify: bool | None = None
@@ -495,12 +495,13 @@ class Bot:
 
     async def upload(self, data: IO | str, type: str) -> dict:
         '''
-        Uploads a file to the server.
+        Uploads a file to the server. Returns raw JSON with the token.
+
+        You probably should use one of the upload_* methods instead.
 
         :param data: File-like object or path to the file
         :param type: File type
         '''
-
         if isinstance(data, str):
             data = open(data, 'rb')
         
@@ -516,25 +517,45 @@ class Bot:
         return token_json
     
 
-    async def upload_image(self, data: BinaryIO | str):
+    async def upload_image(self, data: BinaryIO | str) -> PhotoAttachment:
+        '''
+        Uploads an image to the server and returns a PhotoAttachment.
+
+        :param data: File-like object or path to the file
+        '''
         raw_photo = await self.upload(data, 'image')
         token = list(raw_photo['photos'].values())[0]['token']
         return PhotoAttachment(PhotoPayload(token=token))
     
 
-    async def upload_video(self, data: BinaryIO | str):
+    async def upload_video(self, data: BinaryIO | str) -> VideoAttachment:
+        '''
+        Uploads a video to the server and returns a VideoAttachment.
+
+        :param data: File-like object or path to the file
+        '''
         raw_video = await self.upload(data, 'video')
         token = raw_video['token']
         return VideoAttachment(MediaPayload(token=token))
     
 
-    async def upload_audio(self, data: BinaryIO | str):
+    async def upload_audio(self, data: BinaryIO | str) -> AudioAttachment:
+        '''
+        Uploads an audio file to the server and returns an AudioAttachment.
+
+        :param data: File-like object or path to the file
+        '''
         raw_audio = await self.upload(data, 'audio')
         token = raw_audio['token']
         return AudioAttachment(MediaPayload(token=token))
     
 
-    async def upload_file(self, data: IO | str):
+    async def upload_file(self, data: IO | str) -> FileAttachment: 
+        '''
+        Uploads a file to the server and returns a FileAttachment.
+
+        :param data: File-like object or path to the file
+        '''
         raw_file = await self.upload(data, 'file')
         token = raw_file['token']
         return FileAttachment(MediaPayload(token=token))
@@ -548,7 +569,7 @@ class Bot:
         reply_to: "int | None" = None,
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[buttons.Button]] | None | buttons.KeyboardBuilder" = None,
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
         attachments: "list[Attachment] | None" = None
     ) -> Message:
         '''
@@ -605,40 +626,13 @@ class Bot:
         return Message.from_json(json['message'])
 
 
-    async def reply(self,
-        text: str,
-        message: Message,
-        format: "Literal['markdown', 'html', 'default'] | None" = 'default',
-        notify: bool = True,
-        disable_link_preview: bool = False,
-        keyboard: "List[List[buttons.Button]] | None" = None,
-        attachments: "list[Attachment] | None" = None
-    ) -> Message:
-        '''
-        Allows you to reply to a message easily.
-        
-        :param text: Message text. Up to 4000 characters
-        :param message: Message to reply to
-        :param format: Message format. Bot.default_format by default
-        :param notify: Whether to notify users about the message. True by default.
-        :param disable_link_preview: Whether to disable link embedding in messages. True by default
-        :param keyboard: An inline keyboard to attach to the message
-        :param attachments: List of attachments
-        '''
-        return await self.send_message(
-            text, message.recipient.chat_id, format=format,
-            reply_to=message.body.message_id, notify=notify,
-            disable_link_preview=disable_link_preview, keyboard=keyboard, attachments=attachments
-        )
-
-
     async def edit_message(self,
         message_id: int,
         text: str,
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
-        keyboard: "List[List[buttons.Button]] | None" = None,
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
         # todo attachments
     ) -> Message:
         '''

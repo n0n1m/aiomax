@@ -7,8 +7,8 @@ def get_message_body(
     format: "Literal['markdown', 'html'] | None" = None,
     reply_to: "int | None" = None,
     notify: bool = True,
-    keyboard: "List[List[buttons.Button]] | None" = None,
-    attachments: "list[Attachment] | None" = None
+    keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+    attachments: "List[Attachment] | None" = None
 ) -> dict:
     '''
     Returns the body of the message as json.

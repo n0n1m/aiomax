@@ -14,18 +14,7 @@ class BotCommand:
         return {
             "name": self.name, "description": self.description
         }
-    
 
-class PhotoAttachmentRequestPayload:
-    def __init__(self, url: "str | None"):
-        self.url = url
-    
-
-    def as_dict(self):
-        return {
-            "url": self.url
-        }
-    
 
 class User:
     def __init__(self,
@@ -70,21 +59,17 @@ class User:
     def __repr__(self):
         return f"{type(self).__name__}(user_id={self.user_id!r}, full_name={self.full_name!r})"
 
+
     def __eq__(self, other):
         return self.user_id == other.user_id
+
 
     @staticmethod
     def from_json(data: dict) -> "User | None":
         if data == None: return None
 
         return User(**data)
-    
-    @property
-    def full_name(self):
-        if self.last_name:
-            return f"{self.first_name} {self.last_name}"
-        else:
-            return self.first_name
+
 
 class Attachment:
     def __init__(self, type: str):
@@ -146,15 +131,15 @@ class StickerPayload:
 class ContactPayload:
     def __init__(self,
         vcf_info: "str | None" = None,
-        tam_info: "User | None" = None,
+        max_info: "User | None" = None,
     ):
         self.vcf_info: "str | None" = vcf_info
-        self.tam_info: "User | None" = tam_info
+        self.max_info: "User | None" = max_info
 
 
     @staticmethod
     def from_json(data: dict) -> "ContactPayload | None":
-        return ContactPayload(data['vcf_info'], data['tam_info'])
+        return ContactPayload(data['vcf_info'], data['max_info'])
 
 
 class PhotoPayload(MediaPayload):
@@ -231,15 +216,17 @@ class VideoAttachment(Attachment):
 class AudioAttachment(Attachment):
     def __init__(self,
         payload: MediaPayload,
+        transcription: "str | None" = None
     ):
         super().__init__("audio")
         self.payload: MediaPayload = payload
+        self.transcription: "str | None" = transcription
 
 
     @staticmethod
     def from_json(data: dict) -> "AudioAttachment | None":
         return AudioAttachment(
-            MediaPayload.from_json(data['payload'])
+            MediaPayload.from_json(data['payload'], data.get('transcription', None))
         )
     
     
@@ -281,8 +268,8 @@ class FileAttachment(Attachment):
 class StickerAttachment(Attachment):
     def __init__(self,
         payload: StickerPayload,
-        width: int,
-        height: int
+        width: "int | None" = None,
+        height: "int | None" = None
     ):
         super().__init__("sticker")
         self.payload: StickerPayload = payload
@@ -294,8 +281,8 @@ class StickerAttachment(Attachment):
     def from_json(data: dict) -> "StickerAttachment | None":
         return StickerAttachment(
             StickerPayload.from_json(data['payload']),
-            data['width'],
-            data['height']
+            data.get('width', None),
+            data.get('height', None)
         )
 
 
@@ -481,12 +468,12 @@ class LinkedMessage:
     def __init__(self,
         type: str,
         message: MessageBody,
-        sender: "User | None" = None,
+        sender: User,
         chat_id: "int | None" = None,
     ):
         self.type: str = type
         self.message: MessageBody = message
-        self.sender: "User | None" = sender
+        self.sender: User = sender
         self.chat_id: "int | None" = chat_id
 
 
@@ -505,13 +492,12 @@ class LinkedMessage:
 class Message:
     def __init__(self,
         recipient: MessageRecipient,
-        body: MessageBody = None,
-        timestamp: float = None,
-        sender: "User | None" = None,
+        body: MessageBody,
+        timestamp: float,
+        sender: User,
         link: "LinkedMessage | None" = None,
         views: "int | None" = None,
         url: "str | None" = None,
-        constructor: "User | None" = None,
         bot = None
     ):
         self.recipient: MessageRecipient = recipient
@@ -521,7 +507,6 @@ class Message:
         self.link: "LinkedMessage | None" = link
         self.views: "int | None" = views
         self.url: "str | None" = url
-        self.constructor: "User | None" = constructor
         self.user_locale: "str | None" = None
         self.bot = bot
 
@@ -530,6 +515,13 @@ class Message:
 
     def __str__(self):
         return self.body.text
+    
+    def __eq__(self, other):
+        return self.id == other.id
+    
+    @property
+    def id(self) -> str:
+        return self.body.message_id
 
     @staticmethod
     def from_json(data: dict) -> "Message":
@@ -540,8 +532,7 @@ class Message:
             sender = User.from_json(data.get("sender", None)),
             link = LinkedMessage.from_json(data.get("link", None)),
             views = data.get("stat", {}).get("views", None),
-            url = data.get("url", None),
-            constructor = User.from_json(data.get("constructor", None)),
+            url = data.get("url", None)
         )
 
 
@@ -550,8 +541,8 @@ class Message:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | None" = None
     ) -> "Message":
         '''
         Send a message to the chat that the message is sent.
@@ -561,13 +552,14 @@ class Message:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         if self.bot == None:
             return
         return (await self.bot.send_message(
             text, chat_id=self.recipient.chat_id,
             format=format, notify=notify, disable_link_preview=disable_link_preview,
-            keyboard=keyboard
+            keyboard=keyboard, attachments=attachments
         ))
 
 
@@ -576,8 +568,8 @@ class Message:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[buttons.Button]] | None" = None,
-        # todo attachments
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | None" = None
     ) -> "Message":
         '''
         Reply to this message.
@@ -587,11 +579,13 @@ class Message:
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         if self.bot == None:
             return
         return (await self.bot.reply(
-            text, self, format, notify, disable_link_preview, keyboard
+            text, self, format, notify, disable_link_preview, keyboard,
+            attachments
         ))
     
 
@@ -627,7 +621,7 @@ class CommandContext:
     ):
         self.bot = bot
         self.message: Message = message
-        self.sender: "User | None" = message.sender
+        self.sender: User = message.sender
         self.recipient: MessageRecipient = message.recipient
         self.command_name: str = command_name
         self.args_raw: str = args
@@ -639,8 +633,8 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[buttons.Button]] | None" = None,
-        attachments: "list[Attachment] | None" = None
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | None" = None
     ) -> Message:
         '''
         Send a message to the chat that the user sent the command.
@@ -664,8 +658,8 @@ class CommandContext:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
-        keyboard: "List[List[buttons.Button]] | None" = None,
-        attachments: "list[Attachment] | None" = None
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | None" = None
     ) -> Message:
         '''
         Reply to the message that the user sent.
@@ -682,7 +676,7 @@ class CommandContext:
         ))
 
 
-class Handler():
+class Handler:
     def __init__(
         self,
         call: Callable,
@@ -700,10 +694,16 @@ class Image:
     
     
     @staticmethod
-    def from_json(data: dict) -> "User | None":
+    def from_json(data: dict) -> "Image | None":
         if data == None: return None
 
-        return User(**data)
+        return Image(**data)
+    
+
+    def as_dict(self):
+        return {
+            "url": self.url
+        }
     
 
 class Chat:
@@ -777,7 +777,7 @@ class Callback:
         text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
-        keyboard: "List[List[buttons.Button]] | None" = None,
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
         attachments: "list[Attachment] | None" = None
     ):
         '''
@@ -787,12 +787,11 @@ class Callback:
         :param text: Message text. Up to 4000 characters
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
-        :param disable_link_preview: Whether to disable link preview. False by default
         :param keyboard: An inline keyboard to attach to the message
         :param attachments: List of attachments
         '''
-        assert notification != None or text != None,\
-            'Either notification or text must be specified'
+        assert notification != None or text != None or attachments,\
+            'Either notification, text or attachments must be specified'
         body = {
             'notification': notification,
             'message': None
