@@ -733,7 +733,8 @@ class Bot:
             f"https://botapi.max.ru/updates", params=payload
         )
         json = await response.json()
-        self.marker = json['marker']
+        if 'marker' in json:
+            self.marker = json['marker']
 
         return json
     
