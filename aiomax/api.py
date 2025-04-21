@@ -40,6 +40,8 @@ class Bot:
         self.name: "str | None" = None
         self.description: "str | None" = None
         self.bot_commands: List[BotCommand] = None
+
+        self.marker: "int | None" = None
     
 
     async def get(self, *args, **kwargs):
@@ -210,7 +212,7 @@ class Bot:
         name: "str | None" = None,
         description: "str | None" = None,
         commands: "List[BotCommand] | None" = None,
-        photo: "Image | None" = None
+        photo: "ImageRequestPayload | None" = None
     ) -> User:
         '''
         Allows you to change info about the bot. Fill in only the fields that
@@ -447,7 +449,7 @@ class Bot:
 
     async def patch_chat(self,
         chat_id: int,
-        icon: Image | None = None,
+        icon: ImageRequestPayload | None = None,
         title: str | None = None,
         pin: str | None = None,
         notify: bool | None = None
@@ -464,7 +466,7 @@ class Bot:
         '''
 
         payload = {
-            "icon": icon,
+            "icon": icon.as_dict() if icon else None,
             "title": title,
             "pin": pin,
             "notify": notify
@@ -485,7 +487,7 @@ class Bot:
         "typing". Also allows for marking messages as read.
         
         :param chat_id: ID of the chat to do the action in
-        :param action: Constant from aiomax.types.Actions
+        :param action: The action to perform
         '''
 
         response = await self.post(f"https://botapi.max.ru/chats/{chat_id}/actions", json={"action": action})
@@ -715,32 +717,32 @@ class Bot:
     # todo fix - for some reason API replies with "invalid message_id"
 
 
-    async def get_updates(self, limit: int = 100, marker: "int | None" = None) -> tuple[int, dict]:
+    async def get_updates(self, limit: int = 100) -> tuple[int, dict]:
         '''
-        Get bot updates / events. If `marker` is provided, will return updates
-        newer than it. If not, will return all updates since last time this was called.
+        Get bot updates / events.
         
-        :param marker: Pointer to the next page of data.
+        :param limit: Maximum amount of updates to return.
         '''
         payload = {
             "limit": limit,
-            "marker": marker
+            "marker": self.marker
         }
         payload = {k: v for k, v in payload.items() if v}
 
         response = await self.get(
             f"https://botapi.max.ru/updates", params=payload
         )
+        json = await response.json()
+        self.marker = json['marker']
 
-        return await response.json()
+        return json
     
 
     async def handle_update(self, update: dict):
         '''
         Handles an update.
         '''
-        update_type = update['update_type']
-
+        update_type = update['update_type'] 
 
         if update_type == "message_created":
             message = Message.from_json(update["message"])
@@ -799,8 +801,7 @@ class Bot:
                     )))
 
                 bot_logger.debug(f"Command \"{name}\" handled")
-                return
-                
+
                 
         if update_type == 'bot_started':
             payload = BotStartPayload.from_json(update)
@@ -830,6 +831,7 @@ class Bot:
                 bot_logger.debug(f"Callback \"{callback.payload}\" handled")
             else:
                 bot_logger.debug(f"Callback \"{callback.payload}\" not handled")
+
 
     async def start_polling(self):
         '''
@@ -862,6 +864,7 @@ class Bot:
 
         self.session = None
         self.polling = False
+
 
     def run(self):
         '''

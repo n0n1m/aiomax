@@ -26,13 +26,21 @@
 
 Возвращает объект класса `User` с информацией о профиле текущего бота.
 
-### `Bot.patch_me(name: str | None, description: str | None, commands: List[BotCommand] | None, photo: PhotoAttachmentRequestPayload | None) -> User`
+### `Bot.patch_me(name: str | None, description: str | None, commands: List[BotCommand] | None, photo: ImageRequestPayload | None) -> User`
 
 Изменяет информацию о боте и принимает параметры `name`, `description`, `commands`, `photo`.
 
 Параметры, оставленные None (по умолчанию) не будут изменены.
 
 Возвращает объект класса `User` с обновленными данными.
+
+- `name: str | None` - новое имя бота
+
+- `description: str | None` - новое описание профиля бота
+
+- `commands: List[BotCommand] | None` - новый список команд бота
+
+- `photo: ImageRequestPayload | None` - новая аватарка бота в виде объекта класса `ImageRequestPayload`
 
 ### `Bot.get_chats(count: int | None = None, marker: int | None = None) -> Chat`
 
@@ -118,7 +126,7 @@
 
 - `block: bool | None` - Надо ли блокировать пользователя? False по умолчанию
 
-### `Bot.patch_chat(chat_id: int, icon: PhotoAttachmentRequestPayload | None = None, title: str | None = None, pin: str | None = None, notify: bool | None = None)`
+### `Bot.patch_chat(chat_id: int, icon: ImageRequestPayload | None = None, title: str | None = None, pin: str | None = None, notify: bool | None = None)`
 
 Изменяет информацию о чате, например имя, иконку или закрепленное сообщение (для последнего также есть `Bot.pin`).
 
@@ -128,7 +136,7 @@
 
 - `chat_id: int` - ID чата
 
-- `icon: PhotoAttachmentRequestPayload | None` - новая иконка чата
+- `icon: ImageRequestPayload | None` - новая иконка чата в виде объекта класса `ImageRequestPayload`
 
 - `title: str | None` - новое название чата
 
@@ -225,3 +233,11 @@
 Удаляет сообщение.
 
 - `message_id: int` - ID сообщения для удаления.
+
+### `Bot.start_polling()`
+
+Начинает Long polling. Может использоваться обёрнутым в `asyncio.run()` в конце программы для запуска бота.
+
+### `Bot.run()`
+
+Начинает Long polling. Является коротким синтаксисом для `asyncio.run(Bot.start_polling())`.

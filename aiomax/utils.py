@@ -1,4 +1,3 @@
-from .types import *
 from typing import *
 from . import buttons
 
