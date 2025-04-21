@@ -27,7 +27,8 @@ class Bot:
             'message_created': [],
             'on_ready': [],
             'bot_started': [],
-            'message_callback': []
+            'message_callback': [],
+            'message_chat_created': [],
         }
         self.commands: dict[str, list] = {}
         self.command_prefixes: "str | List[str]" = command_prefixes
@@ -155,6 +156,16 @@ class Bot:
         '''
         def decorator(func): 
             self.handlers["message_callback"].append(Handler(call=func, filter=filter))
+            return func
+        return decorator
+
+
+    def on_button_chat_create(self):
+        '''
+        Decorator for receiving button presses.
+        '''
+        def decorator(func): 
+            self.handlers["message_chat_created"].append(func)
             return func
         return decorator
     
@@ -832,6 +843,14 @@ class Bot:
                 bot_logger.debug(f"Callback \"{callback.payload}\" handled")
             else:
                 bot_logger.debug(f"Callback \"{callback.payload}\" not handled")
+
+                
+        if update_type == 'message_chat_created':
+            payload = ChatCreatePayload.from_json(update)
+            bot_logger.debug(f"Created chat \"{payload.start_payload}\"")
+
+            for i in self.handlers[update_type]:
+                asyncio.create_task(i(payload))
 
 
     async def start_polling(self):

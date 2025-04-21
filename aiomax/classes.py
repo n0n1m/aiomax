@@ -769,7 +769,7 @@ class Chat:
         self.description: "str | None" = description
         self.pinned_message: "Message | None" = pinned_message
         self.owner_id: "int | None" = owner_id
-        self.participants: "Dict[int, int] | None" = {int(k): v for k, v in participants.items()}
+        self.participants: "Dict[int, int] | None" = {int(k): v for k, v in participants.items()} if participants else None
         self.link: "str | None" = link
         self.messages_count: "str | None" = messages_count
         self.chat_message_id: "str | None" = chat_message_id
@@ -850,4 +850,37 @@ class Callback:
             User.from_json(data['user']),
             user_locale,
             data.get('payload', None)
+        )
+
+
+class ChatCreatePayload:
+    def __init__(self,
+        timestamp: int,
+        chat: Chat,
+        message_id: "str | None" = None,
+        start_payload: "str | None" = None
+    ):
+        '''
+        Payload that is sent to the `Bot.on_button_chat_create` decorator.
+
+        :param timestamp: Timestamp of the button press
+        :param chat: Created chat
+        :param message_id: Message ID on which the button was
+        :param start_payload: Start payload specified by the button
+        '''
+        self.timestamp: int = timestamp
+        self.chat: Chat = chat
+        self.message_id: "str | None" = message_id
+        self.start_payload: "str | None" = start_payload
+
+
+    @staticmethod
+    def from_json(data: dict) -> "ChatCreatePayload | None":
+        if data == None: return None
+        
+        return ChatCreatePayload(
+            data['timestamp'],
+            Chat.from_json(data['chat']),
+            data.get('message_id', None),
+            data.get('start_payload', None)
         )
