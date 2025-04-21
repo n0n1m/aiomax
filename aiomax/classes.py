@@ -728,10 +728,10 @@ class ImageRequestPayload:
     
     
     @staticmethod
-    def from_json(data: dict) -> "Image | None":
+    def from_json(data: dict) -> "ImageRequestPayload | None":
         if data == None: return None
 
-        return Image(**data)
+        return ImageRequestPayload(**data)
     
 
     def as_dict(self):
