@@ -1,0 +1,25 @@
+# aiomax
+
+Асинхронное API для работы с мессенджером [Max](https://max.ru).
+
+## Начало работы
+
+Чтобы установить aiomax, выполните следующую команду:
+
+```bash
+pip install git+https://github.com/dpnspn/aiomax.git
+```
+
+А затем взгляните на [примеры](docs/examples.md) ботов.
+
+### Документация
+
+- [Функции класса `Bot`](docs/bots.md)
+
+- [Декораторы и хендлеры](docs/decorators.md)
+
+- [Кнопки и клавиатуры](docs/buttons.md)
+
+- [Классы](docs/classes.md)
+
+- [Логирование](docs/logging.md)
