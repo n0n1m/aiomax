@@ -583,7 +583,7 @@ class Message:
         if self.bot == None:
             return
         return (await self.bot.send_message(
-            text, chat_id=self.message.recipient.chat_id,
+            text, chat_id=self.recipient.chat_id,
             format=format, notify=notify, disable_link_preview=disable_link_preview,
             keyboard=keyboard, attachments=attachments, reply_to=self.id
         ))
