@@ -807,6 +807,11 @@ class Callback:
         self.payload: "str | None" = payload
         self.user_locale: "str | None" = user_locale
 
+    
+    @property
+    def content(self) -> str:
+        return self.payload
+    
 
     async def answer(self,
         notification: "str | None" = None,
@@ -855,10 +860,6 @@ class Callback:
             user_locale,
             data.get('payload', None)
         )
-    
-    @property
-    def content(self) -> str:
-        return self.payload
 
 
 class ChatCreatePayload:
