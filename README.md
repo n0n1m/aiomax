@@ -23,3 +23,5 @@ pip install git+https://github.com/dpnspn/aiomax.git
 - [Классы](docs/classes.md)
 
 - [Логирование](docs/logging.md)
+
+- [Фильтры](docs/filters.md)

@@ -27,4 +27,39 @@ def in_dialog(message: aiomax.Message):
 
 @bot.on_message(in_dialog)
 async def dialog(message: aiomax.Message):
+    pass # Содержимое функции
 ```
+
+### Классы
+
+Классы используются для более сложных фильтров, принимающих аргументы
+Пример фильтра, принимающего тип чата и проверяющего, что сообщение отправлено именно в чате этого типа
+
+```python
+class ChatTypeFilter:
+    def __init__(self, chat_type):
+        self.chat_type = chat_type
+
+    def __call__(self, message: aiomax.Message):
+        return message.recipient.chat_type == self.chat_type
+
+@bot.on_message(ChatTypeFilter('dialog'))
+async def dialog(message: aiomax.Message):
+    pass # Содержимое функции
+```
+
+## Встроенные фильтры
+
+В подмодуле `aiomax.filters` есть несколько встроенных фильтров.
+
+### aiomax.filters.startswith(prefix: str)
+
+- `prefix` - Строка, с которой должен начинаться контент
+
+Фильтр проверяет, чтобы контент начинался с префикса
+
+### aiomax.filters.regex(pattern: str)
+
+- `pattern` - Регулярное выражение
+
+Фильтр проверяет, чтобы контент соответствовал регулярному выражению
