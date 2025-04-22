@@ -204,9 +204,9 @@
 
 - `disable_link_preview: bool` - отключить предпросмотр ссылок. `False` по умолчанию
 
-- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура. `None` по умолчанию
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений. `None` по умолчанию
+- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
 
 ### `Message.reply(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None) -> Message`
 
@@ -220,9 +220,9 @@
 
 - `disable_link_preview: bool` - отключить предпросмотр ссылок. `False` по умолчанию
 
-- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура. `None` по умолчанию
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений. `None` по умолчанию
+- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
 
 ## `MessageRecipient`
 
@@ -244,7 +244,7 @@
 
 - `text: str | None` - текст сообщения. Может быть `None` для вложений
 
-- `attachments: List[Attachment] | None` - список вложений. Может быть `None`
+- `attachments: List[Attachment] | None` - список вложений у сообщения. Может быть `None`
 
 - `markup: List[Markup] | None` - форматирование сообщения. Может быть `None`
 
@@ -338,9 +338,9 @@
 
 - `disable_link_preview: bool` - отключить предпросмотр ссылок. `False` по умолчанию
 
-- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура. `None` по умолчанию
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений. `None` по умолчанию
+- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
 
 ### `CommandContext.reply(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None) -> Message`
 
@@ -354,9 +354,9 @@
 
 - `disable_link_preview: bool` - отключить предпросмотр ссылок. `False` по умолчанию
 
-- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура. `None` по умолчанию
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений. `None` по умолчанию
+- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
 
 ## `Callback`
 
@@ -390,9 +390,9 @@
 
 - `notify: bool` - уведомлять ли участников о изменении сообщения. `True` по умолчанию
 
-- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура. `None` по умолчанию
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - новая клавиатура, которую надо прикрепить к сообщению. `None` не будет менять клавиатуру.
 
-- `attachments: List[Attachment] | None` - список вложений. `None` по умолчанию
+- `attachments: List[Attachment] | None` - новый список вложений. `None` не будет менять список файлов. Укажите `[]`, чтобы удалить все вложения - **это также удалит клавиатуру, если она есть**.
 
 ## `Image(url: str)`
 

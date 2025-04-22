@@ -206,7 +206,7 @@
 
 - `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - клавиатура, которую надо прикрепить к сообщению.
 
-- `attachments: List[Attachment] | None` - список файлов, которые нужно прикрепить к сообщению
+- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
 
 ### `Bot.edit_message(message_id: int, text: "str | None" = None, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
 
@@ -224,9 +224,9 @@
 
 - `disable_link_preview: bool` - спрятать ли предпросмотр ссылок. `False` по умолчанию
 
-- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - новая клавиатура, которую надо прикрепить к сообщению. None не будет менять клавиатуру.
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - новая клавиатура, которую надо прикрепить к сообщению. `None` не будет менять клавиатуру.
 
-- `attachments: List[Attachment] | None` - список файлов, которые нужно прикрепить к сообщению. None не будет менять список файлов.
+- `attachments: List[Attachment] | None` - новый список вложений. `None` не будет менять список файлов. Укажите `[]`, чтобы удалить все вложения - **это также удалит клавиатуру, если она есть**.
 
 ### `Bot.delete_message(message_id: int)`
 
