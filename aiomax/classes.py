@@ -521,6 +521,10 @@ class Message:
     @property
     def id(self) -> str:
         return self.body.message_id
+    
+    @property
+    def content(self) -> str:
+        return self.body.text
 
     @staticmethod
     def from_json(data: dict) -> "Message":
@@ -851,6 +855,10 @@ class Callback:
             user_locale,
             data.get('payload', None)
         )
+    
+    @property
+    def content(self) -> str:
+        return self.payload
 
 
 class ChatCreatePayload:
