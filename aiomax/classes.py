@@ -225,7 +225,8 @@ class AudioAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "AudioAttachment | None":
         return AudioAttachment(
-            MediaPayload.from_json(data['payload'], data.get('transcription', None))
+            MediaPayload.from_json(data['payload']),
+            data.get('transcription', None)
         )
     
     
