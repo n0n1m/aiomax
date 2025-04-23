@@ -17,7 +17,7 @@ class Bot:
         case_sensitive: bool = True,
         default_format: "Literal['markdown', 'html'] | None" = None,
         max_messages_cached: int = 10000,
-        DEBUG: bool = False
+        debug: bool = False
     ):
         '''
         Bot init
@@ -28,7 +28,7 @@ class Bot:
         :param case_sensitive: If False the bot will respond to commands regardless of case
         :param default_format: Default message formatting mode
         :param max_messages_cached: Maximum number of messages to cache. Set to 0 to disable caching
-        @param DEBUG: removes try-except constructions in api for more detailized traceback
+        :param debug: removes try-except constructions in api for more detailized traceback
         '''
         self.access_token: str = access_token
         self.session = None
@@ -57,7 +57,7 @@ class Bot:
 
         self.marker: "int | None" = None
 
-        self.DEBUG = DEBUG
+        self.debug = debug
 
     async def get(self, *args, **kwargs):
         '''
@@ -647,17 +647,14 @@ class Bot:
         if response.status != 200:
             exception = Exception(await response.text())
             retry = False
-            if not self.DEBUG:
-                try:
-                    err_json = await response.json()
-                    if err_json['code'] == 'attachment.not.ready':
-                        retry = True
-                except:
-                    raise exception
-            else:
+
+            try:
                 err_json = await response.json()
                 if err_json['code'] == 'attachment.not.ready':
                     retry = True
+            except:
+                raise exception
+
             if retry:
                 await asyncio.sleep(1)
                 return await self.send_message(text=text, chat_id=chat_id, user_id=user_id, format=format, reply_to=reply_to, notify=notify, disable_link_preview=disable_link_preview, attachments=attachments)
@@ -796,19 +793,19 @@ class Bot:
                 self.cache.add_message(message)
 
             # handling
-            HANDLED = False
+            handled = False
 
             for handler in self.handlers['message_created']:
                 if handler.filter:
                     if handler.filter(message):
                         asyncio.create_task(handler.call(message))
-                        HANDLED = True
+                        handled = True
                 else:
                     asyncio.create_task(handler.call(message))
-                    HANDLED = True
+                    handled = True
             
             # handle logs
-            if HANDLED:
+            if handled:
                 bot_logger.debug(f"Message \"{message.body.text}\" handled")
             else:
                 bot_logger.debug(f"Message \"{message.body.text}\" not handled")
@@ -817,7 +814,7 @@ class Bot:
             prefixes = self.command_prefixes if type(self.command_prefixes) != str\
                 else [self.command_prefixes]
             prefixes = list(prefixes)
-            HANDLED = False
+            handled = False
 
             if self.mention_prefix:
                 prefixes.extend([f'@{self.username} {i}' for i in prefixes])
@@ -879,7 +876,7 @@ class Bot:
 
                 
         if update_type == 'message_callback':
-            HANDLED = False
+            handled = False
 
             callback = Callback.from_json(
                 update['callback'], update.get('user_locale', None), self
@@ -889,12 +886,12 @@ class Bot:
                 if handler.filter:
                     if handler.filter(callback):
                         asyncio.create_task(handler.call(callback))
-                        HANDLED = True
+                        handled = True
                 else:
                     asyncio.create_task(handler.call(callback))
-                    HANDLED = True
+                    handled = True
                 
-            if HANDLED:
+            if handled:
                 bot_logger.debug(f"Callback \"{callback.payload}\" handled")
             else:
                 bot_logger.debug(f"Callback \"{callback.payload}\" not handled")
@@ -927,21 +924,18 @@ class Bot:
                 await i()
 
             while self.polling:
-                if not self.DEBUG:
-                    try:
-                        updates = await self.get_updates()
-                        
-                        for update in updates["updates"]:
-                            await self.handle_update(update)
-
-                    except Exception as e:
-                        bot_logger.error(f"Error while handling updates: {e}")
-                        await asyncio.sleep(3)
-                else:
+                try:
                     updates = await self.get_updates()
-                        
+                    
                     for update in updates["updates"]:
                         await self.handle_update(update)
+
+                except Exception as e:
+                    if self.debug:
+                        bot_logger.exception(e)
+                    else:
+                        bot_logger.error(f"Error while handling updates: {e}")
+                    await asyncio.sleep(3)
 
         self.session = None
         self.polling = False
