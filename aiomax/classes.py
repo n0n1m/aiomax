@@ -381,8 +381,7 @@ class MessageRecipient:
 
         return MessageRecipient(
             chat_id = data["chat_id"],
-            chat_type = data["chat_type"],
-            ss = "d"
+            chat_type = data["chat_type"]
         )
     
 
