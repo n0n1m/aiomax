@@ -8,7 +8,7 @@
 
 ## Референс
 
-### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None)`
+### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None, max_messages_cached: int = 10000)`
 
 Создаёт объект класса `Bot`, через который можно управлять ботом.
 
@@ -16,11 +16,13 @@
 
 - `command_prefixes: str | List[str]` - префикс (или префиксы) команд бота. `/` по умолчанию
 
-- `mention_prefix: bool` - будет ли бот реагировать на команды, начинающиеся с его имени пользователя (формата `@username /command`). Без `mention_prefix` бот не будет работать в группах. `True` по умолчанию.
+- `mention_prefix: bool` - будет ли бот реагировать на команды, начинающиеся с его имени пользователя (формата `@username /command`). Без `mention_prefix` бот не будет работать в группах. `True` по умолчанию
 
-- `case_sensitive: bool` - важна ли капитализация текста у команд. Например, если `False`, то команду с названием `test` можно будет ввести как и через `/test`, так и через `/TEST`. `True` по умолчанию.
+- `case_sensitive: bool` - важна ли капитализация текста у команд. Например, если `False`, то команду с названием `test` можно будет ввести как и через `/test`, так и через `/TEST`. `True` по умолчанию
 
-- `default_format: 'markdown' | 'html' | None` - какой язык разметки использовать, если не указан в запросе. `None` по умолчанию.
+- `default_format: 'markdown' | 'html' | None` - какой язык разметки использовать, если не указан в запросе. `None` по умолчанию
+
+- `max_messages_cached: int` - максимальное количество кэшированных сообщений. `10000` по умолчанию. Кэширование сообщений нужно для того, чтобы вы смогли просматривать старые версии сообщений (например, при `Bot.on_message_edit`). **Поставьте `0`, если хотите выключить кеширование.**
 
 ### `Bot.get_me() -> User`
 

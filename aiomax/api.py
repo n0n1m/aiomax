@@ -4,7 +4,7 @@ import aiohttp
 
 from .utils import get_message_body
 from .classes import *
-from json import JSONDecodeError
+from .cache import *
 
 import logging
 bot_logger = logging.getLogger("aiomax.bot")
@@ -15,10 +15,18 @@ class Bot:
         command_prefixes: "str | List[str]" = "/",
         mention_prefix: bool = True,
         case_sensitive: bool = True,
-        default_format: "Literal['markdown', 'html'] | None" = None
+        default_format: "Literal['markdown', 'html'] | None" = None,
+        max_messages_cached: int = 10000
     ):
         '''
         Bot init
+
+        :param access_token: Bot access token from https://max.ru/masterbot
+        :param command_prefixes: List of command prefixes or a command prefix
+        :param mention_prefix: Whether to respond to commands starting with the ping of the bot
+        :param case_sensitive: If False the bot will respond to commands regardless of case
+        :param default_format: Default message formatting mode
+        :param max_messages_cached: Maximum number of messages to cache. Set to 0 to disable caching
         '''
         self.access_token: str = access_token
         self.session = None
@@ -29,12 +37,15 @@ class Bot:
             'bot_started': [],
             'message_callback': [],
             'message_chat_created': [],
+            'message_edited': [],
         }
         self.commands: dict[str, list] = {}
         self.command_prefixes: "str | List[str]" = command_prefixes
         self.mention_prefix: bool = mention_prefix
         self.case_sensitive: bool = case_sensitive
         self.default_format: "str | None" = default_format
+        self.cache: "MessageCache | None" = MessageCache(max_messages_cached)\
+            if max_messages_cached > 0 else None
         
         self.id: "int | None" = None
         self.username: "str | None" = None
@@ -126,6 +137,16 @@ class Bot:
             if isinstance(filter, str):
                 new_filter = lambda message: message.body.text == filter
             self.handlers["message_created"].append(Handler(call=func, filter=new_filter))
+            return func
+        return decorator
+
+
+    def on_message_edit(self):
+        '''
+        Decorator for editing messages.
+        '''
+        def decorator(func):
+            self.handlers["message_edited"].append(func)
             return func
         return decorator
 
@@ -761,6 +782,12 @@ class Bot:
             message = Message.from_json(update["message"])
             message.bot = self
             message.user_locale = update.get('user_locale', None)
+
+            # caching
+            if self.cache:
+                self.cache.add_message(message)
+
+            # handling
             HANDLED = False
 
             for handler in self.handlers['message_created']:
@@ -814,6 +841,25 @@ class Bot:
                     )))
 
                 bot_logger.debug(f"Command \"{name}\" handled")
+
+
+        if update_type == 'message_edited': 
+            message = Message.from_json(update["message"])
+            message.bot = self
+            message.user_locale = update.get('user_locale', None)
+
+            # caching
+            old_message = None
+            if self.cache:
+                old_message = self.cache.get_message(message.id)
+                self.cache.add_message(message)
+
+            # handling
+            for handler in self.handlers[update_type]:
+                asyncio.create_task(handler(old_message, message))
+
+            # handle logs
+            bot_logger.debug(f"Message \"{message.body.text}\" edited")
 
                 
         if update_type == 'bot_started':
