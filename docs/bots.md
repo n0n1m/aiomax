@@ -8,7 +8,7 @@
 
 ## Референс
 
-### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None, max_messages_cached: int = 10000)`
+### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None, max_messages_cached: int = 10000, DEBUG: bool = False)`
 
 Создаёт объект класса `Bot`, через который можно управлять ботом.
 
@@ -23,6 +23,8 @@
 - `default_format: 'markdown' | 'html' | None` - какой язык разметки использовать, если не указан в запросе. `None` по умолчанию
 
 - `max_messages_cached: int` - максимальное количество кэшированных сообщений. `10000` по умолчанию. Кэширование сообщений нужно для того, чтобы вы смогли просматривать старые версии сообщений (например, при `Bot.on_message_edit`). **Поставьте `0`, если хотите выключить кеширование.**
+
+- `DEBUG: bool` - Если `True`, все ошибки в поллинге фатальны, но дают более детализированную информацию. `False` по умолчанию
 
 ### `Bot.get_me() -> User`
 

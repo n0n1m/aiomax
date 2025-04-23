@@ -16,7 +16,8 @@ class Bot:
         mention_prefix: bool = True,
         case_sensitive: bool = True,
         default_format: "Literal['markdown', 'html'] | None" = None,
-        max_messages_cached: int = 10000
+        max_messages_cached: int = 10000,
+        DEBUG: bool = False
     ):
         '''
         Bot init
@@ -27,6 +28,7 @@ class Bot:
         :param case_sensitive: If False the bot will respond to commands regardless of case
         :param default_format: Default message formatting mode
         :param max_messages_cached: Maximum number of messages to cache. Set to 0 to disable caching
+        @param DEBUG: removes try-except constructions in api for more detailized traceback
         '''
         self.access_token: str = access_token
         self.session = None
@@ -54,7 +56,8 @@ class Bot:
         self.bot_commands: List[BotCommand] = None
 
         self.marker: "int | None" = None
-    
+
+        self.DEBUG = DEBUG
 
     async def get(self, *args, **kwargs):
         '''
@@ -644,12 +647,17 @@ class Bot:
         if response.status != 200:
             exception = Exception(await response.text())
             retry = False
-            try:
+            if not self.DEBUG:
+                try:
+                    err_json = await response.json()
+                    if err_json['code'] == 'attachment.not.ready':
+                        retry = True
+                except:
+                    raise exception
+            else:
                 err_json = await response.json()
                 if err_json['code'] == 'attachment.not.ready':
                     retry = True
-            except:
-                raise exception
             if retry:
                 await asyncio.sleep(1)
                 return await self.send_message(text=text, chat_id=chat_id, user_id=user_id, format=format, reply_to=reply_to, notify=notify, disable_link_preview=disable_link_preview, attachments=attachments)
@@ -919,15 +927,21 @@ class Bot:
                 await i()
 
             while self.polling:
-                try:
+                if not self.DEBUG:
+                    try:
+                        updates = await self.get_updates()
+                        
+                        for update in updates["updates"]:
+                            await self.handle_update(update)
+
+                    except Exception as e:
+                        bot_logger.error(f"Error while handling updates: {e}")
+                        await asyncio.sleep(3)
+                else:
                     updates = await self.get_updates()
-                    
+                        
                     for update in updates["updates"]:
                         await self.handle_update(update)
-
-                except Exception as e:
-                    bot_logger.error(f"Error while handling updates: {e}")
-                    await asyncio.sleep(3)
 
         self.session = None
         self.polling = False
