@@ -8,7 +8,7 @@
 
 ## Референс
 
-### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None)`
+### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None, DEBUG: bool = False)`
 
 Создаёт объект класса `Bot`, через который можно управлять ботом.
 
@@ -21,6 +21,8 @@
 - `case_sensitive: bool` - важна ли капитализация текста у команд. Например, если `False`, то команду с названием `test` можно будет ввести как и через `/test`, так и через `/TEST`. `True` по умолчанию.
 
 - `default_format: 'markdown' | 'html' | None` - какой язык разметки использовать, если не указан в запросе. `None` по умолчанию.
+
+- `DEBUG: bool` - Если `True`, все ошибки в поллинге фатальны, но дают более детализированную информацию. `False` по умолчанию
 
 ### `Bot.get_me() -> User`
 
