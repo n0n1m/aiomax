@@ -600,22 +600,52 @@ class BotStartPayload:
         chat_id: int,
         user: User,
         payload: "str | None",
-        user_locale: "str | None"
+        user_locale: "str | None",
+        bot = None
     ):
         self.chat_id: int = chat_id
         self.user: User = user
         self.payload: "str | None" = payload
         self.user_locale: "str | None" = user_locale
+        self.bot = bot
 
 
     @staticmethod
-    def from_json(data: dict) -> "BotStartPayload":
+    def from_json(data: dict, bot) -> "BotStartPayload":
         return BotStartPayload(
             chat_id = data["chat_id"],
             user = User.from_json(data["user"]),
             payload = data.get('payload', None),
-            user_locale = data.get('user_locale', None)
+            user_locale = data.get('user_locale', None),
+            bot = bot,
         )
+    
+    async def send(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | None" = None
+    ) -> "Message":
+        '''
+        Send a message to the chat where bot was started.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
+        '''
+        if self.bot == None:
+            return
+        return (await self.bot.send_message(
+            text, chat_id=self.chat_id,
+            format=format, notify=notify, disable_link_preview=disable_link_preview,
+            keyboard=keyboard, attachments=attachments
+        ))
+    
     
 
 class CommandContext:

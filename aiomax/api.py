@@ -831,7 +831,7 @@ class Bot:
 
                 
         if update_type == 'bot_started':
-            payload = BotStartPayload.from_json(update)
+            payload = BotStartPayload.from_json(update, self)
             bot_logger.debug(f"User \"{payload.user!r}\" started bot")
 
             for i in self.handlers[update_type]:
