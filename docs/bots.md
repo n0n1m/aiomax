@@ -8,7 +8,7 @@
 
 ## Референс
 
-### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None, max_messages_cached: int = 10000, DEBUG: bool = False)`
+### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None, max_messages_cached: int = 10000, debug: bool = False)`
 
 Создаёт объект класса `Bot`, через который можно управлять ботом.
 
