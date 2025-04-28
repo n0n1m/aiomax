@@ -662,7 +662,9 @@ class Bot:
                 raise exception
         
         json = await response.json()
-        return Message.from_json(json['message'])
+        message = Message.from_json(json['message'])
+        message.bot = self
+        return message
 
 
     async def edit_message(self,
@@ -706,6 +708,9 @@ class Bot:
         json = await response.json()
         if not json['success']:
             raise Exception(json['message'])
+        message = Message.from_json(json)
+        message.bot = self
+        return message
 
 
     async def delete_message(self,
