@@ -593,6 +593,30 @@ class Message:
             keyboard=keyboard, attachments=attachments, reply_to=self.id
         ))
     
+    async def edit(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        reply_to: "int | None" = None,
+        notify: bool = True,
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+    ) -> "Message":
+        '''
+        Edit a message
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
+        '''
+        if self.bot == None:
+            return
+        return (await self.bot.edit_message(
+            self.id, text,
+            format=format, notify=notify,
+            keyboard=keyboard, reply_to=reply_to
+        ))
 
 class BotStartPayload:
     def __init__(self,
