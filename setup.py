@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='aiomax',
-    version='0.5.0',
+    version='0.5.1',
     description='Max asynchronous API',
     author='oaa dpnspn',
     packages=find_packages(),

@@ -40,7 +40,8 @@ class Bot:
             'message_callback': [],
             'message_chat_created': [],
             'message_edited': [],
-        }
+            'message_removed': []
+        } 
         self.commands: dict[str, list] = {}
         self.command_prefixes: "str | List[str]" = command_prefixes
         self.mention_prefix: bool = mention_prefix
@@ -58,6 +59,7 @@ class Bot:
         self.marker: "int | None" = None
 
         self.debug = debug
+
 
     async def get(self, *args, **kwargs):
         '''
@@ -138,7 +140,7 @@ class Bot:
         def decorator(func):
             new_filter = filter
             if isinstance(filter, str):
-                new_filter = lambda message: message.body.text == filter
+                new_filter = lambda message: message.content == filter
             self.handlers["message_created"].append(Handler(call=func, filter=new_filter))
             return func
         return decorator
@@ -150,6 +152,19 @@ class Bot:
         '''
         def decorator(func):
             self.handlers["message_edited"].append(func)
+            return func
+        return decorator
+
+
+    def on_message_delete(self, filter: "Callable | str | None" = None):
+        '''
+        Decorator for deleted messages.
+        '''
+        def decorator(func):
+            new_filter = filter
+            if isinstance(filter, str):
+                new_filter = lambda pl: pl.content == filter
+            self.handlers["message_removed"].append(Handler(call=func, filter=new_filter))
             return func
         return decorator
 
@@ -870,6 +885,21 @@ class Bot:
 
             # handle logs
             bot_logger.debug(f"Message \"{message.body.text}\" edited")
+
+
+        if update_type == 'message_removed': 
+            payload = MessageDeletePayload.from_json(update, self)
+
+            # handling
+            for handler in self.handlers[update_type]:
+                if handler.filter:
+                    if handler.filter(payload):
+                        asyncio.create_task(handler.call(payload))
+                else:
+                    asyncio.create_task(handler.call(payload))
+
+            # handle logs
+            bot_logger.debug(f"Message \"{payload.content}\" deleted")
 
                 
         if update_type == 'bot_started':
