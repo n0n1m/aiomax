@@ -1,10 +1,9 @@
 # С чего начать
 
-{% hint style="info" %}
-aiomax это асинхронное API для работы с мессенджером [Max](https://max.ru).
-{% endhint %}
+Асинхронное API для работы с мессенджером [Max](https://max.ru).
 
-
+> [!TIP]
+> Документация `aiomax` также доступна в более удобном виде для прочтения на [GitBook](https://dpnspn.gitbook.io/aiomax)
 
 ## Начало работы
 
