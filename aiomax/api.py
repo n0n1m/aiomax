@@ -40,7 +40,12 @@ class Bot:
             'message_callback': [],
             'message_chat_created': [],
             'message_edited': [],
-            'message_removed': []
+            'message_removed': [],
+            'chat_title_changed': [],
+            'bot_added': [],
+            'bot_removed': [],
+            'user_added': [],
+            'user_removed': []
         } 
         self.commands: dict[str, list] = {}
         self.command_prefixes: "str | List[str]" = command_prefixes
@@ -175,6 +180,56 @@ class Bot:
         '''
         def decorator(func): 
             self.handlers["bot_started"].append(func)
+            return func
+        return decorator
+
+
+    def on_chat_title_change(self):
+        '''
+        Decorator for handling chat title changes.
+        '''
+        def decorator(func): 
+            self.handlers["chat_title_changed"].append(func)
+            return func
+        return decorator
+
+
+    def on_bot_add(self):
+        '''
+        Decorator for handling bot invitations in groups.
+        '''
+        def decorator(func): 
+            self.handlers["bot_added"].append(func)
+            return func
+        return decorator
+
+
+    def on_bot_remove(self):
+        '''
+        Decorator for handling bot kicks from groups.
+        '''
+        def decorator(func): 
+            self.handlers["bot_removed"].append(func)
+            return func
+        return decorator
+
+
+    def on_user_add(self):
+        '''
+        Decorator for handling user joins.
+        '''
+        def decorator(func): 
+            self.handlers["user_added"].append(func)
+            return func
+        return decorator
+
+
+    def on_user_remove(self):
+        '''
+        Decorator for handling user leaves.
+        '''
+        def decorator(func): 
+            self.handlers["user_removed"].append(func)
             return func
         return decorator
     
@@ -905,6 +960,27 @@ class Bot:
         if update_type == 'bot_started':
             payload = BotStartPayload.from_json(update, self)
             bot_logger.debug(f"User \"{payload.user!r}\" started bot")
+
+            for i in self.handlers[update_type]:
+                asyncio.create_task(i(payload))
+
+                
+        if update_type == 'chat_title_changed':
+            payload = ChatTitleEditPayload.from_json(update)
+
+            for i in self.handlers[update_type]:
+                asyncio.create_task(i(payload))
+
+                
+        if update_type == 'bot_added' or update_type == 'bot_removed':
+            payload = ChatMembershipPayload.from_json(update)
+
+            for i in self.handlers[update_type]:
+                asyncio.create_task(i(payload))
+                
+                
+        if update_type == 'user_added' or update_type == 'user_removed':
+            payload = UserMembershipPayload.from_json(update)
 
             for i in self.handlers[update_type]:
                 asyncio.create_task(i(payload))

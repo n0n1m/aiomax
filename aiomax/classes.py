@@ -1005,3 +1005,106 @@ class MessageDeletePayload:
             return None
         
         return self.message.content
+    
+
+class ChatTitleEditPayload:
+    def __init__(self,
+        timestamp: int,
+        user: User,
+        chat_id: "int | None" = None,
+        title: "str | None" = None
+    ):
+        '''
+        Payload that is sent to the `Bot.on_chat_title_change` decorator.
+
+        :param timestamp: Timestamp of the title edit.
+        :param user: User that edited the chat name.
+        :param chat_id: Chat ID that had its title edited.
+        :param title: New chat title
+        '''
+        self.timestamp: int = timestamp
+        self.user: User = user
+        self.chat_id: "int | None" = chat_id
+        self.title: "str | None" = title
+
+
+    @staticmethod
+    def from_json(data: dict) -> "ChatTitleEditPayload | None":
+        if data == None: return None
+        
+        return ChatTitleEditPayload(
+            data['timestamp'],
+            User.from_json(data['user']),
+            data.get('chat_id', None),
+            data.get('title', None),
+        )
+
+
+class ChatMembershipPayload:
+    def __init__(self,
+        timestamp: int,
+        user: User,
+        chat_id: "int | None" = None,
+        is_channel: bool = False
+    ):
+        '''
+        Payload that is sent to the `Bot.on_bot_add` or `Bot.on_bot_remove` decorator.
+
+        :param timestamp: Timestamp of the action.
+        :param user: User that invited or kicked the bot.
+        :param chat_id: Chat ID that the bot was invited to / kicked from.
+        :param is_channel: Whether the bot got added to / kicked from a channel or not
+        '''
+        self.timestamp: int = timestamp
+        self.user: User = user
+        self.chat_id: "int | None" = chat_id
+        self.is_channel: bool = is_channel
+
+
+    @staticmethod
+    def from_json(data: dict) -> "ChatMembershipPayload | None":
+        if data == None: return None
+        
+        return ChatMembershipPayload(
+            data['timestamp'],
+            User.from_json(data['user']),
+            data.get('chat_id', None),
+            data.get('is_channel', False),
+        )
+
+
+class UserMembershipPayload:
+    def __init__(self,
+        timestamp: int,
+        user: User,
+        chat_id: "int | None" = None,
+        is_channel: bool = False,
+        initiator: "int | None" = None
+    ):
+        '''
+        Payload that is sent to the `Bot.on_user_add` or `Bot.on_user_remove` decorator.
+
+        :param timestamp: Timestamp of the action.
+        :param user: User that joined or left the chat.
+        :param chat_id: Chat ID that the user joined / left.
+        :param is_channel: Whether the user was added to / kicked from a channel or not.
+        :param initiator: User ID of the inviter / kicker, if the user got invited by another user or kicked by an admin.
+        '''
+        self.timestamp: int = timestamp
+        self.user: User = user
+        self.chat_id: "int | None" = chat_id
+        self.is_channel: bool = is_channel
+        self.initiator: "int | None" = initiator
+
+
+    @staticmethod
+    def from_json(data: dict) -> "UserMembershipPayload | None":
+        if data == None: return None
+        
+        return UserMembershipPayload(
+            data['timestamp'],
+            User.from_json(data['user']),
+            data.get('chat_id', None),
+            data.get('is_channel', False),
+            data.get('inviter_id', data.get('admin_id', None))
+        )
