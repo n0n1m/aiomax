@@ -617,6 +617,14 @@ class Message:
             format=format, notify=notify,
             keyboard=keyboard, reply_to=reply_to
         ))
+    
+    async def delete(self):
+        if self.bot == None:
+            return
+        return await self.bot.delete_message(
+            self.id
+        )
+
 
 class BotStartPayload:
     def __init__(self,
