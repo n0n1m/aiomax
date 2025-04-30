@@ -517,6 +517,9 @@ class Message:
         return self.body.text
     
     def __eq__(self, other):
+        if not isinstance(other, Message):
+            # return other.__eq__(self) # le excuse le me
+            return False
         return self.id == other.id
     
     @property
@@ -956,3 +959,49 @@ class ChatCreatePayload:
             data.get('message_id', None),
             data.get('start_payload', None)
         )
+    
+
+
+class MessageDeletePayload:
+    def __init__(self,
+        timestamp: int,
+        message: "Message | None" = None,
+        message_id: "str | None" = None,
+        chat_id: "int | None" = None,
+        user_id: "int | None" = None
+    ):
+        '''
+        Payload that is sent to the `Bot.on_message_delete` decorator.
+
+        :param timestamp: Timestamp of the message deletion.
+        :param message: Cached Message object. May be None if message was not cached
+        :param message_id: ID of the deleted message
+        :param chat_id: ID of the chat the message was deleted in
+        :param user_id: ID of the user who deleted the message
+        '''
+        self.timestamp: int = timestamp
+        self.message: "Message | None" = message
+        self.message_id: "str | None" = message_id
+        self.chat_id: "int | None" = chat_id
+        self.user_id: "int | None" = user_id
+
+
+    @staticmethod
+    def from_json(data: dict, bot) -> "MessageDeletePayload | None":
+        if data == None: return None
+        
+        return MessageDeletePayload(
+            data['timestamp'],
+            bot.cache.get_message(data.get('message_id', None)),
+            data.get('message_id', None),
+            data.get('chat_id', None),
+            data.get('user_id', None),
+        )
+
+
+    @property
+    def content(self) -> "str | None":
+        if self.message == None:
+            return None
+        
+        return self.message.content
