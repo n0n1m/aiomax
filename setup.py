@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
 
 def readme():
-    with open('README.md', 'r') as f:
+    with open('pypi-description.md', 'r') as f:
         return f.read()
 
 setup(
     name='aiomax',
-    version='0.6.0',
+    version='1.0.0',
     description='Max asynchronous API',
     author='oaa dpnspn',
     author_email='mbutsk@icloud.com',
@@ -19,5 +19,22 @@ setup(
     long_description_content_type='text/markdown',
     project_urls={
         "GitBook docs": "https://dpnspn.gitbook.io/aiomax"
-    }
+    },
+    keywords = [
+        "bot",
+        "api",
+        "asyncio",
+        "max"
+    ],
+    classifiers = [
+        "License :: OSI Approved :: MIT License",
+        "Framework :: AsyncIO",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Communications :: Chat",
+    ]
 )
