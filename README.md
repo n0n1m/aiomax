@@ -7,6 +7,12 @@
 Чтобы установить aiomax, выполните следующую команду:
 
 ```bash
+pip install aiomax
+```
+
+Чтобы установить git-версию aiomax (возможны баги и не завершенность), выполните команду:
+
+```bash
 pip install git+https://github.com/dpnspn/aiomax.git
 ```
 
