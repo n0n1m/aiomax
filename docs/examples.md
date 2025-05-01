@@ -16,7 +16,7 @@ bot = aiomax.Bot('TOKEN')
 
 @bot.on_message()
 async def echo(message: aiomax.Message):
-    await bot.reply(message.body.text, message)
+    await message.reply(message.body.text)
 
 asyncio.run(bot.start_polling())
 ```
