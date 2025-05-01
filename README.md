@@ -20,7 +20,12 @@ pip install git+https://github.com/dpnspn/aiomax.git
 
 А затем взгляните на [примеры](docs/examples.md) ботов.
 
-Обсудить aiomax / задать вопрос можно в Max чате [Aiomax Community](https://max.ru/join/45DmBRwDNvcZVqYvf_cSCPu-_DuvYa5VmuQ4K2cmC_Q)
+## Aiomax Community
+
+Обсудить aiomax / задать вопрос можно в сети чатов Aiomax Community
+[Telegram](https://t.me/aiomax_chat) / [Max](https://max.ru/join/45DmBRwDNvcZVqYvf_cSCPu-_DuvYa5VmuQ4K2cmC_Q)
+
+Новости о aiomax и Max Bot api выходят на телеграм канале [Aiomax Changelog](https://t.me/aiomax_cl)
 
 ## Документация
 
