@@ -4,6 +4,8 @@
 
 ## Начало работы
 
+[![AUR Version](https://img.shields.io/aur/version/python-aiomax?style=for-the-badge&logo=arch%20linux&logoColor=white)](https://aur.archlinux.org/packages/python-aiomax)
+
 Чтобы установить aiomax, выполните следующую команду:
 
 ```bash
