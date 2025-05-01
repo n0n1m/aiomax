@@ -18,6 +18,8 @@ pip install git+https://github.com/dpnspn/aiomax.git
 
 А затем взгляните на [примеры](docs/examples.md) ботов.
 
+Обсудить aiomax / задать вопрос можно в Max чате [Aiomax Community](https://max.ru/join/45DmBRwDNvcZVqYvf_cSCPu-_DuvYa5VmuQ4K2cmC_Q)
+
 ## Документация
 
 > [!TIP]
