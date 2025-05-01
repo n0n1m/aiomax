@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 
 def readme():
-    with open('pypi-description.md', 'r') as f:
-        return f.read()
+    try:
+        with open('pypi-description.md', 'r') as f:
+            return f.read()
+    except:
+        return 'Max asynchronous API'
 
 setup(
     name='aiomax',
