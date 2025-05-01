@@ -14,6 +14,9 @@ pip install git+https://github.com/dpnspn/aiomax.git
 
 ## Документация
 
+> [!TIP]
+> Документацию в более удобном виде для прочтения можно найти на [GitBook](https://dpnspn.gitbook.io/aiomax)
+
 - [Функции класса `Bot`](docs/bots.md)
 
 - [Декораторы и хендлеры](docs/decorators.md)
