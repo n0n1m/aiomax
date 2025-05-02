@@ -425,7 +425,7 @@ class Bot:
     async def pin(self,
         chat_id: int,
         message_id: str,
-        notify: bool | None = None
+        notify: "bool | None" = None
     ):
         '''
         Pin a message in a chat
@@ -557,7 +557,7 @@ class Bot:
         icon: ImageRequestPayload | None = None,
         title: str | None = None,
         pin: str | None = None,
-        notify: bool | None = None
+        notify: "bool | None" = None
     ) -> Chat:
         '''
         Allows you to edit chat information, like the name,
