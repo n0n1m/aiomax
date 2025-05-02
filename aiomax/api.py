@@ -554,9 +554,9 @@ class Bot:
 
     async def patch_chat(self,
         chat_id: int,
-        icon: ImageRequestPayload | None = None,
-        title: str | None = None,
-        pin: str | None = None,
+        icon: "ImageRequestPayload | None" = None,
+        title: "str | None" = None,
+        pin: "str | None" = None,
         notify: "bool | None" = None
     ) -> Chat:
         '''
@@ -600,7 +600,7 @@ class Bot:
         return await response.json()
     
 
-    async def upload(self, data: IO | str, type: str) -> dict:
+    async def upload(self, data: "IO | str", type: str) -> dict:
         '''
         Uploads a file to the server. Returns raw JSON with the token.
 
@@ -624,7 +624,7 @@ class Bot:
         return token_json
     
 
-    async def upload_image(self, data: BinaryIO | str) -> PhotoAttachment:
+    async def upload_image(self, data: "BinaryIO | str") -> PhotoAttachment:
         '''
         Uploads an image to the server and returns a PhotoAttachment.
 
@@ -635,7 +635,7 @@ class Bot:
         return PhotoAttachment(PhotoPayload(token=token))
     
 
-    async def upload_video(self, data: BinaryIO | str) -> VideoAttachment:
+    async def upload_video(self, data: "BinaryIO | str") -> VideoAttachment:
         '''
         Uploads a video to the server and returns a VideoAttachment.
 
@@ -646,7 +646,7 @@ class Bot:
         return VideoAttachment(MediaPayload(token=token))
     
 
-    async def upload_audio(self, data: BinaryIO | str) -> AudioAttachment:
+    async def upload_audio(self, data: "BinaryIO | str") -> AudioAttachment:
         '''
         Uploads an audio file to the server and returns an AudioAttachment.
 
@@ -657,7 +657,7 @@ class Bot:
         return AudioAttachment(MediaPayload(token=token))
     
 
-    async def upload_file(self, data: IO | str) -> FileAttachment: 
+    async def upload_file(self, data: "IO | str") -> FileAttachment: 
         '''
         Uploads a file to the server and returns a FileAttachment.
 
