@@ -14,7 +14,7 @@ setup(
     author='oaa dpnspn',
     author_email='mbutsk@icloud.com',
     packages=find_packages(),
-    install_requires=['aiohttp'],
+    install_requires=['aiohttp', 'emoji'],
     zip_safe=False,
     url = "https://github.com/dpnspn/aiomax",
     license="MIT License, see LICENSE.md file",
