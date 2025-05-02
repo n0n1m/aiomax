@@ -237,5 +237,6 @@ class KeyboardBuilder:
             self.add(button)
             if counter == in_row:
                 self.row()
+                counter = 0
             counter += 1
         
