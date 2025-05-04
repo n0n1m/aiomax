@@ -224,6 +224,26 @@
 
 - `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
 
+### `Message.edit(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None) -> Message`
+
+Редактирует это сообщение.
+
+- `text: str` - текст сообщения. Максимум 4000 символов
+
+- `format: Literal['html', 'markdown', 'default'] | None` - формат сообщения. `Bot.default_format` по умолчанию
+
+- `notify: bool` - уведомлять ли участников о сообщении. `True` по умолчанию
+
+- `disable_link_preview: bool` - отключить предпросмотр ссылок. `False` по умолчанию
+
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
+
+- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
+
+### `Message.delete()
+
+Удаляет это сообщение.
+
 ## `MessageRecipient`
 
 Информация о получателе сообщения. Может быть чатом или пользователем
