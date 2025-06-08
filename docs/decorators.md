@@ -1,6 +1,10 @@
 # Декораторы
 
-## `Bot.on_message(filter: Callable | None = None)`
+Декораторы используются для обработки поступающих запросов с Max API - например, получения сообщений или поступления команд. Они доступны для использования в классах `aiomax.Bot` и `aiomax.Router`.
+
+Больше о роутерах можно почитать [тут](routers.md).
+
+## `on_message(filter: Callable | None = None)`
 
 Декоратор для получения сообщений.
 
@@ -12,7 +16,7 @@
 
 Отправляет функции объект класса `Message`.
 
-## `Bot.on_message_edit()`
+## `on_message_edit()`
 
 Декоратор для получения сообщений при их редактировании.
 
@@ -22,7 +26,7 @@
 
 - второй (`after`) - новое состояние сообщения `Message`.
 
-## `Bot.on_message_delete(filter: Callable | None = None)`
+## `on_message_delete(filter: Callable | None = None)`
 
 Декоратор для получения сообщений при их удалении.
 
@@ -34,17 +38,17 @@
 
 Отправляет функции объект класса `MessageDeletePayload`.
 
-## `Bot.on_bot_start()`
+## `on_bot_start()`
 
 Декоратор вызывается, когда пользователь жмет кнопку "Начать" в ЛС с ботом.
 
 Отправляет функции объект класса `BotStartPayload`.
 
-## `Bot.on_ready()`
+## `on_ready()`
 
 Декоратор вызывается перед началом долгого опроса (поллинга).
 
-## `Bot.on_command(name: "str | None" = None, aliases = List[str] = [])`
+## `on_command(name: "str | None" = None, aliases = List[str] = [])`
 
 Декоратор для получения команд с префиксом.
 
@@ -54,7 +58,7 @@
 
 Отправляет функции объект класса `CommandsContext`.
 
-## `Bot.on_button_callback(filter: Callable | None = None)`
+## `on_button_callback(filter: Callable | None = None)`
 
 Декоратор для отслеживания нажатий на кнопки типа `CallbackButton`.
 
@@ -62,37 +66,37 @@
 
 Отправляет функции объект класса `Callback`.
 
-## `Bot.on_button_chat_create()`
+## `on_button_chat_create()`
 
 Декоратор для отслеживания нажатий на создание чатов с помощью кнопки типа `ChatButton`.
 
 Отправляет функции объект класса `ChatCreatePayload`.
 
-## `Bot.on_bot_add()`
+## `on_bot_add()`
 
 Декоратор для отслеживания добавления бота в чаты.
 
 Отправляет функции объект класса `ChatMembershipPayload`.
 
-## `Bot.on_bot_remove()`
+## `on_bot_remove()`
 
 Декоратор для отслеживания удаления бота с чатов.
 
 Отправляет функции объект класса `ChatMembershipPayload`.
 
-## `Bot.on_user_add()`
+## `on_user_add()`
 
 Декоратор для отслеживания добавления или входа пользователей в чаты.
 
 Отправляет функции объект класса `UserMembershipPayload`.
 
-## `Bot.on_user_remove()`
+## `on_user_remove()`
 
 Декоратор для отслеживания удаления или выхода пользователей с чатов.
 
 Отправляет функции объект класса `UserMembershipPayload`.
 
-## `Bot.on_chat_title_change()`
+## `on_chat_title_change()`
 
 Декоратор для отслеживания изменений названий чатов.
 

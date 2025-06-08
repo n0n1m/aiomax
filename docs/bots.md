@@ -6,6 +6,8 @@
 
 Для примеров посмотрите в [examples.md](examples.md).
 
+Класс `Router` является суперклассом `Bot` и поддерживает все его методы.
+
 ## Референс
 
 ### `Bot(access_token: str, command_prefixes: str | List[str] = '/', mention_prefix: bool = True, case_sensitive: bool = True, default_format: Literal['markdown', 'html'] | None = None, max_messages_cached: int = 10000, debug: bool = False)`

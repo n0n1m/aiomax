@@ -110,6 +110,33 @@ async def reset(cb: aiomax.Callback):
 asyncio.run(bot.start_polling())
 ```
 
+## Разделение на несколько файлов через роутеры
+
+### `echo.py`
+
+```py
+import aiomax
+
+router = aiomax.Router()
+
+@router.on_message()
+async def echo(message: aiomax.Message):
+    await message.reply(message.content)
+```
+
+### `main.py`
+
+```py
+import aiomax
+import echo
+
+bot = aiomax.Bot('TOKEN')
+bot.add_router(echo.router)
+
+bot.run()
+```
+
+
 ## Остальная документация
 
 - [Функции класса `Bot`](bots.md)
@@ -121,3 +148,5 @@ asyncio.run(bot.start_polling())
 - [Классы](classes.md)
 
 - [Логирование](logging.md)
+
+- [Роутеры](routers.md)
