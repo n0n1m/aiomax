@@ -227,8 +227,12 @@ t
         Decorator for receiving button presses.
         '''
         def decorator(func): 
+            new_filter = filter
+            if isinstance(filter, str):
+                new_filter = lambda pl: pl.content == filter
+
             self._handlers["message_callback"].append(
-                Handler(call=func, deco_filter=filter, router_filters=self.filters['message_callback'])
+                Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_callback'])
             )
             return func
         

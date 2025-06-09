@@ -1,6 +1,8 @@
 # Роутеры
 
-Роутер - `aiomax.Router` - это класс, который содержит только обработчики событий ([декораторы](decorators.md)), и который добавляется к основному классу `aiomax.Bot`.
+Роутер - `aiomax.Router` - это класс, который содержит только обработчики событий ([декораторы](decorators.md)), и добавляется к классу `aiomax.Bot` при помощи `add_router()`.
+
+Класс `aiomax.Bot` сам по себе является главным роутером.
 
 Роутеры могут быть полезны, если вы хотите разделить ваш код на несколько файлов.
 
@@ -8,29 +10,7 @@
 
 ## Создание
 
-Для создания роутера создаём экземпляр класса `aiomax.Router`:
-
-```py
-router = aiomax.Router()
-```
-
-Добавлять обработчиков в него можно точно также, как и в класс `aiomax.Bot`, например:
-
-```py
-@router.on_message()
-async def echo(message: aiomax.Message):
-    await message.reply(message.content)
-```
-
-Чтобы роутер работал, его нужно присвоить к основному классу `aiomax.Bot`:
-
-```py
-bot = aiomax.Bot('TOKEN')
-bot.add_router(router)
-bot.run()
-```
-
-В итоге получаем:
+Пример работы роутера:
 
 ```py
 import aiomax
@@ -38,11 +18,11 @@ import aiomax
 bot = aiomax.Bot('TOKEN')
 router = aiomax.Router()
 
-@router.on_message()
+@router.on_message() # присваиваем роутеру обработчик
 async def echo(message: aiomax.Message):
     await message.reply(message.content)
 
-bot.add_router(router)
+bot.add_router(router) # добавляем роутер к боту
 bot.run()
 ```
 
@@ -60,7 +40,7 @@ async def echo(message: aiomax.Message):
 bot.run()
 ```
 
-Если ваш роутер находится в отдельном файле, где нет доступа к главному классу `aiomax.Bot`, вы можете получить его через `router.bot`:
+Обхект класса `aiomax.Bot`, к которому привязан роутер, можно получить через `router.bot`:
 
 ```py
 @router.on_command('my_name')
@@ -68,7 +48,7 @@ async def my_name(message: aiomax.Message):
     await message.reply('Мое имя - '+router.bot.name)
 ```
 
-Так как `add_router` - функция класса `aiomax.Router`, а `aiomax.Router` - это суперкласс `aiomax.Bot`, вы можете использовать её как и на боте, так и на другом роутере.
+Роутер может иметь дочерние роутеры.
 
 ```py
 bot = aiomax.Bot('TOKEN')
@@ -82,7 +62,7 @@ async def echo(message: aiomax.Message):
 
 bot.add_router(router)
 
-# второй роутер
+# дочерний роутер
 child_router = aiomax.Router()
 
 @child_router.on_message()
@@ -92,7 +72,7 @@ async def echo_second(message: aiomax.Message):
 router.add_router(child_router)
 ```
 
-`aiomax.Router` также принимает единственный аргумент `case_sensitive` (`bool`, по умолчанию `True`), который определяет, будет ли бот реагировать на команды, зарегистрированные через `@router.on_command`, с отличающимся регистром.
+`aiomax.Router` принимает единственный аргумент `case_sensitive` (`bool`, по умолчанию `True`), который определяет, будет ли бот реагировать на команды, зарегистрированные через `@router.on_command`, с отличающимся регистром.
 
 ## Фильтры
 
@@ -102,28 +82,14 @@ router.add_router(child_router)
 
 Также, в отличии от некоторых фильтров в [декораторах](decorators.md), фильтры в роутерах не поддерживают передачу `str`.
 
-Готовые функции-фильтры и как писать свои можно посмотреть в [filters.md](filters.md).
+Подробнее о фильтрах в [filters.md](filters.md).
 
-### `add_message_filter(filter: callable)`
+### Функции
 
-Добавляет фильтр на получение сообщений (декоратор `on_message`).
+- `add_message_filter(filter: callable)` - Добавляет фильтр на получение сообщений (декоратор `on_message`).
 
-Функции передается объект `aiomax.Message`.
+- `add_message_edit_filter(filter: callable)` - Добавляет фильтр на изменение сообщений (декоратор `on_message_edit`).
 
-### `add_message_edit_filter(filter: callable)`
+- `add_message_delete_filter(filter: callable)` - Добавляет фильтр на удаление сообщений (декоратор `on_message_delete`).
 
-Добавляет фильтр на редактирование сообщений (декоратор `on_message_edit`).
-
-Функции передается **только** объект `aiomax.Message` **нового** сообщения.
-
-### `add_message_delete_filter(filter: callable)`
-
-Добавляет фильтр на удаление сообщений (декоратор `on_message_delete`).
-
-Функции передается объект `aiomax.MessageDeletePayload`.
-
-### `add_button_callback_filter(filter: callable)`
-
-Добавляет фильтр на нажатие кнопок (декоратор `on_button_callback`).
-
-Функции передается объект `aiomax.Callback`.
+- `add_button_callback_filter(filter: callable)` - Добавляет фильтр на нажатие кнопок (декоратор `on_button_callback`).
