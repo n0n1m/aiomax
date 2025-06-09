@@ -48,7 +48,7 @@ async def my_name(message: aiomax.Message):
     await message.reply('Мое имя - '+router.bot.name)
 ```
 
-Роутер может иметь дочерние роутеры, наприимер:
+Роутер может иметь дочерние роутеры, например:
 
 ```py
 bot = aiomax.Bot('TOKEN')
