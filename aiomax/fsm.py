@@ -17,13 +17,13 @@ class FSMStorage:
         '''
         return self.data.get(user_id)
 
-    def change_state(self, user_id: int, new: Any) -> None:
+    def change_state(self, user_id: int, new: Any):
         '''
         Changes user's state
         '''
         self.states[user_id] = new
 
-    def change_data(self, user_id: int, new: Any) -> None:
+    def change_data(self, user_id: int, new: Any):
         '''
         Changes user's data
         '''
@@ -41,7 +41,7 @@ class FSMStorage:
         '''
         return self.data.pop(user_id, None)
     
-    def clear(self, user_id: int) -> None:
+    def clear(self, user_id: int):
         '''
         Clears user's state and data
         '''
@@ -90,7 +90,7 @@ class FSMCursor:
         '''
         return self.storage.clear_data(self.user_id)
     
-    def clear(self) -> None:
+    def clear(self):
         '''
         Clears user's state and data
         '''
