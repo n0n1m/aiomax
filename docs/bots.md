@@ -28,7 +28,7 @@
 
 ### `Bot.storage: FSMStorage`
 
-FSM хранилищие присваемое боту. Подробнее в [fsm.md](fsm.md)
+FSM хранилище, присваиваемое боту. Подробнее в [fsm.md](fsm.md)
 
 ### `Bot.get_me() -> User`
 

@@ -1,6 +1,6 @@
 # Декораторы
 
-Каждый декоратор кроме `Bot.on_button_chat_create()` также отправляет функции объект класса `FSMCursor` используя `user_id` пользователя, совершившего действие. Подробнее в [fsm.md](fsm.md)
+Каждый декоратор, кроме `Bot.on_button_chat_create()`, также отправляет функции объект класса `FSMCursor` как аргумент `cursor` используя `user_id` пользователя, совершившего действие. Подробнее в [fsm.md](fsm.md)
 
 ## `Bot.on_message(filter: Callable | None = None)`
 

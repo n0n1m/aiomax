@@ -113,7 +113,7 @@ class state:
         if not user_id:
             return False
         
-        if not obj.bot:
+        if not hasattr(obj, "bot"):
             return False
         
         storage = obj.bot.storage
