@@ -223,20 +223,23 @@ class KeyboardBuilder:
         '''
         self.buttons.append(list(buttons))
     
+
     def table(self,
         in_row: int,
-        *buttons: Button):
+        *buttons: Button
+    ):
         '''
-        Adds buttons so that there are `in_row` buttons in each row
+        Adds multiple rows of buttons so that there are `in_row` buttons in each row
 
-        :param in_row: buttons in row
+        :param in_row: How many buttons to put in each row
         '''
+        counter = 0
 
-        counter = 1
         for button in buttons:
-            self.add(button)
-            if counter == in_row:
+            if counter == 0:
                 self.row()
-                counter = 0
-            counter += 1
+                counter = in_row
+
+            self.add(button)
+            counter -= 1
         
