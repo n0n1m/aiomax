@@ -708,7 +708,7 @@ class Bot(Router):
             for handler in self.handlers['message_created']:
                 filters = [filter(message) for filter in handler.filters]
 
-                if all(filters) or len(filters) == 0:
+                if all(filters):
                     kwargs = utils.context_kwargs(handler.call, cursor=cursor)
                     asyncio.create_task(handler.call(message))
                     handled = True
@@ -774,7 +774,7 @@ class Bot(Router):
             for handler in self.handlers[update_type]:
                 filters = [filter(message) for filter in handler.filters]
 
-                if all(filters) or len(filters) == 0:
+                if all(filters):
                     kwargs = utils.context_kwargs(handler.call, before=old_message, after=message, cursor=cursor)
                     asyncio.create_task(handler.call(old_message, message, **kwargs))
 
@@ -794,7 +794,7 @@ class Bot(Router):
             for handler in self.handlers[update_type]:
                 filters = [filter(payload) for filter in handler.filters]
 
-                if all(filters) or len(filters) == 0:
+                if all(filters):
                     kwargs = utils.context_kwargs(handler.call, cursor=cursor)
                     asyncio.create_task(handler.call(payload, **kwargs))
 
@@ -854,7 +854,7 @@ class Bot(Router):
             for handler in self.handlers[update_type]:
                 filters = [filter(callback) for filter in handler.filters]
 
-                if all(filters) or len(filters) == 0::
+                if all(filters):
                     kwargs = utils.context_kwargs(handler.call, cursor=cursor)
                     asyncio.create_task(handler.call(callback, **kwargs))
                     handled = True
