@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name='aiomax',
-    version='2.0.0',
+    version='2.0.1',
     description='Max asynchronous API',
     author='oaa dpnspn',
     author_email='mbutsk@icloud.com',
