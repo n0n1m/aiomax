@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 def readme():
     try:
-        with open('pypi-description.md', 'r') as f:
+        with open('pypi-description.md', encoding='utf-8') as f:
             return f.read()
     except:
         return 'Max asynchronous API'
