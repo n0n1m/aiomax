@@ -165,6 +165,41 @@ bot.add_router(command_router)
 bot.run()
 ```
 
+## Ввод имени и фамилии с помощью FSM
+
+```py
+import aiomax
+from aiomax import fsm
+
+bot = aiomax.Bot('TOKEN')
+
+
+# Запуск бота пользователем
+@bot.on_bot_start()
+async def start(pd: aiomax.BotStartPayload, cursor: fsm.FSMCursor):
+    await pd.send("Как Вас зовут?")
+    cursor.change_state('name')  # Изменения состояние
+
+
+# Ввод имени
+@bot.on_message(aiomax.filters.state('name'))
+async def write_name(message: aiomax.Message, cursor: fsm.FSMCursor):
+    await message.reply("Напишите свою фамилию")
+    cursor.change_state('surname')  # Изменения состояние
+    cursor.change_data({'name': message.content})  # Добавление имени в данные
+
+
+@bot.on_message(aiomax.filters.state('surname'))
+async def write_surname(message: aiomax.Message, cursor: fsm.FSMCursor):
+    name = cursor.get_data()['name']  # Получение имени из данных
+    surname = message.content
+
+    await message.reply(f"Здравствуйте, {name} {surname}")
+    cursor.clear()  # Очищение состояния и данных пользователя
+
+bot.run()
+```
+
 ## Остальная документация
 
 - [Функции класса `Bot`](bots.md)
@@ -176,6 +211,8 @@ bot.run()
 - [Классы](classes.md)
 
 - [Логирование](logging.md)
+
+- [FSM (Конечные автоматы)](fsm.md)
 
 - [Фильтры](filters.md)
 

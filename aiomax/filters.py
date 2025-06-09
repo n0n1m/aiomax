@@ -1,6 +1,6 @@
 from . import classes
 import re
-
+from typing import *
 
 class equals:
     def __init__(self, content: str):
@@ -94,3 +94,28 @@ def papaya(obj: any):
         return words[-2].lower() == "папайя"
     else:
         raise Exception(f"Class {type(object).__name__} has no content")
+
+class state:
+    def __init__(self, state: Any):
+        '''
+        :param state: State to check
+        
+        Checks if the content matches the given pattern
+        '''
+        self.state = state
+    
+    def __call__(self, obj: Any):
+        if not hasattr(obj, "user_id"):
+            raise Exception(f"Class {type(object).__name__} has no user id")
+        
+        user_id = obj.user_id
+
+        if not user_id:
+            return False
+        
+        if not hasattr(obj, "bot") or not obj.bot:
+            return False
+        
+        storage = obj.bot.storage
+
+        return storage.get_state(user_id) == self.state

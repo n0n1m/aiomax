@@ -2,9 +2,10 @@ import asyncio
 from typing import *
 import aiohttp
 
-from .utils import get_message_body
+from . import utils
 from .classes import *
 from .cache import *
+from . import fsm
 from .router import *
 
 import logging
@@ -52,6 +53,8 @@ class Bot(Router):
         self.marker: "int | None" = None
 
         self.debug = debug
+
+        self.storage = fsm.FSMStorage()
 
 
     async def get(self, *args, **kwargs):
@@ -540,7 +543,7 @@ class Bot(Router):
         if format == 'default':
             format = self.default_format
 
-        body = get_message_body(text, format, reply_to, notify, keyboard, attachments)
+        body = utils.get_message_body(text, format, reply_to, notify, keyboard, attachments)
 
         response = await self.post(
             f"https://botapi.max.ru/messages", params=params, json=body
@@ -598,7 +601,7 @@ class Bot(Router):
         if format == 'default':
             format = self.default_format
             
-        body = get_message_body(text, format, reply_to, notify, keyboard)
+        body = utils.get_message_body(text, format, reply_to, notify, keyboard)
 
         response = await self.put(
             f"https://botapi.max.ru/messages", params=params, json=body
@@ -693,6 +696,7 @@ class Bot(Router):
             message = Message.from_json(update["message"])
             message.bot = self
             message.user_locale = update.get('user_locale', None)
+            cursor = fsm.FSMCursor(self.storage, message.sender.user_id)
 
             # caching
             if self.cache:
@@ -705,6 +709,7 @@ class Bot(Router):
                 filters = [filter(message) for filter in handler.filters]
 
                 if all(filters) or len(filters) == 0:
+                    kwargs = utils.context_kwargs(handler.call, cursor=cursor)
                     asyncio.create_task(handler.call(message))
                     handled = True
             
@@ -745,9 +750,10 @@ class Bot(Router):
                     return
 
                 for i in self.commands[check_name]:
+                    kwargs = utils.context_kwargs(i, cursor=cursor)
                     asyncio.create_task(i(CommandContext(
                         self, message, name, args
-                    )))
+                    ), **kwargs))
 
                 bot_logger.debug(f"Command \"{name}\" handled")
 
@@ -756,6 +762,7 @@ class Bot(Router):
             message = Message.from_json(update["message"])
             message.bot = self
             message.user_locale = update.get('user_locale', None)
+            cursor = fsm.FSMCursor(self.storage, message.sender.user_id)
 
             # caching
             old_message = None
@@ -768,7 +775,8 @@ class Bot(Router):
                 filters = [filter(message) for filter in handler.filters]
 
                 if all(filters) or len(filters) == 0:
-                    asyncio.create_task(handler.call(old_message, message))
+                    kwargs = utils.context_kwargs(handler.call, before=old_message, after=message, cursor=cursor)
+                    asyncio.create_task(handler.call(old_message, message, **kwargs))
 
             # handle logs
             bot_logger.debug(f"Message \"{message.body.text}\" edited")
@@ -777,12 +785,18 @@ class Bot(Router):
         if update_type == 'message_removed': 
             payload = MessageDeletePayload.from_json(update, self)
 
+            if payload.user_id:
+                cursor = fsm.FSMCursor(self.storage, payload.user_id)
+            else:
+                cursor = None
+
             # handling
             for handler in self.handlers[update_type]:
                 filters = [filter(payload) for filter in handler.filters]
 
                 if all(filters) or len(filters) == 0:
-                    asyncio.create_task(handler.call(payload))
+                    kwargs = utils.context_kwargs(handler.call, cursor=cursor)
+                    asyncio.create_task(handler.call(payload, **kwargs))
 
             # handle logs
             bot_logger.debug(f"Message \"{payload.content}\" deleted")
@@ -790,31 +804,42 @@ class Bot(Router):
                 
         if update_type == 'bot_started':
             payload = BotStartPayload.from_json(update, self)
+            cursor = fsm.FSMCursor(self.storage, payload.user.user_id)
+
             bot_logger.debug(f"User \"{payload.user!r}\" started bot")
 
             for i in self.handlers[update_type]:
-                asyncio.create_task(i(payload))
+                kwargs = utils.context_kwargs(i, cursor=cursor)
+                asyncio.create_task(i(payload, **kwargs))
 
                 
         if update_type == 'chat_title_changed':
             payload = ChatTitleEditPayload.from_json(update)
+            cursor = fsm.FSMCursor(self.storage, payload.user.user_id)
+
+            bot_logger.debug(f"User \"{payload.user!r}\" changed title of chat {payload.chat_id}")
 
             for i in self.handlers[update_type]:
-                asyncio.create_task(i(payload))
+                kwargs = utils.context_kwargs(i, cursor=cursor)
+                asyncio.create_task(i(payload, **kwargs))
 
                 
         if update_type == 'bot_added' or update_type == 'bot_removed':
             payload = ChatMembershipPayload.from_json(update)
+            cursor = fsm.FSMCursor(self.storage, payload.user.user_id)
 
             for i in self.handlers[update_type]:
-                asyncio.create_task(i(payload))
+                kwargs = utils.context_kwargs(i, cursor=cursor)
+                asyncio.create_task(i(payload, **kwargs))
                 
                 
         if update_type == 'user_added' or update_type == 'user_removed':
             payload = UserMembershipPayload.from_json(update)
+            cursor = fsm.FSMCursor(self.storage, payload.user.user_id)
 
             for i in self.handlers[update_type]:
-                asyncio.create_task(i(payload))
+                kwargs = utils.context_kwargs(i, cursor=cursor)
+                asyncio.create_task(i(payload, **kwargs))
 
                 
         if update_type == 'message_callback':
@@ -824,11 +849,14 @@ class Bot(Router):
                 update['callback'], update.get('user_locale', None), self
             )
 
+            cursor = fsm.FSMCursor(self.storage, callback.user.user_id)
+  
             for handler in self.handlers[update_type]:
                 filters = [filter(callback) for filter in handler.filters]
 
-                if all(filters) or len(filters) == 0:
-                    asyncio.create_task(handler.call(callback))
+                if all(filters) or len(filters) == 0::
+                    kwargs = utils.context_kwargs(handler.call, cursor=cursor)
+                    asyncio.create_task(handler.call(callback, **kwargs))
                     handled = True
                 
             if handled:
