@@ -6,11 +6,12 @@ from . import utils
 from .classes import *
 from .cache import *
 from . import fsm
+from .router import *
 
 import logging
 bot_logger = logging.getLogger("aiomax.bot")
 
-class Bot:
+class Bot(Router):
     def __init__(self,
         access_token: str,
         command_prefixes: "str | List[str]" = "/",
@@ -31,27 +32,14 @@ class Bot:
         :param max_messages_cached: Maximum number of messages to cache. Set to 0 to disable caching
         :param debug: removes try-except constructions in api for more detailized traceback
         '''
+        super().__init__(case_sensitive)
+
         self.access_token: str = access_token
         self.session = None
         self.polling = False
-        self.handlers: dict[str, List[Handler]] = {
-            'message_created': [],
-            'on_ready': [],
-            'bot_started': [],
-            'message_callback': [],
-            'message_chat_created': [],
-            'message_edited': [],
-            'message_removed': [],
-            'chat_title_changed': [],
-            'bot_added': [],
-            'bot_removed': [],
-            'user_added': [],
-            'user_removed': []
-        } 
-        self.commands: dict[str, list] = {}
+
         self.command_prefixes: "str | List[str]" = command_prefixes
         self.mention_prefix: bool = mention_prefix
-        self.case_sensitive: bool = case_sensitive
         self.default_format: "str | None" = default_format
         self.cache: "MessageCache | None" = MessageCache(max_messages_cached)\
             if max_messages_cached > 0 else None
@@ -138,163 +126,6 @@ class Bot:
             del kwargs['params']
         return await self.session.delete(*args, params=params, **kwargs)
     
-
-    # decorators
-
-    def on_message(self, filter: "Callable | str | None" = None):
-        '''
-        Decorator for receiving messages.
-        '''
-        def decorator(func):
-            new_filter = filter
-            if isinstance(filter, str):
-                new_filter = lambda message: message.content == filter
-            self.handlers["message_created"].append(Handler(call=func, filter=new_filter))
-            return func
-        return decorator
-
-
-    def on_message_edit(self):
-        '''
-        Decorator for editing messages.
-        '''
-        def decorator(func):
-            self.handlers["message_edited"].append(func)
-            return func
-        return decorator
-
-
-    def on_message_delete(self, filter: "Callable | str | None" = None):
-        '''
-        Decorator for deleted messages.
-        '''
-        def decorator(func):
-            new_filter = filter
-            if isinstance(filter, str):
-                new_filter = lambda pl: pl.content == filter
-            self.handlers["message_removed"].append(Handler(call=func, filter=new_filter))
-            return func
-        return decorator
-
-
-    def on_bot_start(self):
-        '''
-        Decorator for handling bot start.
-        '''
-        def decorator(func): 
-            self.handlers["bot_started"].append(func)
-            return func
-        return decorator
-
-
-    def on_chat_title_change(self):
-        '''
-        Decorator for handling chat title changes.
-        '''
-        def decorator(func): 
-            self.handlers["chat_title_changed"].append(func)
-            return func
-        return decorator
-
-
-    def on_bot_add(self):
-        '''
-        Decorator for handling bot invitations in groups.
-        '''
-        def decorator(func): 
-            self.handlers["bot_added"].append(func)
-            return func
-        return decorator
-
-
-    def on_bot_remove(self):
-        '''
-        Decorator for handling bot kicks from groups.
-        '''
-        def decorator(func): 
-            self.handlers["bot_removed"].append(func)
-            return func
-        return decorator
-
-
-    def on_user_add(self):
-        '''
-        Decorator for handling user joins.
-        '''
-        def decorator(func): 
-            self.handlers["user_added"].append(func)
-            return func
-        return decorator
-
-
-    def on_user_remove(self):
-        '''
-        Decorator for handling user leaves.
-        '''
-        def decorator(func): 
-            self.handlers["user_removed"].append(func)
-            return func
-        return decorator
-    
-
-    def on_ready(self):
-        '''
-        Decorator for receiving messages.
-        '''
-        def decorator(func): 
-            self.handlers["on_ready"].append(func)
-            return func
-        return decorator
-
-
-    def on_button_callback(self, filter: "Callable | None" = None):
-        '''
-        Decorator for receiving button presses.
-        '''
-        def decorator(func): 
-            self.handlers["message_callback"].append(Handler(call=func, filter=filter))
-            return func
-        return decorator
-
-
-    def on_button_chat_create(self):
-        '''
-        Decorator for receiving button presses.
-        '''
-        def decorator(func): 
-            self.handlers["message_chat_created"].append(func)
-            return func
-        return decorator
-    
-
-    def on_command(self, name: "str | None" = None, aliases: List[str] = []):
-        '''
-        Decorator for receiving commands.
-        '''
-        def decorator(func): 
-            # command name
-            if name is None:
-                command_name = func.__name__
-            else:
-                assert ' ' not in name, 'Command name cannot contain spaces'
-                command_name = name
-            
-            check_name = command_name.lower() if not self.case_sensitive else command_name
-            if check_name not in self.commands:
-                self.commands[check_name] = []
-            self.commands[check_name].append(func)
-
-            # aliases
-            for i in aliases:
-                assert ' ' not in i, 'Command alias cannot contain spaces'
-
-                check_name = i.lower() if not self.case_sensitive else i
-                if check_name not in self.commands:
-                    self.commands[check_name] = []
-                self.commands[check_name].append(func)
-            return func
-        return decorator
-        
 
     # send requests
 
@@ -875,14 +706,11 @@ class Bot:
             handled = False
 
             for handler in self.handlers['message_created']:
-                if handler.filter:
-                    if handler.filter(message):
-                        kwargs = utils.context_kwargs(handler.call, cursor=cursor)
-                        asyncio.create_task(handler.call(message, **kwargs))
-                        handled = True
-                else:
+                filters = [filter(message) for filter in handler.filters]
+
+                if all(filters) or len(filters) == 0:
                     kwargs = utils.context_kwargs(handler.call, cursor=cursor)
-                    asyncio.create_task(handler.call(message, **kwargs))
+                    asyncio.create_task(handler.call(message))
                     handled = True
             
             # handle logs
@@ -944,8 +772,11 @@ class Bot:
 
             # handling
             for handler in self.handlers[update_type]:
-                kwargs = utils.context_kwargs(handler, before=old_message, after=message, cursor=cursor)
-                asyncio.create_task(handler(**kwargs))
+                filters = [filter(message) for filter in handler.filters]
+
+                if all(filters) or len(filters) == 0:
+                    kwargs = utils.context_kwargs(handler.call, before=old_message, after=message, cursor=cursor)
+                    asyncio.create_task(handler.call(old_message, message, **kwargs))
 
             # handle logs
             bot_logger.debug(f"Message \"{message.body.text}\" edited")
@@ -961,11 +792,9 @@ class Bot:
 
             # handling
             for handler in self.handlers[update_type]:
-                if handler.filter:
-                    if handler.filter(payload):
-                        kwargs = utils.context_kwargs(handler.call, cursor=cursor)
-                        asyncio.create_task(handler.call(payload, **kwargs))
-                else:
+                filters = [filter(payload) for filter in handler.filters]
+
+                if all(filters) or len(filters) == 0:
                     kwargs = utils.context_kwargs(handler.call, cursor=cursor)
                     asyncio.create_task(handler.call(payload, **kwargs))
 
@@ -1021,14 +850,11 @@ class Bot:
             )
 
             cursor = fsm.FSMCursor(self.storage, callback.user.user_id)
+  
+            for handler in self.handlers[update_type]:
+                filters = [filter(callback) for filter in handler.filters]
 
-            for handler in self.handlers[update_type]:     
-                if handler.filter:
-                    if handler.filter(callback):
-                        kwargs = utils.context_kwargs(handler.call, cursor=cursor)
-                        asyncio.create_task(handler.call(callback, **kwargs))
-                        handled = True
-                else:
+                if all(filters) or len(filters) == 0::
                     kwargs = utils.context_kwargs(handler.call, cursor=cursor)
                     asyncio.create_task(handler.call(callback, **kwargs))
                     handled = True

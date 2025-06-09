@@ -768,10 +768,19 @@ class Handler:
     def __init__(
         self,
         call: Callable,
-        filter: "Callable | None" = None,
+        deco_filter: "Callable | None" = None,
+        router_filters: List[Callable] = [],
     ):
         self.call = call
-        self.filter = filter
+        self.deco_filter: "Callable | None" = deco_filter
+        self.router_filters: List[Callable] = router_filters
+
+    
+    @property
+    def filters(self) -> List[Callable]:
+        if self.deco_filter:
+            return [self.deco_filter, *self.router_filters]
+        return self.router_filters
 
 
 class Image:
