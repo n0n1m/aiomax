@@ -12,7 +12,7 @@
 pip install aiomax
 ```
 
-Чтобы установить git-версию aiomax (возможны баги и не завершенность), выполните команду:
+Чтобы установить git-версию aiomax (возможны баги и недоделанность), выполните команду:
 
 ```bash
 pip install git+https://github.com/dpnspn/aiomax.git
@@ -25,7 +25,7 @@ pip install git+https://github.com/dpnspn/aiomax.git
 Обсудить aiomax / задать вопрос можно в сети чатов Aiomax Community
 [Telegram](https://t.me/aiomax_chat) / [Max](https://max.ru/join/45DmBRwDNvcZVqYvf_cSCPu-_DuvYa5VmuQ4K2cmC_Q)
 
-Новости о aiomax и Max Bot api выходят на телеграм канале [Aiomax Changelog](https://t.me/aiomax_cl)
+Новости о aiomax и Max Bot API выходят на телеграм канале [Aiomax Changelog](https://t.me/aiomax_cl)
 
 ## Документация
 
@@ -43,3 +43,5 @@ pip install git+https://github.com/dpnspn/aiomax.git
 - [Логирование](docs/logging.md)
 
 - [Фильтры](docs/filters.md)
+
+- [Роутеры](docs/routers.md)
