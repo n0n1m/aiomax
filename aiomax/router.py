@@ -35,6 +35,12 @@ t
         self.case_sensitive: bool = case_sensitive
         self.parent = None # Parent bot of this router
         self.routers: List["Router"] = []
+        self.filters: Dict[str, List[Callable]] = {
+            'message_created': [],
+            'message_edited': [],
+            'message_removed': [],
+            'message_callback': []
+        }
 
 
     # routers
@@ -103,18 +109,29 @@ t
             new_filter = filter
             if isinstance(filter, str):
                 new_filter = lambda message: message.content == filter
-            self._handlers["message_created"].append(Handler(call=func, filter=new_filter))
+
+            self._handlers["message_created"].append(
+                Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_created'])
+            )
             return func
+        
         return decorator
 
 
-    def on_message_edit(self):
+    def on_message_edit(self, filter: "Callable | str | None" = None):
         '''
         Decorator for editing messages.
         '''
         def decorator(func):
-            self._handlers["message_edited"].append(func)
+            new_filter = filter
+            if isinstance(filter, str):
+                new_filter = lambda pl: pl.content == filter
+
+            self._handlers["message_edited"].append(
+                Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_edited'])
+            )
             return func
+        
         return decorator
 
 
@@ -126,8 +143,12 @@ t
             new_filter = filter
             if isinstance(filter, str):
                 new_filter = lambda pl: pl.content == filter
-            self._handlers["message_removed"].append(Handler(call=func, filter=new_filter))
+
+            self._handlers["message_removed"].append(
+                Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_removed'])
+            )
             return func
+        
         return decorator
 
 
@@ -206,8 +227,11 @@ t
         Decorator for receiving button presses.
         '''
         def decorator(func): 
-            self._handlers["message_callback"].append(Handler(call=func, filter=filter))
+            self._handlers["message_callback"].append(
+                Handler(call=func, deco_filter=filter, router_filters=self.filters['message_callback'])
+            )
             return func
+        
         return decorator
 
 
@@ -248,3 +272,18 @@ t
                 self._commands[check_name].append(func)
             return func
         return decorator
+    
+
+    # filters
+
+    def add_message_filter(self, filter: "Callable"):
+        self.filters['message_created'].append(filter)
+
+    def add_message_edit_filter(self, filter: "Callable"):
+        self.filters['message_edited'].append(filter)
+
+    def add_message_delete_filter(self, filter: "Callable"):
+        self.filters['message_removed'].append(filter)
+
+    def add_button_callback_filter(self, filter: "Callable"):
+        self.filters['message_callback'].append(filter)

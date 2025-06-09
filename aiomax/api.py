@@ -702,11 +702,9 @@ class Bot(Router):
             handled = False
 
             for handler in self.handlers['message_created']:
-                if handler.filter:
-                    if handler.filter(message):
-                        asyncio.create_task(handler.call(message))
-                        handled = True
-                else:
+                filters = [filter(message) for filter in handler.filters]
+
+                if all(filters) or len(filters) == 0:
                     asyncio.create_task(handler.call(message))
                     handled = True
             
@@ -767,7 +765,10 @@ class Bot(Router):
 
             # handling
             for handler in self.handlers[update_type]:
-                asyncio.create_task(handler(old_message, message))
+                filters = [filter(message) for filter in handler.filters]
+
+                if all(filters) or len(filters) == 0:
+                    asyncio.create_task(handler.call(old_message, message))
 
             # handle logs
             bot_logger.debug(f"Message \"{message.body.text}\" edited")
@@ -778,10 +779,9 @@ class Bot(Router):
 
             # handling
             for handler in self.handlers[update_type]:
-                if handler.filter:
-                    if handler.filter(payload):
-                        asyncio.create_task(handler.call(payload))
-                else:
+                filters = [filter(payload) for filter in handler.filters]
+
+                if all(filters) or len(filters) == 0:
                     asyncio.create_task(handler.call(payload))
 
             # handle logs
@@ -824,12 +824,10 @@ class Bot(Router):
                 update['callback'], update.get('user_locale', None), self
             )
 
-            for handler in self.handlers[update_type]:     
-                if handler.filter:
-                    if handler.filter(callback):
-                        asyncio.create_task(handler.call(callback))
-                        handled = True
-                else:
+            for handler in self.handlers[update_type]:
+                filters = [filter(callback) for filter in handler.filters]
+
+                if all(filters) or len(filters) == 0:
                     asyncio.create_task(handler.call(callback))
                     handled = True
                 

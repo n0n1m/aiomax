@@ -136,7 +136,6 @@ bot.add_router(echo.router)
 bot.run()
 ```
 
-
 ## Остальная документация
 
 - [Функции класса `Bot`](bots.md)
