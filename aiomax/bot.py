@@ -3,7 +3,7 @@ from typing import *
 import aiohttp
 
 from . import utils
-from .classes import *
+from .types import *
 from .cache import *
 from . import fsm
 from .router import *

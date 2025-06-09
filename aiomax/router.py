@@ -1,7 +1,7 @@
 
 from copy import deepcopy
 from typing import *
-from .classes import *
+from .types import *
 from .cache import *
 
 import logging

@@ -1,4 +1,4 @@
-from . import classes
+from . import types
 import re
 from typing import *
 
