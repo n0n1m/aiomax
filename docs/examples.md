@@ -18,7 +18,7 @@ bot = aiomax.Bot('TOKEN')
 async def echo(message: aiomax.Message):
     await message.reply(message.body.text)
 
-asyncio.run(bot.start_polling())
+bot.run()
 ```
 
 ## Генератор рандомных чисел
@@ -55,7 +55,7 @@ async def send_commands():
         aiomax.BotCommand('random', 'Генерирует случайное число от минимума до максимума')
     ])
 
-asyncio.run(bot.start_polling())
+bot.run()
 ```
 
 ## Эхо-бот с проверкой на чат
@@ -72,7 +72,7 @@ chat_id: int = 2409 # ID чата, сообщения в котором долж
 async def echo(message: aiomax.Message):
     await bot.send_message(message.body.text, message.recipient.chat_id)
 
-asyncio.run(bot.start_polling())
+bot.run()
 ```
 
 ## Простой счётчик со сбросом
@@ -107,7 +107,7 @@ async def reset(cb: aiomax.Callback):
     taps = 0
     await cb.answer('Вы сбросили все тапы!', text=f'Тапов: {taps}')
 
-asyncio.run(bot.start_polling())
+bot.run()
 ```
 
 ## Разделение на несколько файлов через роутеры
@@ -136,6 +136,35 @@ bot.add_router(echo.router)
 bot.run()
 ```
 
+## Глобальные фильтры
+
+```py
+import aiomax
+
+bot = aiomax.Bot('TOKEN')
+command_router = aiomax.Router()
+command_router.add_message_filter(aiomax.filters.startswith('$'))
+
+# эти функции сработают только если сообщение начинается с '$'
+
+@command_router.on_message()
+async def echo(message: aiomax.Message):
+    await message.reply(message.content)
+
+@command_router.on_message()
+async def name(message: aiomax.Message):
+    await message.reply(message.sender.name)
+
+# эта функция сработает всегда
+
+@bot.on_message()
+async def echo(message: aiomax.Message):
+    await message.reply(message.content)
+
+bot.add_router(command_router)
+bot.run()
+```
+
 ## Остальная документация
 
 - [Функции класса `Bot`](bots.md)
@@ -147,5 +176,7 @@ bot.run()
 - [Классы](classes.md)
 
 - [Логирование](logging.md)
+
+- [Фильтры](filters.md)
 
 - [Роутеры](routers.md)
