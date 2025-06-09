@@ -1,4 +1,4 @@
-from .utils import get_message_body
+from . import utils
 from typing import *
 from . import buttons
 
@@ -487,6 +487,10 @@ class LinkedMessage:
             sender = User.from_json(data.get('sender', None)),
             chat_id = data.get('chat_id', None),
         )
+    
+    @property
+    def user_id(self):
+        return self.sender.user_id
 
 
 class Message:
@@ -529,6 +533,10 @@ class Message:
     @property
     def content(self) -> str:
         return self.body.text
+    
+    @property
+    def user_id(self):
+        return self.sender.user_id
 
     @staticmethod
     def from_json(data: dict) -> "Message":
@@ -680,6 +688,10 @@ class BotStartPayload:
             keyboard=keyboard, attachments=attachments
         ))
     
+    @property
+    def user_id(self):
+        return self.user.user_id
+    
     
 
 class CommandContext:
@@ -746,6 +758,10 @@ class CommandContext:
             format=format, notify=notify, disable_link_preview=disable_link_preview,
             keyboard=keyboard, attachments=attachments, reply_to=self.message.id
         ))
+    
+    @property
+    def user_id(self):
+        return self.sender.user_id
 
 
 class Handler:
@@ -905,13 +921,17 @@ class Callback:
         }
         if text != None:
             format = self.bot.default_format if format == 'default' else format
-            body['message'] = get_message_body(text, format, notify=notify, keyboard=keyboard, attachments=attachments)
+            body['message'] = utils.get_message_body(text, format, notify=notify, keyboard=keyboard, attachments=attachments)
 
         out = await self.bot.post(
             'https://botapi.max.ru/answers', params={'callback_id': self.callback_id},
             json=body
         )
         return await out.json()
+    
+    @property
+    def user_id(self):
+        return self.user.user_id
 
 
     @staticmethod
@@ -968,7 +988,8 @@ class MessageDeletePayload:
         message: "Message | None" = None,
         message_id: "str | None" = None,
         chat_id: "int | None" = None,
-        user_id: "int | None" = None
+        user_id: "int | None" = None,
+        bot = None
     ):
         '''
         Payload that is sent to the `Bot.on_message_delete` decorator.
@@ -984,6 +1005,7 @@ class MessageDeletePayload:
         self.message_id: "str | None" = message_id
         self.chat_id: "int | None" = chat_id
         self.user_id: "int | None" = user_id
+        self.bot = bot
 
 
     @staticmethod
@@ -996,6 +1018,7 @@ class MessageDeletePayload:
             data.get('message_id', None),
             data.get('chat_id', None),
             data.get('user_id', None),
+            bot = bot
         )
 
 
@@ -1026,6 +1049,11 @@ class ChatTitleEditPayload:
         self.user: User = user
         self.chat_id: "int | None" = chat_id
         self.title: "str | None" = title
+    
+    
+    @property
+    def user_id(self):
+        return self.user.user_id
 
 
     @staticmethod
@@ -1059,6 +1087,11 @@ class ChatMembershipPayload:
         self.user: User = user
         self.chat_id: "int | None" = chat_id
         self.is_channel: bool = is_channel
+    
+
+    @property
+    def user_id(self):
+        return self.user.user_id
 
 
     @staticmethod
@@ -1095,6 +1128,11 @@ class UserMembershipPayload:
         self.chat_id: "int | None" = chat_id
         self.is_channel: bool = is_channel
         self.initiator: "int | None" = initiator
+
+
+    @property
+    def user_id(self):
+        return self.sender.user_id
 
 
     @staticmethod

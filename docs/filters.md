@@ -62,6 +62,10 @@ async def dialog(message: aiomax.Message):
 
 Поддерживает `Bot.on_message` и `Bot.on_button_callback`.
 
+### `aiomax.filters.state(state: any)`
+
+Проверяет, чтобы состояние пользователя (`State`) равнялось `state`. Подробнее в [fsm.md](fsm.md)
+
 ## Написание собственных фильтров
 
 При написании собственных фильтров у вас есть 3 варианта:

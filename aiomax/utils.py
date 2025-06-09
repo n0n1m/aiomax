@@ -1,5 +1,6 @@
 from typing import *
 from . import buttons
+from inspect import signature
 
 def get_message_body(
     text: str,
@@ -46,3 +47,13 @@ def get_message_body(
         body['attachments'] = []
 
     return body
+
+def context_kwargs(func: Callable, **kwargs):
+    '''
+    Returns only those kwargs, that callable accepts
+    '''
+    params = list(signature(func).parameters.keys())
+    
+    kwargs = {kw: arg for kw, arg in kwargs.items() if kw in params}
+
+    return kwargs
