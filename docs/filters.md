@@ -117,3 +117,35 @@ class ChatTypeFilter:
 async def dialog(message: aiomax.Message):
     pass # Содержимое функции
 ```
+
+## Использование нескольких фильтров
+
+Вы можете указать несколько фильтров в декораторах `@bot.on_message`, `@bot.on_message_edit`, `@bot.on_message_delete` и т.д., передавая их через запятую.
+
+Это позволяет комбинировать различные условия без необходимости писать сложные фильтры вручную.
+По умолчанию используется логика `AND`: обработчик сработает только если все фильтры прошли.
+
+### Пример с несколькими фильтрами (`AND`)
+```py
+@bot.on_message(
+    lambda message: message.recipient.chat_id == 123456,
+    lambda message: not message.sender.is_bot
+)
+async def dialog_not_forwarded(message: aiomax.Message):
+    await bot.delete_message(message.id) # Удаляем сообщение в чате 123456 если оно не от бота
+```
+### Использование режима `OR`
+Если вы хотите, чтобы сработал любой из фильтров (логика `OR`), укажите параметр `mode='or'`:
+```py
+@bot.on_message(
+    aiomax.filters.equals("привет"),
+    aiomax.filters.equals("hello"),
+    mode='or'
+)
+async def greetings(message: aiomax.Message):
+    await message.reply("Привет, друг!") # Отвечаем на любое из двух приветствий
+```
+### Особенности
+- Можно комбинировать любые фильтры: `lambda`, функции, классы, встроенные фильтры `aiomax.filters`.
+- Если фильтры не переданы, считается что фильтр всегда `True` (обрабатываются все сообщения).
+- По умолчанию `mode='and'` — все фильтры должны пройти.

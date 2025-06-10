@@ -3,6 +3,7 @@ from copy import deepcopy
 from typing import *
 from .types import *
 from .cache import *
+from .filters import equals
 
 import logging
 bot_logger = logging.getLogger("aiomax.bot")
@@ -60,7 +61,7 @@ t
             if filter_ is None:
                 continue
             elif isinstance(filter_, str):
-                normalized_filters.append(lambda message, s=filter_: message.content == s)
+                normalized_filters.append(equals(filter_))
             elif callable(filter_):
                 normalized_filters.append(filter_)
             else:
