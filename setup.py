@@ -5,12 +5,12 @@ def readme():
         with open('pypi-description.md', encoding='utf-8') as f:
             return f.read()
     except:
-        return 'Max asynchronous API'
+        return 'Asynchronous framework for Max Bot API '
 
 setup(
     name='aiomax',
-    version='2.0.1',
-    description='Max asynchronous API',
+    version='2.0.2',
+    description='Asynchronous framework for Max Bot API ',
     author='oaa dpnspn',
     author_email='mbutsk@icloud.com',
     packages=find_packages(),

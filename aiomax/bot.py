@@ -710,7 +710,7 @@ class Bot(Router):
 
                 if all(filters):
                     kwargs = utils.context_kwargs(handler.call, cursor=cursor)
-                    asyncio.create_task(handler.call(message))
+                    asyncio.create_task(handler.call(message, **kwargs))
                     handled = True
             
             # handle logs
