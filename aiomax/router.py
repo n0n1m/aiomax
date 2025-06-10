@@ -42,43 +42,43 @@ t
             'message_callback': []
         }
         
-@staticmethod
-def wrap_filters(
-    filters: Tuple["Callable | str | None", ...],
-    mode: str = "and"
-) -> Callable:
-    '''
-    Normalize multiple filters into a single callable.
+    @staticmethod
+    def wrap_filters(
+        filters: Tuple["Callable | str | None", ...],
+        mode: str = "and"
+    ) -> Callable:
+        '''
+        Normalize multiple filters into a single callable.
 
-    :param filters: filters to combine
-    :param mode: "and" (default) — all filters must pass,
-                 "or" — at least one filter must pass.
-    '''
-    normalized_filters = []
+        :param filters: filters to combine
+        :param mode: "and" (default) — all filters must pass,
+                     "or" — at least one filter must pass.
+        '''
+        normalized_filters = []
 
-    for filter_ in filters:
-        if filter_ is None:
-            continue
-        elif isinstance(filter_, str):
-            normalized_filters.append(lambda message, s=filter_: message.content == s)
-        elif callable(filter_):
-            normalized_filters.append(filter_)
+        for filter_ in filters:
+            if filter_ is None:
+                continue
+            elif isinstance(filter_, str):
+                normalized_filters.append(lambda message, s=filter_: message.content == s)
+            elif callable(filter_):
+                normalized_filters.append(filter_)
+            else:
+                raise ValueError(f"Unsupported filter type: {type(filter_)}")
+
+        if not normalized_filters:
+            return lambda message: True
+
+        if mode == "and":
+            def combined_filter(message):
+                return all(f(message) for f in normalized_filters)
+        elif mode == "or":
+            def combined_filter(message):
+                return any(f(message) for f in normalized_filters)
         else:
-            raise ValueError(f"Unsupported filter type: {type(filter_)}")
+            raise ValueError(f"Unsupported mode: {mode}. Use 'and' or 'or'.")
 
-    if not normalized_filters:
-        return lambda message: True
-
-    if mode == "and":
-        def combined_filter(message):
-            return all(f(message) for f in normalized_filters)
-    elif mode == "or":
-        def combined_filter(message):
-            return any(f(message) for f in normalized_filters)
-    else:
-        raise ValueError(f"Unsupported mode: {mode}. Use 'and' or 'or'.")
-
-    return combined_filter
+        return combined_filter
 
 
     # routers
