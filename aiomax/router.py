@@ -144,7 +144,7 @@ t
         Decorator for receiving messages.
         '''
         def decorator(func):
-            new_filter = self.wrap_filters(filters)
+            new_filter = self.wrap_filters(filters, mode=mode)
 
             self._handlers["message_created"].append(
                 Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_created'])
@@ -158,7 +158,7 @@ t
         Decorator for editing messages.
         '''
         def decorator(func):
-            new_filter = self.wrap_filters(filters)
+            new_filter = self.wrap_filters(filters, mode=mode)
 
             self._handlers["message_edited"].append(
                 Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_edited'])
@@ -173,7 +173,7 @@ t
         Decorator for deleted messages.
         '''
         def decorator(func):
-            new_filter = self.wrap_filters(filters)
+            new_filter = self.wrap_filters(filters, mode=mode)
 
             self._handlers["message_removed"].append(
                 Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_removed'])
@@ -257,7 +257,7 @@ t
         Decorator for receiving button presses.
         '''
         def decorator(func):
-            new_filter = self.wrap_filters(filters)
+            new_filter = self.wrap_filters(filters, mode=mode)
 
             self._handlers["message_callback"].append(
                 Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_callback'])
