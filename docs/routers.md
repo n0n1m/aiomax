@@ -72,6 +72,12 @@ async def echo_second(message: aiomax.Message):
 router.add_router(child_router)
 ```
 
+Чтобы отвязать роутер от другого роутера, используется метод `remove_router(router: aiomax.Router)`:
+
+```py
+bot.remove_router(router)
+```
+
 `aiomax.Router` принимает единственный аргумент `case_sensitive` (`bool`, по умолчанию `True`), который определяет, будет ли бот реагировать на команды, зарегистрированные через `@router.on_command`, с отличающимся регистром.
 
 ## Фильтры

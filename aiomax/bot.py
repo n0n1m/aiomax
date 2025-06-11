@@ -18,8 +18,7 @@ class Bot(Router):
         mention_prefix: bool = True,
         case_sensitive: bool = True,
         default_format: "Literal['markdown', 'html'] | None" = None,
-        max_messages_cached: int = 10000,
-        debug: bool = False
+        max_messages_cached: int = 10000
     ):
         '''
         Bot init
@@ -30,7 +29,6 @@ class Bot(Router):
         :param case_sensitive: If False the bot will respond to commands regardless of case
         :param default_format: Default message formatting mode
         :param max_messages_cached: Maximum number of messages to cache. Set to 0 to disable caching
-        :param debug: removes try-except constructions in api for more detailized traceback
         '''
         super().__init__(case_sensitive)
 
@@ -51,8 +49,6 @@ class Bot(Router):
         self.bot_commands: List[BotCommand] = None
 
         self.marker: "int | None" = None
-
-        self.debug = debug
 
         self.storage = fsm.FSMStorage()
 
@@ -511,7 +507,7 @@ class Bot(Router):
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        attachments: "list[Attachment] | None" = None
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> Message:
         '''
         Allows you to send a message to a user or in a chat.
@@ -846,7 +842,7 @@ class Bot(Router):
             handled = False
 
             callback = Callback.from_json(
-                update['callback'], update.get('user_locale', None), self
+                update['callback'], update.get('message', None), update.get('user_locale', None), self
             )
 
             cursor = fsm.FSMCursor(self.storage, callback.user.user_id)
@@ -899,10 +895,7 @@ class Bot(Router):
                         await self.handle_update(update)
 
                 except Exception as e:
-                    if self.debug:
-                        bot_logger.exception(e)
-                    else:
-                        bot_logger.error(f"Error while handling updates: {e}")
+                    bot_logger.exception(e)
                     await asyncio.sleep(3)
 
         self.session = None

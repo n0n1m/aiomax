@@ -196,7 +196,7 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `data: IO | str` - Путь к файлу или file-like объект.
 
-### `Bot.send_message(text: str, chat_id: int | None = None, user_id: int | None = None, format: 'markdown' | 'html' | 'default' | None = 'default', reply_to: int | None = None, notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
+### `Bot.send_message(text: str, chat_id: int | None = None, user_id: int | None = None, format: 'markdown' | 'html' | 'default' | None = 'default', reply_to: int | None = None, notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None)`
 
 Отправляет сообщение в нужный чат.
 
@@ -216,9 +216,9 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - клавиатура, которую надо прикрепить к сообщению.
 
-- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
+- `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
-### `Bot.edit_message(message_id: int, text: "str | None" = None, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
+### `Bot.edit_message(message_id: int, text: "str | None" = None, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None)`
 
 Изменяет содержимое сообщения.
 
@@ -236,7 +236,7 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - новая клавиатура, которую надо прикрепить к сообщению. `None` не будет менять клавиатуру.
 
-- `attachments: List[Attachment] | None` - новый список вложений. `None` не будет менять список файлов. Укажите `[]`, чтобы удалить все вложения - **это также удалит клавиатуру, если она есть**.
+- `attachments: List[Attachment] | Attachment | None` - новый список вложений. `None` не будет менять список файлов. Укажите `[]`, чтобы удалить все вложения - **это также удалит клавиатуру, если она есть**.
 
 ### `Bot.delete_message(message_id: int)`
 

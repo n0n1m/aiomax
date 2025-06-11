@@ -192,7 +192,7 @@
 
 Возвращает `Message.body.text`.
 
-### `Message.send(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None) -> Message`
+### `Message.send(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None) -> Message`
 
 Отправляет сообщение в чат, в который было отправлено сообщение.
 
@@ -206,9 +206,9 @@
 
 - `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
+- `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
-### `Message.reply(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None) -> Message`
+### `Message.reply(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None) -> Message`
 
 Отвечает на это сообщение.
 
@@ -222,9 +222,9 @@
 
 - `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
+- `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
-### `Message.edit(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None) -> Message`
+### `Message.edit(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None) -> Message`
 
 Редактирует это сообщение.
 
@@ -238,7 +238,7 @@
 
 - `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
+- `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
 ### `Message.delete()
 
@@ -264,7 +264,7 @@
 
 - `text: str | None` - текст сообщения. Может быть `None` для вложений
 
-- `attachments: List[Attachment] | None` - список вложений у сообщения. Может быть `None`
+- `attachments: List[Attachment] | Attachment | None` - список вложений у сообщения. Может быть `None`
 
 - `markup: List[Markup] | None` - форматирование сообщения. Может быть `None`
 
@@ -346,7 +346,7 @@
 
 - `args_raw: str` - сырые, неразделённые пробелами аргументы команды. Полезно, если нужно обрабатывать аргументы команды, которые содержат пробелы
 
-### `CommandContext.send(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None) -> Message`
+### `CommandContext.send(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None) -> Message`
 
 Отправляет сообщение в чат, в который была отправлена команда.
 
@@ -360,9 +360,9 @@
 
 - `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
+- `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
-### `CommandContext.reply(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None) -> Message`
+### `CommandContext.reply(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None) -> Message`
 
 Отвечает на сообщение с командой.
 
@@ -376,7 +376,7 @@
 
 - `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
 
-- `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
+- `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
 ## `Callback`
 
@@ -390,11 +390,13 @@
 
 - `user: User` - пользователь, нажавший кнопку
 
+- `message: Message | None` - сообщение, на котором находится кнопка. Может быть `None`, если сообщение было удалено в момент получения обновления
+
 - `payload: str | None` - Payload, указанный при создании `CallbackButton`. Может быть `None`
 
 - `user_locale: str | None` - язык пользователя в формате IETF BCP 47. Может быть `None`
 
-### `answer(notification: "str | None" = None, text: str | None = None, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
+### `Callback.answer(notification: "str | None" = None, text: str | None = None, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None)`
 
 Отвечает на нажатие кнопки.
 
@@ -410,9 +412,41 @@
 
 - `notify: bool` - уведомлять ли участников о изменении сообщения. `True` по умолчанию
 
-- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - новая клавиатура, которую надо прикрепить к сообщению. `None` не будет менять клавиатуру.
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - новая клавиатура, которую надо прикрепить к сообщению. `None` не будет менять клавиатуру. Укажите `[]`, чтобы удалить клавиатуру.
 
-- `attachments: List[Attachment] | None` - новый список вложений. `None` не будет менять список файлов. Укажите `[]`, чтобы удалить все вложения - **это также удалит клавиатуру, если она есть**.
+- `attachments: List[Attachment] | Attachment | None` - новый список вложений. `None` не будет менять список файлов. Укажите `[]`, чтобы удалить все вложения, не включая клавиатуру.
+
+### `Callback.send(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None) -> Message`
+
+Отправляет сообщение в тот же чат, в котором находится сообщение с нажатой кнопкой.
+
+- `text: str` - текст сообщения. Максимум 4000 символов
+
+- `format: Literal['html', 'markdown', 'default'] | None` - формат сообщения. `Bot.default_format` по умолчанию
+
+- `notify: bool` - уведомлять ли участников о сообщении. `True` по умолчанию
+
+- `disable_link_preview: bool` - отключить предпросмотр ссылок. `False` по умолчанию
+
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
+
+- `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
+
+### `Callback.reply(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None) -> Message`
+
+Отвечает на сообщение, на котором была нажата кнопка.
+
+- `text: str` - текст сообщения. Максимум 4000 символов
+
+- `format: Literal['html', 'markdown', 'default'] | None` - формат сообщения. `Bot.default_format` по умолчанию
+
+- `notify: bool` - уведомлять ли участников о сообщении. `True` по умолчанию
+
+- `disable_link_preview: bool` - отключить предпросмотр ссылок. `False` по умолчанию
+
+- `keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None` - инлайн-клавиатура
+
+- `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
 ## `Image(url: str)`
 
@@ -420,7 +454,7 @@
 
 - `url: str` - ссылка на изображение
 
-## ImageRequestPayload(url: "str | None" = None, token: "str | None" = None)
+## `ImageRequestPayload(url: "str | None" = None, token: "str | None" = None)`
 
 Изображение, загружаемое для аватарки или иконки чата или профиля.
 

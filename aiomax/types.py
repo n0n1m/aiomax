@@ -557,7 +557,7 @@ class Message:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        attachments: "List[Attachment] | None" = None
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> "Message":
         '''
         Send a message to the chat that the message is sent.
@@ -584,7 +584,7 @@ class Message:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        attachments: "List[Attachment] | None" = None
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> "Message":
         '''
         Reply to this message.
@@ -604,6 +604,7 @@ class Message:
             keyboard=keyboard, attachments=attachments, reply_to=self.id
         ))
     
+
     async def edit(self,
         text: str,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
@@ -668,7 +669,7 @@ class BotStartPayload:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        attachments: "List[Attachment] | None" = None
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> "Message":
         '''
         Send a message to the chat where bot was started.
@@ -716,7 +717,7 @@ class CommandContext:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        attachments: "List[Attachment] | None" = None
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> Message:
         '''
         Send a message to the chat that the user sent the command.
@@ -741,7 +742,7 @@ class CommandContext:
         notify: bool = True,
         disable_link_preview: bool = False,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        attachments: "List[Attachment] | None" = None
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> Message:
         '''
         Reply to the message that the user sent.
@@ -887,6 +888,7 @@ class Callback:
         bot,
         timestamp: int,
         callback_id: str,
+        message: "Message | None",
         user: User,
         user_locale: "str | None",
         payload: "str | None" = None
@@ -894,6 +896,7 @@ class Callback:
         self.bot = bot
         self.timestamp: int = timestamp
         self.callback_id: str = callback_id
+        self.message: "Message | None" = message
         self.user: User = user
         self.payload: "str | None" = payload
         self.user_locale: "str | None" = user_locale
@@ -902,6 +905,64 @@ class Callback:
     @property
     def content(self) -> str:
         return self.payload
+
+
+    async def send(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | Attachment | None" = None
+    ) -> "Message":
+        '''
+        Send a message to the chat that contains the message with the pressed button.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
+        '''
+        if self.bot == None:
+            return
+        assert self.message != None, 'Original message not found'
+        
+        return (await self.bot.send_message(
+            text, chat_id=self.message.recipient.chat_id,
+            format=format, notify=notify, disable_link_preview=disable_link_preview,
+            keyboard=keyboard, attachments=attachments
+        ))
+
+
+    async def reply(self,
+        text: str,
+        format: "Literal['html', 'markdown', 'default'] | None" = 'default',
+        notify: bool = True,
+        disable_link_preview: bool = False,
+        keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | Attachment | None" = None
+    ) -> "Message":
+        '''
+        Reply to the message with the button.
+
+        :param text: Message text. Up to 4000 characters
+        :param format: Message format. Bot.default_format by default
+        :param notify: Whether to notify users about the message. True by default.
+        :param disable_link_preview: Whether to disable link preview. False by default
+        :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
+        '''
+        if self.bot == None:
+            return
+        assert self.message != None, 'Original message not found'
+        
+        return (await self.bot.send_message(
+            text, chat_id=self.message.recipient.chat_id,
+            format=format, notify=notify, disable_link_preview=disable_link_preview,
+            keyboard=keyboard, attachments=attachments, reply_to=self.message.id
+        ))
     
 
     async def answer(self,
@@ -910,7 +971,7 @@ class Callback:
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        attachments: "list[Attachment] | None" = None
+        attachments: "List[Attachment] | Attachment | None" = None
     ):
         '''
         Answer the callback.
@@ -928,6 +989,13 @@ class Callback:
             'notification': notification,
             'message': None
         }
+        if keyboard == None and self.message != None:
+            keyboard = [i for i in self.message.body.attachments if i.type == 'inline_keyboard']
+            if len(keyboard) == 0:
+                keyboard = None
+            else:
+                keyboard = keyboard[0].payload
+
         if text != None:
             format = self.bot.default_format if format == 'default' else format
             body['message'] = utils.get_message_body(text, format, notify=notify, keyboard=keyboard, attachments=attachments)
@@ -938,19 +1006,21 @@ class Callback:
         )
         return await out.json()
     
+
     @property
     def user_id(self):
         return self.user.user_id
 
 
     @staticmethod
-    def from_json(data: dict, user_locale: "str | None" = None, bot = None) -> "Callback | None":
+    def from_json(data: dict, message: "dict | None", user_locale: "str | None" = None, bot = None) -> "Callback | None":
         if data == None: return None
         
         return Callback(
             bot,
             data['timestamp'],
             data['callback_id'],
+            Message.from_json(message) if message != None else None,
             User.from_json(data['user']),
             user_locale,
             data.get('payload', None)
