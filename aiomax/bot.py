@@ -568,7 +568,7 @@ class Bot(Router):
 
 
     async def edit_message(self,
-        message_id: int,
+        message_id: str,
         text: "str | None" = None,
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
@@ -614,7 +614,7 @@ class Bot(Router):
 
 
     async def delete_message(self,
-        message_id: int
+        message_id: str
     ):
         '''
         Allows you to delete a message in chat.
@@ -638,7 +638,7 @@ class Bot(Router):
 
 
     # async def get_message(self,
-    #     message_id: int
+    #     message_id: str
     # ) -> Message:
     #     '''
     #     Allows you to fetch message's info.
