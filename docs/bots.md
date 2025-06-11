@@ -218,7 +218,7 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `attachments: List[Attachment] | None` - список вложений, которые нужно прикрепить к сообщению
 
-### `Bot.edit_message(message_id: int, text: "str | None" = None, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
+### `Bot.edit_message(message_id: str, text: "str | None" = None, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | None = None)`
 
 Изменяет содержимое сообщения.
 
