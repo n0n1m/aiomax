@@ -53,7 +53,6 @@ class Bot(Router):
 
         self.storage = fsm.FSMStorage()
 
-
     async def get(self, *args, **kwargs):
         '''
         Sends a GET request to the API.
@@ -66,22 +65,12 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
         
-        request = await self.session.get(*args, params=params, **kwargs)
+        response = await self.session.get(*args, params=params, **kwargs)
 
-        if request.status == 200:
-            return request
+        if response.status == 200:
+            return response
     
-        if request.content_type == "text/plain":
-            text = await request.text()
-        elif request.content_type == "application/json":
-            text = await request.json()
-        else:
-            raise Exception("Unknown error")
-
-        if text.startswith("Invalid access_token"):
-            raise exceptions.InvalidToken()
-        else:
-            raise Exception(f"Unknown error: {text}")
+        raise await utils.get_exception(response)
     
     
     async def post(self, *args, **kwargs):
@@ -96,22 +85,12 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
        
-        request = await self.session.post(*args, params=params, **kwargs)
+        response = await self.session.get(*args, params=params, **kwargs)
 
-        if request.status == 200:
-            return request
+        if response.status == 200:
+            return response
     
-        if request.content_type == "text/plain":
-            text = await request.text()
-        elif request.content_type == "application/json":
-            text = await request.json()
-        else:
-            raise Exception("Unknown error")
-
-        if text.startswith("Invalid access_token"):
-            raise exceptions.InvalidToken()
-        else:
-            raise Exception(f"Unknown error: {text}")
+        raise await utils.get_exception(response)
     
     
     async def patch(self, *args, **kwargs):
@@ -126,22 +105,12 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
         
-        request = await self.session.patch(*args, params=params, **kwargs)
+        response = await self.session.get(*args, params=params, **kwargs)
 
-        if request.status == 200:
-            return request
+        if response.status == 200:
+            return response
     
-        if request.content_type == "text/plain":
-            text = await request.text()
-        elif request.content_type == "application/json":
-            text = await request.json()
-        else:
-            raise Exception("Unknown error")
-
-        if text.startswith("Invalid access_token"):
-            raise exceptions.InvalidToken()
-        else:
-            raise Exception(f"Unknown error: {text}")
+        raise await utils.get_exception(response)
     
     
     async def put(self, *args, **kwargs):
@@ -156,22 +125,12 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
         
-        request = await self.session.put(*args, params=params, **kwargs)
+        response = await self.session.get(*args, params=params, **kwargs)
 
-        if request.status == 200:
-            return request
+        if response.status == 200:
+            return response
     
-        if request.content_type == "text/plain":
-            text = await request.text()
-        elif request.content_type == "application/json":
-            text = await request.json()
-        else:
-            raise Exception("Unknown error")
-
-        if text.startswith("Invalid access_token"):
-            raise exceptions.InvalidToken()
-        else:
-            raise Exception(f"Unknown error: {text}")
+        raise await utils.get_exception(response)
     
     
     async def delete(self, *args, **kwargs):
@@ -186,22 +145,12 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
         
-        request = await self.session.delete(*args, params=params, **kwargs)
+        response = await self.session.get(*args, params=params, **kwargs)
 
-        if request.status == 200:
-            return request
+        if response.status == 200:
+            return response
     
-        if request.content_type == "text/plain":
-            text = await request.text()
-        elif request.content_type == "application/json":
-            text = await request.json()
-        else:
-            raise Exception("Unknown error")
-
-        if text.startswith("Invalid access_token"):
-            raise exceptions.InvalidToken()
-        else:
-            raise Exception(f"Unknown error: {text}")
+        raise await utils.get_exception(response)
     
 
     # send requests

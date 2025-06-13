@@ -1,6 +1,8 @@
 from typing import *
 from . import buttons
 from inspect import signature
+import aiohttp
+from . import exceptions
 
 def get_message_body(
     text: str,
@@ -65,3 +67,15 @@ def context_kwargs(func: Callable, **kwargs):
     kwargs = {kw: arg for kw, arg in kwargs.items() if kw in params}
 
     return kwargs
+
+async def get_exception(response: aiohttp.ClientResponse):
+    if response.content_type == "text/plain":
+        text = await response.text()
+    elif response.content_type == "application/json":
+        text = await response.json()
+    else:
+        return Exception(f"Unknown error: {await response.read()}")
+
+    if text.startswith("Invalid access_token"):
+        return exceptions.InvalidToken()
+    return Exception(f"Unknown error: {text}")

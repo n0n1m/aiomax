@@ -803,7 +803,7 @@ class Image:
         return Image(**data)
 
 
-class ImageRequestPayload:
+class ImageresponsePayload:
     def __init__(self,
         url: "str | None" = None,
         token: "str | None" = None
@@ -824,10 +824,10 @@ class ImageRequestPayload:
     
     
     @staticmethod
-    def from_json(data: dict) -> "ImageRequestPayload | None":
+    def from_json(data: dict) -> "ImageresponsePayload | None":
         if data == None: return None
 
-        return ImageRequestPayload(**data)
+        return ImageresponsePayload(**data)
     
 
     def as_dict(self):
