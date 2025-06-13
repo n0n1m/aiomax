@@ -6,3 +6,4 @@ from . import utils
 from . import filters
 from .cache import *
 from . import fsm
+from . import exceptions
