@@ -604,7 +604,7 @@ class Bot(Router):
         reply_to: "int | None" = None,
         notify: bool = True,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        # todo attachments
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> Message:
         '''
         Allows you to edit a message.
@@ -615,6 +615,7 @@ class Bot(Router):
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
         # error checking
         if text != None:
@@ -627,7 +628,7 @@ class Bot(Router):
         if format == 'default':
             format = self.default_format
             
-        body = utils.get_message_body(text, format, reply_to, notify, keyboard)
+        body = utils.get_message_body(text, format, reply_to, notify, keyboard, attachments)
 
         response = await self.put(
             f"https://botapi.max.ru/messages", params=params, json=body
