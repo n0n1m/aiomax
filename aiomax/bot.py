@@ -85,7 +85,7 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
        
-        response = await self.session.get(*args, params=params, **kwargs)
+        response = await self.session.post(*args, params=params, **kwargs)
 
         if response.status == 200:
             return response
@@ -105,7 +105,7 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
         
-        response = await self.session.get(*args, params=params, **kwargs)
+        response = await self.session.patch(*args, params=params, **kwargs)
 
         if response.status == 200:
             return response
@@ -125,7 +125,7 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
         
-        response = await self.session.get(*args, params=params, **kwargs)
+        response = await self.session.put(*args, params=params, **kwargs)
 
         if response.status == 200:
             return response
@@ -145,7 +145,7 @@ class Bot(Router):
         if 'params' in kwargs:
             del kwargs['params']
         
-        response = await self.session.get(*args, params=params, **kwargs)
+        response = await self.session.delete(*args, params=params, **kwargs)
 
         if response.status == 200:
             return response
