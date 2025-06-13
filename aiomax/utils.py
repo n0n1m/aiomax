@@ -53,7 +53,7 @@ def get_message_body(
             assert hasattr(at, 'as_dict'), 'Attachment must be an image, a video, an audio or a file'
             body['attachments'].append(at.as_dict())
 
-    if attachments == []:
+    if attachments == [] and 'attachments' not in body:
         body['attachments'] = []
 
     return body

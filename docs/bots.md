@@ -218,11 +218,11 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
-### `Bot.edit_message(message_id: int, text: "str | None" = None, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None)`
+### `Bot.edit_message(message_id: str, text: "str | None" = None, format: 'markdown' | 'html' | 'default' | None = 'default', notify: bool = True, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None)`
 
 Изменяет содержимое сообщения.
 
-- `message_id: int` - сообщение для изменения
+- `message_id: str` - сообщение для изменения
 
 - `text: "str | None"` - текст сообщения. Максимум 4000 символов. Необязательно
 
@@ -238,11 +238,11 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `attachments: List[Attachment] | Attachment | None` - новый список вложений. `None` не будет менять список файлов. Укажите `[]`, чтобы удалить все вложения - **это также удалит клавиатуру, если она есть**.
 
-### `Bot.delete_message(message_id: int)`
+### `Bot.delete_message(message_id: str)`
 
 Удаляет сообщение.
 
-- `message_id: int` - ID сообщения для удаления.
+- `message_id: str` - ID сообщения для удаления.
 
 ### `Bot.start_polling()`
 

@@ -117,3 +117,31 @@ class ChatTypeFilter:
 async def dialog(message: aiomax.Message):
     pass # Содержимое функции
 ```
+
+## Использование нескольких фильтров
+
+Вы можете указать несколько фильтров в декораторах, где они поддерживаются, передавая их через запятую.
+
+Это позволяет комбинировать различные условия без необходимости писать сложные фильтры или лямбда-выражения вручную.
+По умолчанию используется логика `AND`: обработчик сработает только в случае, если все фильтры вернули True.
+
+```py
+@bot.on_message(
+    lambda message: message.recipient.chat_id == 2409,
+    lambda message: not message.sender.is_bot
+)
+async def bot_check(message: aiomax.Message):
+    await bot.delete_message(message.id)
+```
+
+Если вы хотите, чтобы обработчик срабатывал если только один любой фильтр вернет True, укажите параметр `mode='or'`:
+
+```py
+@bot.on_message(
+    aiomax.filters.equals("привет"),
+    aiomax.filters.equals("hello"),
+    mode='or'
+)
+async def greetings(message: aiomax.Message):
+    await message.reply("Добрый день! Good afternoon!")
+```
