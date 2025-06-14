@@ -62,6 +62,8 @@ async def dialog(message: aiomax.Message):
 
 Вызывать фильтр не нужно.
 
+Не поддерживает операторы `&` и `|`.
+
 Поддерживает `Bot.on_message` и `Bot.on_button_callback`.
 
 ### `aiomax.filters.state(state: any)`

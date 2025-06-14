@@ -4,7 +4,7 @@ from typing import *
 
 class _OrFilter:
     '''
-    Never use something starting with _.
+    Class for using bit-wise or on filters
     '''
     def __init__(self, filter1, filter2):
         self.filter1 = filter1
@@ -15,9 +15,9 @@ class _OrFilter:
     
 
 class _AndFilter:
-    """
-    Don't.
-    """
+    '''
+    Class for using bit-wise and on filters
+    '''
     def __init__(self, filter1, filter2):
         self.filter1 = filter1
         self.filter2 = filter2 if not isinstance(filter2, str) else equals(filter2)
@@ -28,7 +28,7 @@ class _AndFilter:
 
 class _filter:
     '''
-    If you want to use this class, think again.
+    Superclass of other filters for support of bit-wise or and bit-wise and
     '''
 
     def __or__(self, other):
@@ -118,7 +118,7 @@ class regex(_filter):
             raise Exception(f"Class {type(obj).__name__} has no content")
 
 
-def papaya(obj: any): # no magic?
+def papaya(obj: any):
     '''
     Checks if the content's second-to-last word of the content is "папайя".
 
