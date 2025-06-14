@@ -549,6 +549,29 @@ class Message:
             views = data.get("stat", {}).get("views", None),
             url = data.get("url", None)
         )
+    
+
+    def resolve_mention(self, replies: bool = True, message_text: bool = True, skip_bot: bool = True) -> "int | None":
+        '''
+        Finds who was mentioned in this message and returns the user ID if found.
+
+        :param replies: Whether to check for this message's link author.
+        :param message_text: Whether to check for mentions in message text.
+        :param skip_bot: Whether to ignore mentions of the bot.
+        '''
+        if replies and self.link:
+            if self.link.type == 'reply':
+                if skip_bot and self.bot and self.link.sender.user_id == self.bot.id:
+                    pass
+                else:
+                    return self.link.sender.user_id
+            
+        if message_text:
+            for i in self.body.markup:
+                if i.type != 'user_mention': continue
+                if skip_bot and self.bot and i.user_id == self.bot.id: continue
+                if skip_bot and self.bot and i.user_link == self.bot.username: continue
+                return i.user_id
 
 
     async def send(self,

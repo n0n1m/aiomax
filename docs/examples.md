@@ -208,7 +208,7 @@ bot.run()
 
 - [Кнопки и клавиатуры](buttons.md)
 
-- [Классы](classes.md)
+- [Классы](types.md)
 
 - [Логирование](logging.md)
 

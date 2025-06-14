@@ -38,7 +38,7 @@ pip install git+https://github.com/dpnspn/aiomax.git
 
 - [Кнопки и клавиатуры](docs/buttons.md)
 
-- [Классы](docs/classes.md)
+- [Классы](docs/types.md)
 
 - [Логирование](docs/logging.md)
 

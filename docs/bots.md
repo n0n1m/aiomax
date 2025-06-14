@@ -112,11 +112,39 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `chat_id: int` - ID чата
 
-### `Bot.get_members(chat_id: int) -> List[User]`
+### `Bot.get_members(chat_id: int, count_per_iter: int = 100) -> AsyncIterator[User]`
 
-Возвращает список участников чата.
+Возвращает асинхронный итератор с пользователями в чате.
 
 - `chat_id: int` - ID чата
+
+- `count_per_iter: int` - Количество пользователей, запрашиваемое у API за один запрос. Не может быть больше `100`
+
+Примеры:
+
+```py
+# Вывод всех пользователей в чате в консоль последовательно
+async for user in bot.get_members(chat_id):
+    print(user.user_id, user.name)
+```
+
+```py
+# Выбор случайного пользователя в чате
+users = [i async for i in bot.get_members(chat_id)]
+print(random.choice(users).name)
+```
+
+### `Bot.get_memberships(chat_id: int, user_ids: List[int]) -> List[User] | User | None`
+
+Возвращает список пользователей из чата с указанными ID.
+
+- `chat_id: int` - ID чата
+
+- `user_ids: List[int]` - список ID пользователей
+
+Если `user_ids` - список, то возвращает список найденных в чате пользователей.
+
+Если `user_ids` - один элемент, то возвращает объект класса `User` с информацией о пользователе, либо `None`, если пользователя нет в чате.
 
 ### `Bot.add_members(chat_id: int, users: List[int])`
 
@@ -126,7 +154,7 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `users: List[int]` - список ID пользователей, которых нужно добавить в чат
 
-### `Bot.kick_member(chat_id: int, users: List[int])`
+### `Bot.kick_member(chat_id: int, user_id: int)`
 
 Удаляет пользователя из чата.
 

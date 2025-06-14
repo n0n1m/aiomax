@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name='aiomax',
-    version='2.2.2',
+    version='2.3.0',
     description='Asynchronous framework for Max Bot API ',
     author='oaa dpnspn',
     author_email='mbutsk@icloud.com',
