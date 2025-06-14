@@ -30,7 +30,6 @@ class _filter:
     '''
     Superclass of other filters for support of bit-wise or and bit-wise and
     '''
-
     def __or__(self, other):
         return _OrFilter(self, other)
     
