@@ -145,3 +145,27 @@ async def bot_check(message: aiomax.Message):
 async def greetings(message: aiomax.Message):
     await message.reply("Добрый день! Good afternoon!")
 ```
+
+Также во встроенных фильтрах поддерживаются операторы `&` и `|` для тех же целей.
+
+Эквивалент примера с `and` выше:
+
+```py
+@bot.on_message(
+    lambda message: message.recipient.chat_id == 2409 &
+    lambda message: not message.sender.is_bot
+)
+async def bot_check(message: aiomax.Message):
+    await bot.delete_message(message.id)
+```
+
+Эквивалент примера `or`:
+
+```py
+@bot.on_message(
+    aiomax.filters.equals("привет") |
+    aiomax.filters.equals("hello")
+)
+async def greetings(message: aiomax.Message):
+    await message.reply("Добрый день! Good afternoon!")
+```

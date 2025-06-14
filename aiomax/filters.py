@@ -2,7 +2,43 @@ from . import types
 import re
 from typing import *
 
-class equals:
+class _OrFilter:
+    '''
+    Never use something starting with _.
+    '''
+    def __init__(self, filter1, filter2):
+        self.filter1 = filter1
+        self.filter2 = filter2 if not isinstance(filter2, str) else equals(filter2)
+
+    def __call__(self, obj: any):
+        return self.filter1(obj) or self.filter2(obj)
+    
+
+class _AndFilter:
+    """
+    Don't.
+    """
+    def __init__(self, filter1, filter2):
+        self.filter1 = filter1
+        self.filter2 = filter2 if not isinstance(filter2, str) else equals(filter2)
+
+    def __call__(self, obj: any):
+        return self.filter1(obj) and self.filter2(obj)
+
+
+class _filter:
+    '''
+    If you want to use this class, think again.
+    '''
+
+    def __or__(self, other):
+        return _OrFilter(self, other)
+    
+    def __and__(self, other):
+        return _AndFilter(self, other)
+
+
+class equals(_filter):
     def __init__(self, content: str):
         '''
         :param content: Content to check
@@ -18,7 +54,7 @@ class equals:
             raise Exception(f"Class {type(object).__name__} has no content")
 
 
-class has:
+class has(_filter):
     def __init__(self, content: str):
         '''
         :param content: Content to check
@@ -34,7 +70,7 @@ class has:
             raise Exception(f"Class {type(object).__name__} has no content")
 
 
-class startswith:
+class startswith(_filter):
     def __init__(self, prefix: str):
         '''
         :param prefix: Prefix to check
@@ -50,7 +86,7 @@ class startswith:
             raise Exception(f"Class {type(object).__name__} has no content")
         
 
-class endswith:
+class endswith(_filter):
     def __init__(self, suffix: str):
         '''
         :param suffix: Suffix to check
@@ -66,7 +102,7 @@ class endswith:
             raise Exception(f"Class {type(object).__name__} has no content")
         
 
-class regex:
+class regex(_filter):
     def __init__(self, pattern: str):
         '''
         :param pattern: Regex pattern to check
@@ -82,7 +118,7 @@ class regex:
             raise Exception(f"Class {type(obj).__name__} has no content")
 
 
-def papaya(obj: any):
+def papaya(obj: any): # no magic?
     '''
     Checks if the content's second-to-last word of the content is "папайя".
 
@@ -95,7 +131,7 @@ def papaya(obj: any):
     else:
         raise Exception(f"Class {type(object).__name__} has no content")
 
-class state:
+class state(_filter):
     def __init__(self, state: Any):
         '''
         :param state: State to check
