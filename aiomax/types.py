@@ -60,7 +60,9 @@ class User:
 
 
     def __eq__(self, other):
-        return self.user_id == other.user_id
+        if isinstance(other, User):
+            return self.user_id == other.user_id
+        return False
 
 
     @staticmethod
@@ -373,7 +375,9 @@ class MessageRecipient:
         return f"{type(self).__name__}(chat_id={self.chat_id!r}, chat_type={self.chat_type!r})"
     
     def __eq__(self, other):
-        return self.chat_id == other.chat_id
+        if isinstance(other, MessageRecipient):
+            return self.chat_id == other.chat_id
+        return False
 
     @staticmethod
     def from_json(data: dict) -> "MessageRecipient":
@@ -521,10 +525,9 @@ class Message:
         return self.body.text
     
     def __eq__(self, other):
-        if not isinstance(other, Message):
-            # return other.__eq__(self) # le excuse le me
-            return False
-        return self.id == other.id
+        if isinstance(other, Message):
+            return self.id == other.id
+        return False
     
     @property
     def id(self) -> str:
@@ -894,7 +897,9 @@ class Chat:
         self.chat_message_id: "str | None" = chat_message_id
 
     def __eq__(self, other):
-        return self.chat_id == other.chat_id
+        if isinstance(other, Chat):
+            return self.chat_id == other.chat_id
+        return False
 
     def __repr__(self):
         return f"{self.__class__.__name__}(chat_id={self.chat_id!r}, title={self.title!r})"
