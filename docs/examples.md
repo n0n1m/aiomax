@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
 - [Кнопки и клавиатуры](buttons.md)
 
-- [Классы](classes.md)
+- [Классы](types.md)
 
 - [Логирование](logging.md)
 

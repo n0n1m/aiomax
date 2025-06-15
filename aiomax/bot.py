@@ -353,19 +353,50 @@ class Bot(Router):
         return users
     
 
-    async def get_members(self, chat_id: int) -> List[User]:
+    async def get_memberships(self, chat_id: int, user_ids: "List[int] | int") -> "List[User] | User | None":
         '''
-        Returns a list of members in the chat.
-
-        :param chat_id: The ID of the chat.
+        Returns a list of memberships in the chat for the users with the specified ID.
         '''
-
-        response = await self.get(f"https://botapi.max.ru/chats/{chat_id}/members")
+        params = {
+            'user_ids': user_ids if type(user_ids) == list else [user_ids]
+        }
+        response = await self.get(f"https://botapi.max.ru/chats/{chat_id}/members", params=params)
 
         users = [User.from_json(i) for i in (await response.json())['members']]
 
-        return users
-    
+        if type(user_ids) == list:
+            return users
+        else:
+            return users[0] if len(users) > 0 else None
+
+
+    async def get_members(self, chat_id: int, count_per_iter: int = 100) -> AsyncIterator[User]:
+        '''
+        Returns an asynchronous interator of members in the chat.
+
+        :param chat_id: The ID of the chat.
+        :param count_per_iter: The number of users to fetch per request.
+        '''
+        marker = None
+        
+        while True:
+            params = {
+                "count": count_per_iter,
+                "marker": marker,
+            }
+            params = {k: v for k, v in params.items() if v}
+            response = await self.get(f"https://botapi.max.ru/chats/{chat_id}/members", params=params)
+            data = await response.json()
+
+            users = [User.from_json(i) for i in data['members']]
+
+            for user in users:
+                yield user
+
+            marker = data.get('marker', None)
+            if marker == None:
+                break
+
     
     async def add_members(self,
         chat_id: int,
@@ -554,7 +585,6 @@ class Bot(Router):
         '''
         # error checking
         text = str(text)
-        assert len(text) < 4000, "Message must be less than 4000 characters"
         assert chat_id or user_id, "Either chat_id or user_id must be provided"
         assert not (chat_id and user_id), "Both chat_id and user_id cannot be provided"
 
@@ -604,7 +634,7 @@ class Bot(Router):
         reply_to: "int | None" = None,
         notify: bool = True,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
-        # todo attachments
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> Message:
         '''
         Allows you to edit a message.
@@ -615,11 +645,8 @@ class Bot(Router):
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
         :param keyboard: An inline keyboard to attach to the message
+        :param attachments: List of attachments
         '''
-        # error checking
-        if text != None:
-            assert len(text) < 4000, "Message must be less than 4000 characters"
-
         # editing
         params = {
             "message_id": message_id
@@ -627,7 +654,7 @@ class Bot(Router):
         if format == 'default':
             format = self.default_format
             
-        body = utils.get_message_body(text, format, reply_to, notify, keyboard)
+        body = utils.get_message_body(text, format, reply_to, notify, keyboard, attachments)
 
         response = await self.put(
             f"https://botapi.max.ru/messages", params=params, json=body

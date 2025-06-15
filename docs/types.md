@@ -192,6 +192,16 @@
 
 Возвращает `Message.body.text`.
 
+### `Message.resolve_mention(replies: bool = True, message_text: bool = True, skip_bot: bool = True) -> int`
+
+Возвращает ID пользователя, которого упомянул пользователь через ответ на сообщение или в тексте.
+
+- `replies: bool` - учитывать ли автора отвеченного сообщения при проверке. `True` по умолчанию
+
+- `message_text: bool` - учитывать ли упоминания в тексте при проверке. `True` по умолчанию
+
+- `skip_bot: bool` - пропускать ли упоминания бота. `True` по умолчанию
+
 ### `Message.send(text: str, format: Literal['html', 'markdown', 'default'] | None = 'default', notify: bool = True, disable_link_preview: bool = False, keyboard: List[List[buttons.Button]] | buttons.KeyboardBuilder | None = None, attachments: List[Attachment] | Attachment | None = None) -> Message`
 
 Отправляет сообщение в чат, в который было отправлено сообщение.
@@ -240,7 +250,7 @@
 
 - `attachments: List[Attachment] | Attachment | None` - список вложений, которые нужно прикрепить к сообщению
 
-### `Message.delete()
+### `Message.delete()`
 
 Удаляет это сообщение.
 
