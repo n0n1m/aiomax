@@ -244,9 +244,11 @@ FSM хранилище, присваиваемое боту. Подробнее 
 
 - `message_id: str` - ID сообщения для удаления.
 
-### `Bot.start_polling()`
+### `Bot.start_polling(session: "aiohttp.ClientSession | None" = None)`
 
 Начинает Long polling. Может использоваться обёрнутым в `asyncio.run()` в конце программы для запуска бота.
+
+- `session: aiohttp.ClientSession | None` - aiohttp сессия. Если `None`, создаётся сама
 
 ### `Bot.run()`
 

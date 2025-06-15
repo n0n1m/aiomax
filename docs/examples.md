@@ -200,6 +200,35 @@ async def write_surname(message: aiomax.Message, cursor: fsm.FSMCursor):
 bot.run()
 ```
 
+## Бот с использованием Proxy
+
+```py
+import aiomax
+from aiomax import fsm
+import aiohttp
+import asyncio
+
+bot = aiomax.Bot('TOKEN')
+
+proxy_url = 'http://url:port'
+proxy_auth = aiohttp.BasicAuth("login", "pasword") # Аутенфикация прокси
+
+# Получение и вывод страны
+@bot.on_command("example")
+async def test(ctx: aiomax.CommandContext):
+    response = await bot.session.get("http://ip-api.com/json/")
+    data = await response.json()
+    await ctx.send(f"Country: {data.get('country')}")
+
+
+async def main():
+    session = aiohttp.ClientSession(proxy=proxy_url, proxy_auth=proxy_auth)
+    await bot.start_polling(session)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 ## Остальная документация
 
 - [Функции класса `Bot`](bots.md)

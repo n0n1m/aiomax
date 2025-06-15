@@ -187,7 +187,7 @@ class Bot(Router):
         :param description: Bot description
         :param commands: Commands supported by the bot. To remove all commands,
         pass an empty list.
-        :param photo: Bot profile picture
+        :param photo: Bot profile pictur
         '''
         if commands:
             commands = [i.as_dict() for i in commands]   
@@ -899,13 +899,18 @@ class Bot(Router):
                 asyncio.create_task(i(payload))
 
 
-    async def start_polling(self):
+    async def start_polling(self, session: "aiohttp.ClientSession | None" = None):
         '''
         Starts polling.
+
+        :param session: Custom aiohttp client session
         '''
         self.polling = True
 
-        async with aiohttp.ClientSession() as session:
+        if not session:
+            session = aiohttp.ClientSession()
+
+        async with session:
             self.session = session
 
             # self info (this will cache the info automatically)
@@ -932,8 +937,8 @@ class Bot(Router):
         self.polling = False
 
 
-    def run(self):
+    def run(self, *args, **kwargs):
         '''
         Shortcut for `asyncio.run(Bot.start_polling())`
         '''
-        asyncio.run(self.start_polling())
+        asyncio.run(self.start_polling(*args, **kwargs))
