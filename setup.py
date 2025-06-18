@@ -20,9 +20,6 @@ setup(
     license="MIT License, see LICENSE.md file",
     long_description=readme(),
     long_description_content_type='text/markdown',
-    project_urls={
-        "GitBook docs": "https://dpnspn.gitbook.io/aiomax"
-    },
     keywords = [
         "bot",
         "api",
