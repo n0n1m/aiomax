@@ -12,13 +12,13 @@
 pip install aiomax
 ```
 
-Чтобы установить git-версию aiomax (возможны баги и недоделанность), выполните команду:
+Чтобы установить git-версию aiomax (возможны баги и нестабильность), выполните команду:
 
 ```bash
 pip install git+https://github.com/dpnspn/aiomax.git
 ```
 
-А затем взгляните на [примеры](docs/examples.md) ботов.
+Документация и примеры ботов [тут](https://github.com/dpnspn/aiomax/wiki)
 
 ## Aiomax Community
 
@@ -26,21 +26,3 @@ pip install git+https://github.com/dpnspn/aiomax.git
 [Telegram](https://t.me/aiomax_chat) / [Max](https://max.ru/join/45DmBRwDNvcZVqYvf_cSCPu-_DuvYa5VmuQ4K2cmC_Q)
 
 Новости о aiomax и Max Bot API выходят на телеграм канале [Aiomax Changelog](https://t.me/aiomax_cl)
-
-## Документация
-
-- [Функции класса `Bot`](docs/bots.md)
-
-- [Декораторы и хендлеры](docs/decorators.md)
-
-- [Кнопки и клавиатуры](docs/buttons.md)
-
-- [Классы](docs/types.md)
-
-- [Логирование](docs/logging.md)
-
-- [Фильтры](docs/filters.md)
-
-- [Роутеры](docs/routers.md)
-
-- [FSM (Конечные автоматы)](docs/fsm.md)

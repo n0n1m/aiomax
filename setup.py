@@ -26,6 +26,9 @@ setup(
         "asyncio",
         "max"
     ],
+    project_urls={
+        "Docs": "https://github.com/dpnspn/aiomax/wiki"
+    },
     classifiers = [
         "License :: OSI Approved :: MIT License",
         "Framework :: AsyncIO",
