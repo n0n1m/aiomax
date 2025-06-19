@@ -72,10 +72,12 @@ async def get_exception(response: aiohttp.ClientResponse):
     if response.content_type == "text/plain":
         text = await response.text()
     elif response.content_type == "application/json":
-        text = await response.json()
+        text = (await response.json())['code']
     else:
         return Exception(f"Unknown error: {await response.read()}")
 
     if text.startswith("Invalid access_token"):
         return exceptions.InvalidToken()
+    if text == "attachment.not.ready":
+        return exceptions.AttachmentNotReady()
     return Exception(f"Unknown error: {text}")

@@ -204,9 +204,6 @@ class Bot(Router):
 
         response = await self.patch(f"https://botapi.max.ru/me", json=payload)
         data = await response.json()
-
-        if response.status != 200:
-            raise Exception(data['message'])
     
         # caching info
         if name:
@@ -601,30 +598,18 @@ class Bot(Router):
 
         body = utils.get_message_body(text, format, reply_to, notify, keyboard, attachments)
 
-        response = await self.post(
-            f"https://botapi.max.ru/messages", params=params, json=body
-        )
-        if response.status != 200:
-            exception = Exception(await response.text())
-            retry = False
-
-            try:
-                err_json = await response.json()
-                if err_json['code'] == 'attachment.not.ready':
-                    retry = True
-            except:
-                raise exception
-
-            if retry:
-                await asyncio.sleep(1)
-                return await self.send_message(text=text, chat_id=chat_id, user_id=user_id, format=format, reply_to=reply_to, notify=notify, disable_link_preview=disable_link_preview, attachments=attachments)
-            else:
-                raise exception
+        try:
+            response = await self.post(
+                f"https://botapi.max.ru/messages", params=params, json=body
+            )
+            json = await response.json()
+            message = Message.from_json(json['message'])
+            message.bot = self
+            return message
         
-        json = await response.json()
-        message = Message.from_json(json['message'])
-        message.bot = self
-        return message
+        except exceptions.AttachmentNotReady:
+            await asyncio.sleep(1)
+            return await self.send_message(text=text, chat_id=chat_id, user_id=user_id, format=format, reply_to=reply_to, notify=notify, disable_link_preview=disable_link_preview, attachments=attachments)
 
 
     async def edit_message(self,
@@ -659,8 +644,6 @@ class Bot(Router):
         response = await self.put(
             f"https://botapi.max.ru/messages", params=params, json=body
         )
-        if response.status != 200:
-            raise Exception(await response.text())
         
         json = await response.json()
         if not json['success']:
@@ -686,8 +669,6 @@ class Bot(Router):
         response = await self.delete(
             f"https://botapi.max.ru/messages", params=params
         )
-        if response.status != 200:
-            raise Exception(await response.text())
         
         json = await response.json()
         if not json['success']:
