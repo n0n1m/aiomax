@@ -1,4 +1,6 @@
 from typing import *
+
+from aiomax.types import Attachment
 from . import buttons
 from inspect import signature
 import aiohttp
