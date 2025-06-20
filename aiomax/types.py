@@ -791,6 +791,16 @@ class CommandContext:
         return self.sender.user_id
 
 
+class CommandHandler:
+    def __init__(
+        self,
+        call: Callable,
+        as_message: bool = False,
+    ):
+        self.call = call
+        self.as_message: bool = as_message
+
+
 class Handler:
     def __init__(
         self,

@@ -32,7 +32,7 @@ t
             'user_added': [],
             'user_removed': []
         } # handlers in this router
-        self._commands: dict[str, list] = {} # commands in this router
+        self._commands: dict[str, List[CommandHandler]] = {} # commands in this router
         self.case_sensitive: bool = case_sensitive
         self.parent = None # Parent bot of this router
         self.routers: List["Router"] = []
@@ -99,7 +99,7 @@ t
     
 
     @property
-    def commands(self) -> dict[str, list]:
+    def commands(self) -> dict[str, List[CommandHandler]]:
         '''
         Returns all commands in this and all the child routers.
         '''
@@ -277,9 +277,13 @@ t
         return decorator
     
 
-    def on_command(self, name: "str | None" = None, aliases: List[str] = []):
+    def on_command(self, name: "str | None" = None, aliases: List[str] = [], as_message: bool = False):
         '''
         Decorator for receiving commands.
+
+        :param name: Command name
+        :param aliases: List of alternative names for this command
+        :param as_message: Whether to trigger on_message decorator when this command is invoked
         '''
         def decorator(func): 
             # command name
@@ -292,7 +296,7 @@ t
             check_name = command_name.lower() if not self.case_sensitive else command_name
             if check_name not in self._commands:
                 self._commands[check_name] = []
-            self._commands[check_name].append(func)
+            self._commands[check_name].append(CommandHandler(func, as_message))
 
             # aliases
             for i in aliases:
@@ -301,7 +305,7 @@ t
                 check_name = i.lower() if not self.case_sensitive else i
                 if check_name not in self._commands:
                     self._commands[check_name] = []
-                self._commands[check_name].append(func)
+                self._commands[check_name].append(CommandHandler(func, as_message))
             return func
         return decorator
     
