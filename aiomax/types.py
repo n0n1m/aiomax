@@ -1034,7 +1034,7 @@ class Callback:
             else:
                 keyboard = keyboard[0].payload
 
-        if text != None:
+        if text != None or attachments != None or keyboard != None:
             format = self.bot.default_format if format == 'default' else format
             body['message'] = utils.get_message_body(text, format, notify=notify, keyboard=keyboard, attachments=attachments)
 
