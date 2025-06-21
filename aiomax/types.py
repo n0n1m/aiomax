@@ -113,6 +113,14 @@ class MediaPayload:
     @staticmethod
     def from_json(data: dict) -> "MediaPayload | None":
         return MediaPayload(url=data.get('url'), token=data.get('token'))
+    
+    def as_dict(self) -> dict:
+        data = {}
+        if self.url:
+            data['url'] = self.url
+        if self.token:
+            data['token'] = self.token
+        return data
 
 
 class StickerPayload:
@@ -151,7 +159,7 @@ class ContactPayload:
 
 class PhotoPayload(MediaPayload):
     def __init__(self,
-        token: str,
+        token: "str | None" = None,
         url: "str | None" = None,
         photo_id: "int | None" = None
     ):
@@ -166,36 +174,38 @@ class PhotoPayload(MediaPayload):
 
 class PhotoAttachment(Attachment):
     def __init__(self,
-        payload: PhotoPayload
+        url: "str | None" = None,
+        token: "str | None" = None
     ):
         super().__init__("image")
-        self.payload: PhotoPayload = payload
+        self.payload: PhotoPayload = PhotoPayload(token=token, url=url)
 
 
     @staticmethod
     def from_json(data: dict) -> "PhotoAttachment | None":
-        return PhotoAttachment(
-            PhotoPayload.from_json(data['payload'])
-        )
+        photo = PhotoAttachment(None)
+        photo.payload = PhotoPayload.from_json(data['payload'])
+        return photo
     
     
     def as_dict(self):
         return {
             'type': self.type,
-            'payload': {'token': self.payload.token}
+            'payload': self.payload.as_dict()
         }
 
 
 class VideoAttachment(Attachment):
     def __init__(self,
-        payload: MediaPayload,
+        token: "str | None" = None,
+        url: "str | None" = None,
         thumbnail: "str | None" = None,
         width: "int | None" = None,
         height: "int | None" = None,
         duration: "int | None" = None
     ):
         super().__init__("video")
-        self.payload: MediaPayload = payload
+        self.payload = MediaPayload(url=url, token=token)
         self.thumbnail: "str | None" = thumbnail
         self.width: "int | None" = width
         self.height: "int | None" = height
@@ -205,7 +215,8 @@ class VideoAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "VideoAttachment | None":
         return VideoAttachment(
-            MediaPayload.from_json(data['payload']),
+            data['payload'].get('token', None),
+            data['payload'].get('url', None),
             data.get('thumbnail', None),
             data.get('width', None),
             data.get('height', None),
@@ -216,7 +227,7 @@ class VideoAttachment(Attachment):
     def as_dict(self):
         return {
             'type': self.type,
-            'payload': {'token': self.payload.token}
+            'payload': self.payload.as_dict()
         }
 
 
@@ -360,6 +371,13 @@ class LocationAttachment(Attachment):
             data['latitude'],
             data['longitude']
         )
+    
+    def as_dict(self) -> dict:
+        return {
+            "type": "location",
+            "latitude": self.latitude,
+            "longitude": self.longitude
+        }
 
 
 class InlineKeyboardAttachment(Attachment):
@@ -646,7 +664,7 @@ class Message:
     
 
     async def edit(self,
-        text: "str | NO | None" = None,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
@@ -1279,10 +1297,3 @@ class UserMembershipPayload:
             data.get('is_channel', False),
             data.get('inviter_id', data.get('admin_id', None))
         )
-
-
-class NO:
-    '''
-    Class for telling the library not to do something.
-    Does not need to be called/initialized.
-    '''

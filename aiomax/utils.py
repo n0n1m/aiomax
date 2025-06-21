@@ -1,13 +1,13 @@
 from typing import *
 
-from aiomax.types import Attachment, NO
+from aiomax.types import Attachment
 from . import buttons
 from inspect import signature
 import aiohttp
 from . import exceptions
 
 def get_message_body(
-    text: "str | NO | None",
+    text: "str | None" = None,
     format: "Literal['markdown', 'html'] | None" = None,
     reply_to: "int | None" = None,
     notify: bool = True,
@@ -18,7 +18,7 @@ def get_message_body(
     Returns the body of the message as json.
     '''
     body = {
-        "text": text if not text == NO else "",
+        "text": text,
         "format": format,
         "notify": notify
     }

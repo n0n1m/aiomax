@@ -520,7 +520,7 @@ class Bot(Router):
         '''
         raw_photo = await self.upload(data, 'image')
         token = list(raw_photo['photos'].values())[0]['token']
-        return PhotoAttachment(PhotoPayload(token=token))
+        return PhotoAttachment(token=token)
     
 
     async def upload_video(self, data: "BinaryIO | str") -> VideoAttachment:
@@ -531,7 +531,7 @@ class Bot(Router):
         '''
         raw_video = await self.upload(data, 'video')
         token = raw_video['token']
-        return VideoAttachment(MediaPayload(token=token))
+        return VideoAttachment(token=token)
     
 
     async def upload_audio(self, data: "BinaryIO | str") -> AudioAttachment:
@@ -615,7 +615,7 @@ class Bot(Router):
 
     async def edit_message(self,
         message_id: str,
-        text: "str | NO | None" = None,
+        text: "str | None" = None,
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
@@ -954,7 +954,7 @@ class Bot(Router):
                     await asyncio.sleep(3)
 
                 except asyncio.exceptions.CancelledError:
-                    exit()
+                    break # Python 3.9 throws an error when exit() is used
 
         self.session = None
         self.polling = False
