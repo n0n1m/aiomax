@@ -741,23 +741,6 @@ class Bot(Router):
             if self.cache:
                 self.cache.add_message(message)
 
-            # handling
-            handled = False
-
-            for handler in self.handlers['message_created']:
-                filters = [filter(message) for filter in handler.filters]
-
-                if all(filters):
-                    kwargs = utils.context_kwargs(handler.call, cursor=cursor)
-                    asyncio.create_task(handler.call(message, **kwargs))
-                    handled = True
-            
-            # handle logs
-            if handled:
-                bot_logger.debug(f"Message \"{message.body.text}\" handled")
-            else:
-                bot_logger.debug(f"Message \"{message.body.text}\" not handled")
-
             # handling commands
             prefixes = self.command_prefixes if type(self.command_prefixes) != str\
                 else [self.command_prefixes]
@@ -788,13 +771,37 @@ class Bot(Router):
                     bot_logger.debug(f"Command \"{name}\" not handled")
                     return
 
+                block = False
+                
                 for i in self.commands[check_name]:
-                    kwargs = utils.context_kwargs(i, cursor=cursor)
-                    asyncio.create_task(i(CommandContext(
+                    kwargs = utils.context_kwargs(i.call, cursor=cursor)
+                    asyncio.create_task(i.call(CommandContext(
                         self, message, name, args
                     ), **kwargs))
 
+                    if not i.as_message:
+                        block = True
+
                 bot_logger.debug(f"Command \"{name}\" handled")
+                if block:
+                    return
+
+            # handling
+            handled = False
+
+            for handler in self.handlers['message_created']:
+                filters = [filter(message) for filter in handler.filters]
+
+                if all(filters):
+                    kwargs = utils.context_kwargs(handler.call, cursor=cursor)
+                    asyncio.create_task(handler.call(message, **kwargs))
+                    handled = True
+            
+            # handle logs
+            if handled:
+                bot_logger.debug(f"Message \"{message.body.text}\" handled")
+            else:
+                bot_logger.debug(f"Message \"{message.body.text}\" not handled")
 
 
         if update_type == 'message_edited': 

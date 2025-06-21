@@ -1,4 +1,6 @@
 from typing import *
+
+from aiomax.types import Attachment, NO
 from . import buttons
 from inspect import signature
 import aiohttp
@@ -15,9 +17,8 @@ def get_message_body(
     '''
     Returns the body of the message as json.
     '''
-    is_no = hasattr(text, '__name__') and text.__name__ == 'NO'
     body = {
-        "text": text if not is_no else "",
+        "text": text if not text == NO else "",
         "format": format,
         "notify": notify
     }

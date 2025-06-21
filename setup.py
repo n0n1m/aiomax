@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name='aiomax',
-    version='2.4.1',
+    version='2.5.1',
     description='Asynchronous framework for Max Bot API ',
     author='oaa dpnspn',
     author_email='mbutsk@icloud.com',
@@ -37,6 +37,7 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Communications :: Chat",
     ]
