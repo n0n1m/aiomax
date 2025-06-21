@@ -73,8 +73,12 @@ def context_kwargs(func: Callable, **kwargs):
 async def get_exception(response: aiohttp.ClientResponse):
     if response.content_type == "text/plain":
         text = await response.text()
+        description = None
+
     elif response.content_type == "application/json":
         text = (await response.json())['code']
+        description = (await response.json())['message']
+        
     else:
         return Exception(f"Unknown error: {await response.read()}")
 
@@ -82,4 +86,7 @@ async def get_exception(response: aiohttp.ClientResponse):
         return exceptions.InvalidToken()
     if text == "attachment.not.ready":
         return exceptions.AttachmentNotReady()
+    
+    if description:
+        return Exception(f"{text}: {description}")
     return Exception(f"Unknown error: {text}")
