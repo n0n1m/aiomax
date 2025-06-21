@@ -117,16 +117,22 @@ class MediaPayload:
 
 class StickerPayload:
     def __init__(self,
-        url: str,
         code: str,
+        url: "str | None" = None,
     ):
-        self.url: str = url
+        self.url: "str | None" = url
         self.code: str = code
 
 
     @staticmethod
     def from_json(data: dict) -> "StickerPayload | None":
-        return StickerPayload(data['url'], data['code'])
+        return StickerPayload(data['code'], data['url'])
+    
+    def as_dict(self) -> dict:
+        data = {'code': self.code}
+        if self.url is not None:
+            data['url'] = self.url
+        return data
 
 
 class ContactPayload:
@@ -269,23 +275,31 @@ class FileAttachment(Attachment):
 
 class StickerAttachment(Attachment):
     def __init__(self,
-        payload: StickerPayload,
+        code: str,
         width: "int | None" = None,
         height: "int | None" = None
     ):
         super().__init__("sticker")
-        self.payload: StickerPayload = payload
+        self.payload = StickerPayload(code)
         self.width: int = width
         self.height: int = height
 
     
     @staticmethod
     def from_json(data: dict) -> "StickerAttachment | None":
-        return StickerAttachment(
-            StickerPayload.from_json(data['payload']),
+        sticker = StickerAttachment(
+            None,
             data.get('width', None),
             data.get('height', None)
         )
+        sticker.payload = StickerPayload.from_json(data['payload'])
+        return sticker
+    
+    def as_dict(self) -> dict:
+        return {
+            'type': 'sticker',
+            'payload': self.payload.as_dict()
+        }
 
 
 class ContactAttachment(Attachment):
@@ -578,7 +592,7 @@ class Message:
 
 
     async def send(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -605,7 +619,7 @@ class Message:
 
 
     async def reply(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -632,16 +646,17 @@ class Message:
     
 
     async def edit(self,
-        text: str,
+        text: "str | NO | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> "Message":
         '''
         Edit a message
 
-        :param text: Message text. Up to 4000 characters
+        :param text: Message text. Up to 4000 characters (pass `NO` to remove)
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default
@@ -653,7 +668,8 @@ class Message:
         return (await self.bot.edit_message(
             self.id, text,
             format=format, notify=notify,
-            keyboard=keyboard, reply_to=reply_to
+            keyboard=keyboard, reply_to=reply_to,
+            attachments=attachments
         ))
     
     async def delete(self):
@@ -738,7 +754,7 @@ class CommandContext:
 
 
     async def send(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -763,7 +779,7 @@ class CommandContext:
 
 
     async def reply(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -1253,3 +1269,10 @@ class UserMembershipPayload:
             data.get('is_channel', False),
             data.get('inviter_id', data.get('admin_id', None))
         )
+
+
+class NO:
+    '''
+    Class for telling the library not to do something.
+    Does not need to be called/initialized.
+    '''

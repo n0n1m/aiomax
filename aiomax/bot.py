@@ -581,7 +581,6 @@ class Bot(Router):
         :param attachments: List of attachments
         '''
         # error checking
-        text = str(text)
         assert chat_id or user_id, "Either chat_id or user_id must be provided"
         assert not (chat_id and user_id), "Both chat_id and user_id cannot be provided"
 
@@ -603,6 +602,8 @@ class Bot(Router):
                 f"https://botapi.max.ru/messages", params=params, json=body
             )
             json = await response.json()
+            if not json.get('success', True):
+                raise await utils.get_exception(response)
             message = Message.from_json(json['message'])
             message.bot = self
             return message
@@ -614,7 +615,7 @@ class Bot(Router):
 
     async def edit_message(self,
         message_id: str,
-        text: "str | None" = None,
+        text: "str | NO | None" = None,
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
@@ -625,7 +626,7 @@ class Bot(Router):
         Allows you to edit a message.
         
         :param message_id: ID of the message to edit
-        :param text: Message text. Up to 4000 characters
+        :param text: Message text. Up to 4000 characters (pass `NO` to remove)
         :param format: Message format. Bot.default_format by default
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
@@ -641,16 +642,20 @@ class Bot(Router):
             
         body = utils.get_message_body(text, format, reply_to, notify, keyboard, attachments)
 
-        response = await self.put(
-            f"https://botapi.max.ru/messages", params=params, json=body
-        )
+        try:
+            response = await self.put(
+                f"https://botapi.max.ru/messages", params=params, json=body
+            )
+            json = await response.json()
+            if not json.get('success', True):
+                raise await utils.get_exception(response)
+            message = Message.from_json(json)
+            message.bot = self
+            return message
         
-        json = await response.json()
-        if not json['success']:
-            raise Exception(json['message'])
-        message = Message.from_json(json)
-        message.bot = self
-        return message
+        except exceptions.AttachmentNotReady:
+            await asyncio.sleep(1)
+            return await self.edit_message(message_id=message_id, text=text, format=format, reply_to=reply_to, notify=notify, keyboard=keyboard, attachments=attachments)
 
 
     async def delete_message(self,
@@ -940,6 +945,9 @@ class Bot(Router):
                 except Exception as e:
                     bot_logger.exception(e)
                     await asyncio.sleep(3)
+
+                except asyncio.exceptions.CancelledError:
+                    exit()
 
         self.session = None
         self.polling = False

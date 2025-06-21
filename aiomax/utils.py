@@ -5,7 +5,7 @@ import aiohttp
 from . import exceptions
 
 def get_message_body(
-    text: str,
+    text: "str | NO | None",
     format: "Literal['markdown', 'html'] | None" = None,
     reply_to: "int | None" = None,
     notify: bool = True,
@@ -15,8 +15,9 @@ def get_message_body(
     '''
     Returns the body of the message as json.
     '''
+    is_no = hasattr(text, '__name__') and text.__name__ == 'NO'
     body = {
-        "text": text,
+        "text": text if not is_no else "",
         "format": format,
         "notify": notify
     }
@@ -72,12 +73,13 @@ async def get_exception(response: aiohttp.ClientResponse):
     if response.content_type == "text/plain":
         text = await response.text()
     elif response.content_type == "application/json":
-        text = (await response.json())['code']
+        resp_json = await response.json()
+        text = resp_json.get('code') or resp_json.get('message')
     else:
         return Exception(f"Unknown error: {await response.read()}")
 
     if text.startswith("Invalid access_token"):
         return exceptions.InvalidToken()
-    if text == "attachment.not.ready":
+    if text in ("attachment.not.ready", 'Key: errors.process.attachment.video.not.processed'):
         return exceptions.AttachmentNotReady()
     return Exception(f"Unknown error: {text}")
