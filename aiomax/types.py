@@ -694,7 +694,7 @@ class Message:
         '''
         Edit a message
 
-        :param text: Message text. Up to 4000 characters (pass `NO` to remove)
+        :param text: Message text. Up to 4000 characters
         :param format: Message format. Bot.default_format by default
         :param notify: Whether to notify users about the message. True by default.
         :param disable_link_preview: Whether to disable link preview. False by default

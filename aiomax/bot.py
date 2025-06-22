@@ -627,7 +627,7 @@ class Bot(Router):
         Allows you to edit a message.
         
         :param message_id: ID of the message to edit
-        :param text: Message text. Up to 4000 characters (pass `NO` to remove)
+        :param text: Message text. Up to 4000 characters
         :param format: Message format. Bot.default_format by default
         :param reply_to: ID of the message to reply to. Optional
         :param notify: Whether to notify users about the message. True by default.
