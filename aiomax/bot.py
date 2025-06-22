@@ -543,7 +543,7 @@ class Bot(Router):
         '''
         raw_audio = await self.upload(data, 'audio')
         token = raw_audio['token']
-        return AudioAttachment(MediaPayload(token=token))
+        return AudioAttachment(token=token)
     
 
     async def upload_file(self, data: "IO | str") -> FileAttachment: 

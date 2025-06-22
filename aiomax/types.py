@@ -244,18 +244,18 @@ class VideoAttachment(Attachment):
 
 class AudioAttachment(Attachment):
     def __init__(self,
-        payload: MediaPayload,
+        token: str,
         transcription: "str | None" = None
     ):
         super().__init__("audio")
-        self.payload: MediaPayload = payload
+        self.payload = MediaPayload(token)
         self.transcription: "str | None" = transcription
 
 
     @staticmethod
     def from_json(data: dict) -> "AudioAttachment | None":
         return AudioAttachment(
-            MediaPayload.from_json(data['payload']),
+            data['payload']['token'],
             data.get('transcription', None)
         )
     
