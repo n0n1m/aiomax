@@ -53,6 +53,7 @@ class Bot(Router):
 
         self.storage = fsm.FSMStorage()
 
+
     async def get(self, *args, **kwargs):
         '''
         Sends a GET request to the API.
