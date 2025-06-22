@@ -52,7 +52,7 @@ def get_message_body(
             attachments = [attachments]
 
         for at in attachments or []:
-            assert hasattr(at, 'as_dict'), 'Attachment must be an image, a video, an audio or a file'
+            assert hasattr(at, 'as_dict'), 'This attachment cannot be sent'
             body['attachments'].append(at.as_dict())
 
     if attachments == [] and 'attachments' not in body:
