@@ -101,109 +101,34 @@ class Attachment:
             raise Exception(f"Unknown attachment type: {data['type']}")
 
 
-class MediaPayload:
-    def __init__(self,
-        token: str,
-        url: "str | None" = None,
-    ):
-        self.url: "str | None" = url
-        self.token: str = token
-
-
-    @staticmethod
-    def from_json(data: dict) -> "MediaPayload | None":
-        return MediaPayload(url=data.get('url'), token=data.get('token'))
-    
-    def as_dict(self) -> dict:
-        data = {}
-        if self.url:
-            data['url'] = self.url
-        if self.token:
-            data['token'] = self.token
-        return data
-
-
-class StickerPayload:
-    def __init__(self,
-        code: str,
-        url: "str | None" = None,
-    ):
-        self.url: "str | None" = url
-        self.code: str = code
-
-
-    @staticmethod
-    def from_json(data: dict) -> "StickerPayload | None":
-        return StickerPayload(data['code'], data['url'])
-    
-    def as_dict(self) -> dict:
-        data = {'code': self.code}
-        if self.url is not None:
-            data['url'] = self.url
-        return data
-
-
-class ContactPayload:
-    def __init__(self,
-        name: "str | None" = None,
-        vcf_info: "str | None" = None,
-        vcf_phone: "str | None" = None,
-        max_info: "User | None" = None
-    ):
-        self.name: "str | None" = name
-        self.vcf_info: "str | None" = vcf_info
-        self.vcf_phone: "str | None" = vcf_phone
-        self.max_info: "User | None" = max_info
-
-
-    @staticmethod
-    def from_json(data: dict) -> "ContactPayload | None":
-        return ContactPayload(vcf_info=data['vcf_info'], max_info=data['max_info'])
-    
-    def as_dict(self) -> dict:
-        return {
-            'name': self.name,
-            'vcf_info': self.vcf_info,
-            'vcf_phone': self.vcf_phone
-        }
-
-
-class PhotoPayload(MediaPayload):
-    def __init__(self,
-        token: "str | None" = None,
-        url: "str | None" = None,
-        photo_id: "int | None" = None
-    ):
-        super().__init__(url=url, token=token)
-        self.photo_id: "int | None" = photo_id
-
-    
-    @staticmethod
-    def from_json(data: dict) -> "PhotoPayload | None":
-        return PhotoPayload(url=data.get('url'), token=data.get('token'), photo_id=data.get('photo_id'))
-
-
 class PhotoAttachment(Attachment):
     def __init__(self,
         url: "str | None" = None,
-        token: "str | None" = None
+        token: "str | None" = None,
+        photo_id: "int | None" = None
     ):
         super().__init__("image")
-        self.payload: PhotoPayload = PhotoPayload(token=token, url=url)
+        self.url: "str | None" = url
+        self.token: "str | None" = token
+        self.photo_id: "int | None" = photo_id
 
 
     @staticmethod
     def from_json(data: dict) -> "PhotoAttachment | None":
-        photo = PhotoAttachment(None)
-        photo.payload = PhotoPayload.from_json(data['payload'])
+        photo = PhotoAttachment(url=data.get('url'), token=data.get('token'), photo_id=data.get('photo_id'))
         return photo
     
     
     def as_dict(self):
-        return {
+        data = {
             'type': self.type,
-            'payload': self.payload.as_dict()
+            'payload': {}
         }
+        if self.token:
+            data['payload']['token'] = self.token
+        if self.url:
+            data['payload']['url'] = self.url
+        return data
 
 
 class VideoAttachment(Attachment):
@@ -216,7 +141,8 @@ class VideoAttachment(Attachment):
         duration: "int | None" = None
     ):
         super().__init__("video")
-        self.payload = MediaPayload(url=url, token=token)
+        self.token: "str | None" = token
+        self.url: "str | None" = url
         self.thumbnail: "str | None" = thumbnail
         self.width: "int | None" = width
         self.height: "int | None" = height
@@ -236,10 +162,15 @@ class VideoAttachment(Attachment):
     
     
     def as_dict(self):
-        return {
+        data = {
             'type': self.type,
-            'payload': self.payload.as_dict()
+            'payload': {}
         }
+        if self.token:
+            data['payload']['token'] = self.token
+        if self.url:
+            data['payload']['url'] = self.url
+        return data
 
 
 class AudioAttachment(Attachment):
@@ -248,7 +179,7 @@ class AudioAttachment(Attachment):
         transcription: "str | None" = None
     ):
         super().__init__("audio")
-        self.payload = MediaPayload(token)
+        self.token: str = token
         self.transcription: "str | None" = transcription
 
 
@@ -263,18 +194,20 @@ class AudioAttachment(Attachment):
     def as_dict(self):
         return {
             'type': self.type,
-            'payload': {'token': self.payload.token}
+            'payload': {'token': self.token}
         }
 
 
 class FileAttachment(Attachment):
     def __init__(self,
-        payload: MediaPayload,
+        token: str,
+        url: "str | None" = None,
         filename: "str | None" = None,
         size: "int | None" = None
     ):
         super().__init__("file")
-        self.payload: MediaPayload = payload
+        self.url: "str | None" = url
+        self.token: str = token
         self.filename: "str | None" = filename
         self.size: "int | None" = size
 
@@ -282,7 +215,8 @@ class FileAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "FileAttachment | None":
         return FileAttachment(
-            MediaPayload.from_json(data['payload']),
+            data['payload']['token'],
+            data['payload'].get('url'),
             data.get('filename'),
             data.get('size')
         )
@@ -291,18 +225,20 @@ class FileAttachment(Attachment):
     def as_dict(self):
         return {
             'type': self.type,
-            'payload': {'token': self.payload.token}
+            'payload': {'token': self.token}
         }
 
 
 class StickerAttachment(Attachment):
     def __init__(self,
         code: str,
+        url: "str | None" = None,
         width: "int | None" = None,
         height: "int | None" = None
     ):
         super().__init__("sticker")
-        self.payload = StickerPayload(code)
+        self.code: str = code
+        self.url: "str | None" = url
         self.width: int = width
         self.height: int = height
 
@@ -310,17 +246,19 @@ class StickerAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "StickerAttachment | None":
         sticker = StickerAttachment(
-            None,
+            data['payload']['code'],
+            data['payload'].get('url'),
             data.get('width', None),
             data.get('height', None)
         )
-        sticker.payload = StickerPayload.from_json(data['payload'])
         return sticker
     
     def as_dict(self) -> dict:
         return {
             'type': 'sticker',
-            'payload': self.payload.as_dict()
+            'payload': {
+                'code': self.code
+            }
         }
 
 
@@ -332,25 +270,32 @@ class ContactAttachment(Attachment):
         max_info: "User | None" = None
     ):
         super().__init__("contact")
-        self.payload = ContactPayload(name=name, vcf_info=vcf_info, vcf_phone=vcf_phone, max_info=max_info)
+        self.name: "str | None" = name
+        self.vcf_info: "str | None" = vcf_info
+        self.vcf_phone: "str | None" = vcf_phone
+        self.max_info: "User | None" = max_info
 
 
     @staticmethod
     def from_json(data: dict) -> "ContactAttachment | None":
         return ContactAttachment(
             vcf_info=data.get('vcf_info'),
-            max_info=data.get('vcf_phone')
+            max_info=User.from_json(data.get('max_info'))
         )
     
     def as_dict(self) -> dict:
         return {
-            "payload": self.payload.as_dict()
+            'payload': {
+                'name': self.name,
+                'vcf_info': self.vcf_info,
+                'vcf_phone': self.vcf_phone
+            }
         }
 
 
 class ShareAttachment(Attachment):
     def __init__(self,
-        payload: "MediaPayload | None",
+        token: "str | None",
         url: "str | None" = None,
         title: "str | None" = None,
         description: "str | None" = None,
@@ -358,7 +303,7 @@ class ShareAttachment(Attachment):
     ):
         super().__init__("share")
         self.url: "str | None" = url
-        self.payload: "MediaPayload | None" = payload
+        self.token: "str | None" = token
         self.title: "str | None" = title
         self.description: "str | None" = description
         self.image_url: "str | None" = image_url
@@ -367,7 +312,7 @@ class ShareAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "ShareAttachment | None":
         return ShareAttachment(
-            MediaPayload.from_json(data.get('payload', None)),
+            data['payload'].get('token', None),
             data['payload'].get('url', None),
             data.get('title', None),
             data.get('description', None),

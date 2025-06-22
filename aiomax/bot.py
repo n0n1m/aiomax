@@ -554,7 +554,7 @@ class Bot(Router):
         '''
         raw_file = await self.upload(data, 'file')
         token = raw_file['token']
-        return FileAttachment(MediaPayload(token=token))
+        return FileAttachment(token=token)
 
 
     async def send_message(self,
