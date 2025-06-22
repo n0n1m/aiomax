@@ -265,12 +265,23 @@ class StickerAttachment(Attachment):
 class ContactAttachment(Attachment):
     def __init__(self,
         name: "str | None" = None,
+        contact_id: "int | None" = None,
         vcf_info: "str | None" = None,
         vcf_phone: "str | None" = None,
         max_info: "User | None" = None
     ):
+        """
+        Attachment for sending/recieving contacts
+
+        :param name: Contact's name. Only used when sending contacts
+        :param contact_id: Contact's user id (if sending a Max user). Only used when sending contacts
+        :param vcf_info: Contact's information in vCard format
+        :param vcf_phone: Contact's phone number. Only used when sending contacts
+        :param max_info: User object if contact is a user. Only used when recieving contacts, use `contact_id` instead
+        """
         super().__init__("contact")
         self.name: "str | None" = name
+        self.contact_id: "int | None" = contact_id
         self.vcf_info: "str | None" = vcf_info
         self.vcf_phone: "str | None" = vcf_phone
         self.max_info: "User | None" = max_info
@@ -285,8 +296,10 @@ class ContactAttachment(Attachment):
     
     def as_dict(self) -> dict:
         return {
+            'type': self.type,
             'payload': {
                 'name': self.name,
+                'contact_id': self.contact_id,
                 'vcf_info': self.vcf_info,
                 'vcf_phone': self.vcf_phone
             }
@@ -295,8 +308,8 @@ class ContactAttachment(Attachment):
 
 class ShareAttachment(Attachment):
     def __init__(self,
-        token: "str | None",
         url: "str | None" = None,
+        token: "str | None" = None,
         title: "str | None" = None,
         description: "str | None" = None,
         image_url: "str | None" = None,
@@ -312,12 +325,21 @@ class ShareAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "ShareAttachment | None":
         return ShareAttachment(
-            data['payload'].get('token', None),
             data['payload'].get('url', None),
+            data['payload'].get('token', None),
             data.get('title', None),
             data.get('description', None),
             data.get('image_url', None),
         )
+    
+    def as_dict(self) -> dict:
+        return {
+            "type": self.type,
+            "payload" : {
+                "url": self.url,
+                "token": self.token
+            }
+        }
 
 
 class LocationAttachment(Attachment):

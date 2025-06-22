@@ -89,5 +89,5 @@ async def get_exception(response: aiohttp.ClientResponse):
         return exceptions.AttachmentNotReady()
     
     if description:
-        return Exception(f"{text}: {description}")
+        return Exception(f"Unknown error: {text}: {description}")
     return Exception(f"Unknown error: {text}")
