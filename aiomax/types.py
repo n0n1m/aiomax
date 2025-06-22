@@ -145,16 +145,27 @@ class StickerPayload:
 
 class ContactPayload:
     def __init__(self,
+        name: "str | None" = None,
         vcf_info: "str | None" = None,
-        max_info: "User | None" = None,
+        vcf_phone: "str | None" = None,
+        max_info: "User | None" = None
     ):
+        self.name: "str | None" = name
         self.vcf_info: "str | None" = vcf_info
+        self.vcf_phone: "str | None" = vcf_phone
         self.max_info: "User | None" = max_info
 
 
     @staticmethod
     def from_json(data: dict) -> "ContactPayload | None":
-        return ContactPayload(data['vcf_info'], data['max_info'])
+        return ContactPayload(vcf_info=data['vcf_info'], max_info=data['max_info'])
+    
+    def as_dict(self) -> dict:
+        return {
+            'name': self.name,
+            'vcf_info': self.vcf_info,
+            'vcf_phone': self.vcf_phone
+        }
 
 
 class PhotoPayload(MediaPayload):
@@ -315,17 +326,26 @@ class StickerAttachment(Attachment):
 
 class ContactAttachment(Attachment):
     def __init__(self,
-        payload: ContactPayload,
+        name: "str | None" = None,
+        vcf_info: "str | None" = None,
+        vcf_phone: "str | None" = None,
+        max_info: "User | None" = None
     ):
         super().__init__("contact")
-        self.payload: ContactPayload = payload
+        self.payload = ContactPayload(name=name, vcf_info=vcf_info, vcf_phone=vcf_phone, max_info=max_info)
 
 
     @staticmethod
     def from_json(data: dict) -> "ContactAttachment | None":
         return ContactAttachment(
-            ContactPayload.from_json(data['payload'])
+            vcf_info=data.get('vcf_info'),
+            max_info=data.get('vcf_phone')
         )
+    
+    def as_dict(self) -> dict:
+        return {
+            "payload": self.payload.as_dict()
+        }
 
 
 class ShareAttachment(Attachment):
