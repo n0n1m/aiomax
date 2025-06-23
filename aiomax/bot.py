@@ -558,7 +558,7 @@ class Bot(Router):
 
 
     async def send_message(self,
-        text: str,
+        text: "str | None" = None,
         chat_id: "int | None" = None,
         user_id: "int | None" = None,
         format: "Literal['markdown', 'html', 'default'] | None" = 'default',

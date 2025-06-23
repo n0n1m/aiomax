@@ -107,6 +107,13 @@ class PhotoAttachment(Attachment):
         token: "str | None" = None,
         photo_id: "int | None" = None
     ):
+        '''
+        A photo attachment. Use either `url` or `token` when uploading.
+        
+        :param url: Image URL
+        :param token: Attachment token got while uploading the image
+        :param photo_id: Unique photo ID. Not used when sending the attachment
+        '''
         super().__init__("image")
         self.url: "str | None" = url
         self.token: "str | None" = token
@@ -140,6 +147,16 @@ class VideoAttachment(Attachment):
         height: "int | None" = None,
         duration: "int | None" = None
     ):
+        '''
+        A video attachment. Use `token` when uploading.
+
+        :param token: Attachment token got while uploading video
+        :param url: Video URL that can be used for downloading the video
+        :param thumbnail: Video thumbnail URL
+        :param width: Video width
+        :param height: Video height
+        :param duration: Video duration
+        '''
         super().__init__("video")
         self.token: "str | None" = token
         self.url: "str | None" = url
@@ -162,15 +179,12 @@ class VideoAttachment(Attachment):
     
     
     def as_dict(self):
-        data = {
+        return {
             'type': self.type,
-            'payload': {}
+            'payload': {
+                'token': self.token
+            }
         }
-        if self.token:
-            data['payload']['token'] = self.token
-        if self.url:
-            data['payload']['url'] = self.url
-        return data
 
 
 class AudioAttachment(Attachment):
@@ -178,6 +192,12 @@ class AudioAttachment(Attachment):
         token: str,
         transcription: "str | None" = None
     ):
+        '''
+        An audio attachment. Use `token` when uploading.
+
+        :param token: Attachment token got while uploading audio
+        :param transcription: Audio transcription
+        '''
         super().__init__("audio")
         self.token: str = token
         self.transcription: "str | None" = transcription
@@ -205,6 +225,14 @@ class FileAttachment(Attachment):
         filename: "str | None" = None,
         size: "int | None" = None
     ):
+        '''
+        A file attachment. Use `token` when uploading.
+
+        :param token: Attachment token got while uploading the file
+        :param url: File URL that can be used for downloading the file
+        :param filename: File name
+        :param size: File size
+        '''
         super().__init__("file")
         self.url: "str | None" = url
         self.token: str = token
@@ -236,6 +264,14 @@ class StickerAttachment(Attachment):
         width: "int | None" = None,
         height: "int | None" = None
     ):
+        '''
+        A sticker attachment. Use `code` when uploading.
+
+        :param code: Sticker code
+        :param url: Sticker URL that can be used for downloading the sticker
+        :param width: Sticker width
+        :param height: Sticker height
+        '''
         super().__init__("sticker")
         self.code: str = code
         self.url: "str | None" = url
@@ -271,10 +307,10 @@ class ContactAttachment(Attachment):
         max_info: "User | None" = None
     ):
         """
-        Attachment for sending/recieving contacts
+        A contact attachment.
 
-        :param name: Contact's name. Only used when sending contacts
-        :param contact_id: Contact's user id (if sending a Max user). Only used when sending contacts
+        :param name: Contact name. Only used when sending
+        :param contact_id: Contact user ID (if sending a Max user). Only used when sending contacts
         :param vcf_info: Contact's information in vCard format
         :param vcf_phone: Contact's phone number. Only used when sending contacts
         :param max_info: User object if contact is a user. Only used when recieving contacts, use `contact_id` instead
@@ -314,6 +350,15 @@ class ShareAttachment(Attachment):
         description: "str | None" = None,
         image_url: "str | None" = None,
     ):
+        '''
+        Link preview. Use `url` and `token` when uploading
+
+        :param url: Link URL
+        :param token: Attachment token
+        :param title: Preview title
+        :param description: Preview description
+        :param image_url: Preview image URL
+        '''
         super().__init__("share")
         self.url: "str | None" = url
         self.token: "str | None" = token
@@ -331,6 +376,7 @@ class ShareAttachment(Attachment):
             data.get('description', None),
             data.get('image_url', None),
         )
+    
     
     def as_dict(self) -> dict:
         return {
@@ -710,8 +756,14 @@ class BotStartPayload:
             bot = bot,
         )
     
+    
+    @property
+    def user_id(self):
+        return self.user.user_id
+    
+    
     async def send(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -735,10 +787,6 @@ class BotStartPayload:
             format=format, notify=notify, disable_link_preview=disable_link_preview,
             keyboard=keyboard, attachments=attachments
         ))
-    
-    @property
-    def user_id(self):
-        return self.user.user_id
     
     
 
@@ -967,7 +1015,7 @@ class Callback:
 
 
     async def send(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -996,7 +1044,7 @@ class Callback:
 
 
     async def reply(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
