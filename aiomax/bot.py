@@ -222,11 +222,9 @@ class Bot(Router):
     
     async def get_chats(self, count_per_iter: int = 100) -> AsyncIterator[Chat]:
         '''
-        Returns an asynchronous interator of
-        The result includes a list of chats and a marker for moving to the next page.
+        Returns an asynchronous interator of chats the bot is in.
 
-        :param count:  Number of chats requested. 50 by default
-        :param marker: Pointer to the next page of data. Defaults to first page
+        :param count_per_iter: The number of chats to fetch per request.
         '''
         marker = None
         
@@ -238,11 +236,9 @@ class Bot(Router):
             params = {k: v for k, v in params.items() if v}
             response = await self.get(f"https://botapi.max.ru/chats", params=params)
             data = await response.json()
-
-            chats = [Chat.from_json(i) for i in data['chats']]
         
-            for chat in chats:
-                yield chat
+            for chat in data['chats']:
+                yield Chat.from_json(chat)
             
             marker = data.get('marker', None)
             if marker == None:
@@ -394,10 +390,8 @@ class Bot(Router):
             response = await self.get(f"https://botapi.max.ru/chats/{chat_id}/members", params=params)
             data = await response.json()
 
-            users = [User.from_json(i) for i in data['members']]
-
-            for user in users:
-                yield user
+            for user in data['members']:
+                yield User.from_json(user)
 
             marker = data.get('marker', None)
             if marker == None:
