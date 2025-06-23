@@ -220,25 +220,33 @@ class Bot(Router):
             bot_logger.error(f"Failed to update bot info: {data}. ")
     
     
-    async def get_chats(self, count: "int | None" = None, marker: "int | None" = None) -> List[Chat]:
+    async def get_chats(self, count_per_iter: int = 100) -> AsyncIterator[Chat]:
         '''
-        Returns the chats the bot is in.
+        Returns an asynchronous interator of
         The result includes a list of chats and a marker for moving to the next page.
 
         :param count:  Number of chats requested. 50 by default
         :param marker: Pointer to the next page of data. Defaults to first page
         '''
-        params = {
-            "count": count,
-            "marker": marker,
-        }
-        params = {k: v for k, v in params.items() if v}
+        marker = None
+        
+        while True:
+            params = {
+                "count": count_per_iter,
+                "marker": marker,
+            }
+            params = {k: v for k, v in params.items() if v}
+            response = await self.get(f"https://botapi.max.ru/chats", params=params)
+            data = await response.json()
 
-        response = await self.get("https://botapi.max.ru/chats", params=params)
-        data = await response.json()
-        chats = [Chat.from_json(i) for i in data['chats']]
-
-        return chats
+            chats = [Chat.from_json(i) for i in data['chats']]
+        
+            for chat in chats:
+                yield chat
+            
+            marker = data.get('marker', None)
+            if marker == None:
+                break
     
 
     async def chat_by_link(self, link: str) -> Chat:
