@@ -101,95 +101,48 @@ class Attachment:
             raise Exception(f"Unknown attachment type: {data['type']}")
 
 
-class MediaPayload:
-    def __init__(self,
-        token: str,
-        url: "str | None" = None,
-    ):
-        self.url: "str | None" = url
-        self.token: str = token
-
-
-    @staticmethod
-    def from_json(data: dict) -> "MediaPayload | None":
-        return MediaPayload(url=data.get('url'), token=data.get('token'))
-
-
-class StickerPayload:
-    def __init__(self,
-        url: str,
-        code: str,
-    ):
-        self.url: str = url
-        self.code: str = code
-
-
-    @staticmethod
-    def from_json(data: dict) -> "StickerPayload | None":
-        return StickerPayload(data['url'], data['code'])
-
-
-class ContactPayload:
-    def __init__(self,
-        vcf_info: "str | None" = None,
-        max_info: "User | None" = None,
-    ):
-        self.vcf_info: "str | None" = vcf_info
-        self.max_info: "User | None" = max_info
-
-
-    @staticmethod
-    def from_json(data: dict) -> "ContactPayload | None":
-        return ContactPayload(data['vcf_info'], data['max_info'])
-
-
-class PhotoPayload(MediaPayload):
-    def __init__(self,
-        token: str,
-        url: "str | None" = None,
-        photo_id: "int | None" = None
-    ):
-        super().__init__(url=url, token=token)
-        self.photo_id: "int | None" = photo_id
-
-    
-    @staticmethod
-    def from_json(data: dict) -> "PhotoPayload | None":
-        return PhotoPayload(url=data.get('url'), token=data.get('token'), photo_id=data.get('photo_id'))
-
-
 class PhotoAttachment(Attachment):
     def __init__(self,
-        payload: PhotoPayload
+        url: "str | None" = None,
+        token: "str | None" = None,
+        photo_id: "int | None" = None
     ):
         super().__init__("image")
-        self.payload: PhotoPayload = payload
+        self.url: "str | None" = url
+        self.token: "str | None" = token
+        self.photo_id: "int | None" = photo_id
 
 
     @staticmethod
     def from_json(data: dict) -> "PhotoAttachment | None":
-        return PhotoAttachment(
-            PhotoPayload.from_json(data['payload'])
-        )
+        photo = PhotoAttachment(url=data.get('url'), token=data.get('token'), photo_id=data.get('photo_id'))
+        return photo
     
     
     def as_dict(self):
-        return {
+        data = {
             'type': self.type,
-            'payload': {'token': self.payload.token}
+            'payload': {}
         }
+        if self.token:
+            data['payload']['token'] = self.token
+        if self.url:
+            data['payload']['url'] = self.url
+        return data
 
 
 class VideoAttachment(Attachment):
     def __init__(self,
-        payload: MediaPayload,
+        token: "str | None" = None,
+        url: "str | None" = None,
         thumbnail: "str | None" = None,
         width: "int | None" = None,
         height: "int | None" = None,
         duration: "int | None" = None
     ):
         super().__init__("video")
-        self.payload: MediaPayload = payload
+        self.token: "str | None" = token
+        self.url: "str | None" = url
         self.thumbnail: "str | None" = thumbnail
         self.width: "int | None" = width
         self.height: "int | None" = height
@@ -199,7 +152,8 @@ class VideoAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "VideoAttachment | None":
         return VideoAttachment(
-            MediaPayload.from_json(data['payload']),
+            data['payload'].get('token', None),
+            data['payload'].get('url', None),
             data.get('thumbnail', None),
             data.get('width', None),
             data.get('height', None),
@@ -208,26 +162,31 @@ class VideoAttachment(Attachment):
     
     
     def as_dict(self):
-        return {
+        data = {
             'type': self.type,
-            'payload': {'token': self.payload.token}
+            'payload': {}
         }
+        if self.token:
+            data['payload']['token'] = self.token
+        if self.url:
+            data['payload']['url'] = self.url
+        return data
 
 
 class AudioAttachment(Attachment):
     def __init__(self,
-        payload: MediaPayload,
+        token: str,
         transcription: "str | None" = None
     ):
         super().__init__("audio")
-        self.payload: MediaPayload = payload
+        self.token: str = token
         self.transcription: "str | None" = transcription
 
 
     @staticmethod
     def from_json(data: dict) -> "AudioAttachment | None":
         return AudioAttachment(
-            MediaPayload.from_json(data['payload']),
+            data['payload']['token'],
             data.get('transcription', None)
         )
     
@@ -235,18 +194,20 @@ class AudioAttachment(Attachment):
     def as_dict(self):
         return {
             'type': self.type,
-            'payload': {'token': self.payload.token}
+            'payload': {'token': self.token}
         }
 
 
 class FileAttachment(Attachment):
     def __init__(self,
-        payload: MediaPayload,
+        token: str,
+        url: "str | None" = None,
         filename: "str | None" = None,
         size: "int | None" = None
     ):
         super().__init__("file")
-        self.payload: MediaPayload = payload
+        self.url: "str | None" = url
+        self.token: str = token
         self.filename: "str | None" = filename
         self.size: "int | None" = size
 
@@ -254,7 +215,8 @@ class FileAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "FileAttachment | None":
         return FileAttachment(
-            MediaPayload.from_json(data['payload']),
+            data['payload']['token'],
+            data['payload'].get('url'),
             data.get('filename'),
             data.get('size')
         )
@@ -263,57 +225,98 @@ class FileAttachment(Attachment):
     def as_dict(self):
         return {
             'type': self.type,
-            'payload': {'token': self.payload.token}
+            'payload': {'token': self.token}
         }
 
 
 class StickerAttachment(Attachment):
     def __init__(self,
-        payload: StickerPayload,
+        code: str,
+        url: "str | None" = None,
         width: "int | None" = None,
         height: "int | None" = None
     ):
         super().__init__("sticker")
-        self.payload: StickerPayload = payload
+        self.code: str = code
+        self.url: "str | None" = url
         self.width: int = width
         self.height: int = height
 
     
     @staticmethod
     def from_json(data: dict) -> "StickerAttachment | None":
-        return StickerAttachment(
-            StickerPayload.from_json(data['payload']),
+        sticker = StickerAttachment(
+            data['payload']['code'],
+            data['payload'].get('url'),
             data.get('width', None),
             data.get('height', None)
         )
+        return sticker
+    
+    def as_dict(self) -> dict:
+        return {
+            'type': 'sticker',
+            'payload': {
+                'code': self.code
+            }
+        }
 
 
 class ContactAttachment(Attachment):
     def __init__(self,
-        payload: ContactPayload,
+        name: "str | None" = None,
+        contact_id: "int | None" = None,
+        vcf_info: "str | None" = None,
+        vcf_phone: "str | None" = None,
+        max_info: "User | None" = None
     ):
+        """
+        Attachment for sending/recieving contacts
+
+        :param name: Contact's name. Only used when sending contacts
+        :param contact_id: Contact's user id (if sending a Max user). Only used when sending contacts
+        :param vcf_info: Contact's information in vCard format
+        :param vcf_phone: Contact's phone number. Only used when sending contacts
+        :param max_info: User object if contact is a user. Only used when recieving contacts, use `contact_id` instead
+        """
         super().__init__("contact")
-        self.payload: ContactPayload = payload
+        self.name: "str | None" = name
+        self.contact_id: "int | None" = contact_id
+        self.vcf_info: "str | None" = vcf_info
+        self.vcf_phone: "str | None" = vcf_phone
+        self.max_info: "User | None" = max_info
 
 
     @staticmethod
     def from_json(data: dict) -> "ContactAttachment | None":
         return ContactAttachment(
-            ContactPayload.from_json(data['payload'])
+            vcf_info=data.get('vcf_info'),
+            max_info=User.from_json(data.get('max_info'))
         )
+    
+    def as_dict(self) -> dict:
+        return {
+            'type': self.type,
+            'payload': {
+                'name': self.name,
+                'contact_id': self.contact_id,
+                'vcf_info': self.vcf_info,
+                'vcf_phone': self.vcf_phone
+            }
+        }
 
 
 class ShareAttachment(Attachment):
     def __init__(self,
-        payload: "MediaPayload | None",
         url: "str | None" = None,
+        token: "str | None" = None,
         title: "str | None" = None,
         description: "str | None" = None,
         image_url: "str | None" = None,
     ):
         super().__init__("share")
         self.url: "str | None" = url
-        self.payload: "MediaPayload | None" = payload
+        self.token: "str | None" = token
         self.title: "str | None" = title
         self.description: "str | None" = description
         self.image_url: "str | None" = image_url
@@ -322,12 +325,21 @@ class ShareAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "ShareAttachment | None":
         return ShareAttachment(
-            MediaPayload.from_json(data.get('payload', None)),
             data['payload'].get('url', None),
+            data['payload'].get('token', None),
             data.get('title', None),
             data.get('description', None),
             data.get('image_url', None),
         )
+    
+    def as_dict(self) -> dict:
+        return {
+            "type": self.type,
+            "payload" : {
+                "url": self.url,
+                "token": self.token
+            }
+        }
 
 
 class LocationAttachment(Attachment):
@@ -346,6 +358,13 @@ class LocationAttachment(Attachment):
             data['latitude'],
             data['longitude']
         )
+    
+    def as_dict(self) -> dict:
+        return {
+            "type": "location",
+            "latitude": self.latitude,
+            "longitude": self.longitude
+        }
 
 
 class InlineKeyboardAttachment(Attachment):
@@ -578,7 +597,7 @@ class Message:
 
 
     async def send(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -605,7 +624,7 @@ class Message:
 
 
     async def reply(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -632,11 +651,12 @@ class Message:
     
 
     async def edit(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         reply_to: "int | None" = None,
         notify: bool = True,
         keyboard: "List[List[buttons.Button]] | buttons.KeyboardBuilder | None" = None,
+        attachments: "List[Attachment] | Attachment | None" = None
     ) -> "Message":
         '''
         Edit a message
@@ -653,7 +673,8 @@ class Message:
         return (await self.bot.edit_message(
             self.id, text,
             format=format, notify=notify,
-            keyboard=keyboard, reply_to=reply_to
+            keyboard=keyboard, reply_to=reply_to,
+            attachments=attachments
         ))
     
     async def delete(self):
@@ -738,7 +759,7 @@ class CommandContext:
 
 
     async def send(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,
@@ -763,7 +784,7 @@ class CommandContext:
 
 
     async def reply(self,
-        text: str,
+        text: "str | None" = None,
         format: "Literal['html', 'markdown', 'default'] | None" = 'default',
         notify: bool = True,
         disable_link_preview: bool = False,

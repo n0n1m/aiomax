@@ -521,7 +521,7 @@ class Bot(Router):
         '''
         raw_photo = await self.upload(data, 'image')
         token = list(raw_photo['photos'].values())[0]['token']
-        return PhotoAttachment(PhotoPayload(token=token))
+        return PhotoAttachment(token=token)
     
 
     async def upload_video(self, data: "BinaryIO | str") -> VideoAttachment:
@@ -532,7 +532,7 @@ class Bot(Router):
         '''
         raw_video = await self.upload(data, 'video')
         token = raw_video['token']
-        return VideoAttachment(MediaPayload(token=token))
+        return VideoAttachment(token=token)
     
 
     async def upload_audio(self, data: "BinaryIO | str") -> AudioAttachment:
@@ -543,7 +543,7 @@ class Bot(Router):
         '''
         raw_audio = await self.upload(data, 'audio')
         token = raw_audio['token']
-        return AudioAttachment(MediaPayload(token=token))
+        return AudioAttachment(token=token)
     
 
     async def upload_file(self, data: "IO | str") -> FileAttachment: 
@@ -554,7 +554,7 @@ class Bot(Router):
         '''
         raw_file = await self.upload(data, 'file')
         token = raw_file['token']
-        return FileAttachment(MediaPayload(token=token))
+        return FileAttachment(token=token)
 
 
     async def send_message(self,
@@ -582,7 +582,6 @@ class Bot(Router):
         :param attachments: List of attachments
         '''
         # error checking
-        text = str(text)
         assert chat_id or user_id, "Either chat_id or user_id must be provided"
         assert not (chat_id and user_id), "Both chat_id and user_id cannot be provided"
 
@@ -604,6 +603,8 @@ class Bot(Router):
                 f"https://botapi.max.ru/messages", params=params, json=body
             )
             json = await response.json()
+            if not json.get('success', True):
+                raise await utils.get_exception(response)
             message = Message.from_json(json['message'])
             message.bot = self
             return message
@@ -642,16 +643,20 @@ class Bot(Router):
             
         body = utils.get_message_body(text, format, reply_to, notify, keyboard, attachments)
 
-        response = await self.put(
-            f"https://botapi.max.ru/messages", params=params, json=body
-        )
+        try:
+            response = await self.put(
+                f"https://botapi.max.ru/messages", params=params, json=body
+            )
+            json = await response.json()
+            if not json.get('success', True):
+                raise await utils.get_exception(response)
+            message = Message.from_json(json)
+            message.bot = self
+            return message
         
-        json = await response.json()
-        if not json['success']:
-            raise Exception(json['message'])
-        message = Message.from_json(json)
-        message.bot = self
-        return message
+        except exceptions.AttachmentNotReady:
+            await asyncio.sleep(1)
+            return await self.edit_message(message_id=message_id, text=text, format=format, reply_to=reply_to, notify=notify, keyboard=keyboard, attachments=attachments)
 
 
     async def delete_message(self,
@@ -948,6 +953,9 @@ class Bot(Router):
                 except Exception as e:
                     bot_logger.exception(e)
                     await asyncio.sleep(3)
+
+                except asyncio.exceptions.CancelledError:
+                    break # Python 3.9 throws an error when exit() is used
 
         self.session = None
         self.polling = False

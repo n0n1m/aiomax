@@ -2,7 +2,19 @@ from . import types
 import re
 from typing import *
 
-class _OrFilter:
+
+class _filter:
+    '''
+    Superclass of other filters for support of bit-wise or and bit-wise and
+    '''
+    def __or__(self, other):
+        return _OrFilter(self, other)
+    
+    def __and__(self, other):
+        return _AndFilter(self, other)
+
+
+class _OrFilter(_filter):
     '''
     Class for using bit-wise or on filters
     '''
@@ -14,7 +26,7 @@ class _OrFilter:
         return self.filter1(obj) or self.filter2(obj)
     
 
-class _AndFilter:
+class _AndFilter(_filter):
     '''
     Class for using bit-wise and on filters
     '''
@@ -24,17 +36,6 @@ class _AndFilter:
 
     def __call__(self, obj: any):
         return self.filter1(obj) and self.filter2(obj)
-
-
-class _filter:
-    '''
-    Superclass of other filters for support of bit-wise or and bit-wise and
-    '''
-    def __or__(self, other):
-        return _OrFilter(self, other)
-    
-    def __and__(self, other):
-        return _AndFilter(self, other)
 
 
 class equals(_filter):
