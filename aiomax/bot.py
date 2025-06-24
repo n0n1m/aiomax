@@ -943,7 +943,7 @@ class Bot(Router):
 
             # ready event
             for i in self.handlers['on_ready']:
-                await i()
+                asyncio.create_task(i())
 
             while self.polling:
                 try:
