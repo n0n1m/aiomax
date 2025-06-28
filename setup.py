@@ -27,6 +27,7 @@ setup(
         "max"
     ],
     project_urls={
+        "Source code": "https://github.com/dpnspn/aiomax",
         "Docs": "https://github.com/dpnspn/aiomax/wiki"
     },
     classifiers = [
