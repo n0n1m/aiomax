@@ -122,7 +122,7 @@ class PhotoAttachment(Attachment):
 
     @staticmethod
     def from_json(data: dict) -> "PhotoAttachment | None":
-        photo = PhotoAttachment(url=data.get('url'), token=data.get('token'), photo_id=data.get('photo_id'))
+        photo = PhotoAttachment(url=data['payload'].get('url'), token=data['payload'].get('token'), photo_id=data['payload'].get('photo_id'))
         return photo
     
     
@@ -171,7 +171,7 @@ class VideoAttachment(Attachment):
         return VideoAttachment(
             data['payload'].get('token', None),
             data['payload'].get('url', None),
-            data.get('thumbnail', None),
+            data.get('thumbnail', {}).get('url'),
             data.get('width', None),
             data.get('height', None),
             data.get('duration', None),
@@ -189,6 +189,7 @@ class VideoAttachment(Attachment):
 
 class AudioAttachment(Attachment):
     def __init__(self,
+        url: str,
         token: str,
         transcription: "str | None" = None
     ):
@@ -199,6 +200,7 @@ class AudioAttachment(Attachment):
         :param transcription: Audio transcription
         '''
         super().__init__("audio")
+        self.url: str = url
         self.token: str = token
         self.transcription: "str | None" = transcription
 
@@ -206,6 +208,7 @@ class AudioAttachment(Attachment):
     @staticmethod
     def from_json(data: dict) -> "AudioAttachment | None":
         return AudioAttachment(
+            data['payload']['url'],
             data['payload']['token'],
             data.get('transcription', None)
         )
