@@ -3,7 +3,7 @@ from copy import deepcopy
 from typing import *
 from .types import *
 from .cache import *
-from .filters import equals
+from .filters import equals, normalize_filter
 
 import logging
 bot_logger = logging.getLogger("aiomax.bot")
@@ -60,12 +60,7 @@ t
         for filter_ in filters:
             if filter_ is None:
                 continue
-            elif isinstance(filter_, str):
-                normalized_filters.append(equals(filter_))
-            elif callable(filter_):
-                normalized_filters.append(filter_)
-            else:
-                raise ValueError(f"Unsupported filter type: {type(filter_)}")
+            normalized_filters.append(normalize_filter(filter_))
 
         if not normalized_filters:
             return lambda message: True

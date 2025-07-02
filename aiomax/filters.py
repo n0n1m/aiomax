@@ -3,6 +3,19 @@ import re
 from typing import *
 
 
+def normalize_filter(filter_):
+    if isinstance(filter_, str):
+        return equals(filter_)
+
+    elif isinstance(filter_, bool):
+        return lambda _: filter_
+
+    elif callable(filter_):
+        return filter_
+
+    raise ValueError(f"Unsupported filter type: {type(filter_)}")
+
+
 class _filter:
     '''
     Superclass of other filters for support of bit-wise or and bit-wise and
@@ -19,8 +32,8 @@ class _OrFilter(_filter):
     Class for using bit-wise or on filters
     '''
     def __init__(self, filter1, filter2):
-        self.filter1 = filter1
-        self.filter2 = filter2 if not isinstance(filter2, str) else equals(filter2)
+        self.filter1 = normalize_filter(filter1)
+        self.filter2 = normalize_filter(filter2)
 
     def __call__(self, obj: any):
         return self.filter1(obj) or self.filter2(obj)
@@ -31,8 +44,8 @@ class _AndFilter(_filter):
     Class for using bit-wise and on filters
     '''
     def __init__(self, filter1, filter2):
-        self.filter1 = filter1
-        self.filter2 = filter2 if not isinstance(filter2, str) else equals(filter2)
+        self.filter1 = normalize_filter(filter1)
+        self.filter2 = normalize_filter(filter2)
 
     def __call__(self, obj: any):
         return self.filter1(obj) and self.filter2(obj)
