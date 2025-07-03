@@ -683,27 +683,22 @@ class Bot(Router):
             raise Exception(json['message'])
 
 
-    # async def get_message(self,
-    #     message_id: str
-    # ) -> Message:
-    #     '''
-    #     Allows you to fetch message's info.
+    async def get_message(self,
+        message_id: str
+    ) -> Message:
+        '''
+        Allows you to fetch message's info.
         
-    #     :param message_id: ID of the message to get info of
-    #     '''
-    #     assert message_id.startswith('mid.'), "Message ID invalid"
+        :param message_id: ID of the message to get info of
+        '''
+        response = await self.get(
+            f"https://botapi.max.ru/messages/{message_id}"
+        )
+        if response.status != 200:
+            raise Exception(await response.text())
+        data = await response.json()
 
-    #     message_id = message_id[4:]
-
-    #     # editing
-    #     response = await self.get(
-    #         f"https://botapi.max.ru/messages/{message_id}"
-    #     )
-    #     if response.status != 200:
-    #         raise Exception(await response.text())
-        
-    #     return Message.from_json(await response.json())
-    # todo fix - for some reason API replies with "invalid message_id"
+        return Message.from_json(data)
 
 
     async def get_updates(self, limit: int = 100) -> tuple[int, dict]:
