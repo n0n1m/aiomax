@@ -33,7 +33,7 @@ jobs:
         id: setup
         run: |
           git clone --filter=tree:0 --no-checkout git@github.com:n0n1m/aiomax.wiki.git temp
-          cp temp/.git docs/.git
+          cp -r temp/.git docs/.git
           rm -rf temp
           echo "wiki_path=$(pwd)/docs" >> $GITHUB_OUTPUT
       - name: Push commits to main wiki remote
