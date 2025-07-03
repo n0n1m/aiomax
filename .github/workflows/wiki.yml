@@ -44,3 +44,11 @@ jobs:
           files: ${{ steps.extract_branch.outputs.wiki_path }}/**
           force-push: true
           workspace: ${{ steps.extract_branch.outputs.wiki_path }}
+      - name: Push commits to main wiki remote
+        run: |
+          cd docs
+          git config user.name "$(git -C .. log -1 --pretty=%an)"
+          git config user.email "$(git -C .. log -1 --pretty=%ae)"
+          git add -A
+          git commit -m "${{ github.event.head_commit.message }}"
+          git push -f origin HEAD:master
