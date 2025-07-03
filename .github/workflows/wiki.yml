@@ -37,14 +37,6 @@ jobs:
           rm -rf temp
           echo "wiki_path=$(pwd)/docs" >> $GITHUB_OUTPUT
       - name: Push commits to main wiki remote
-        uses: IAreKyleW00t/verified-bot-commit@v1.4.1
-        with:
-          message: ${{ github.event.head_commit.message }}
-          ref: ${{ steps.extract_branch.outputs.wiki_path }}/refs/heads/master
-          files: ${{ steps.extract_branch.outputs.wiki_path }}/**
-          force-push: true
-          workspace: ${{ steps.extract_branch.outputs.wiki_path }}
-      - name: Push commits to main wiki remote
         run: |
           cd docs
           git config user.name "$(git -C .. log -1 --pretty=%an)"
