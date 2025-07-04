@@ -20,15 +20,15 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
       - name: Clone and edit AUR repo
         run: |
-          sudo apt install -y makepkg
+          sha=$(curl -s "https://codeload.github.com/dpnspn/aiomax/tar.gz/refs/tags/${{ github.event.release.tag_name }}" | sha256sum - | cut -d " " -f1)
           git clone ssh://aur@aur.archlinux.org/python-aiomax-autotest.git aur-repo
           cd aur-repo
           sed -i 's/^pkgver=.*/pkgver=${{ github.event.release.tag_name }}/' PKGBUILD
           sed -i 's/^pkgrel=.*/pkgrel=1/' PKGBUILD
-          whoami
-          sed -i 's/^sha256sums=.*/'$(makepkg -g)'/' PKGBUILD
-          cat PKGBUILD
-          makepkg --printsrcinfo > .SRCINFO
+          sed -i "s/^sha256sums=.*/sha256sums=('$sha')/" PKGBUILD
+          sed -i 's/pkgver = .*/pkgver = ${{ github.event.release.tag_name }}/' .SRCINFO
+          sed -i 's/pkgrel = .*/pkgrel = 1/' .SRCINFO
+          sed -i "s/sha256sums = .*/sha256sums = $sha/" .SRCINFO
       - name: Push changes to AUR
         run: |
           cd ${{ github.workspace }}/aur-repo
