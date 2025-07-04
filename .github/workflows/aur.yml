@@ -25,8 +25,9 @@ jobs:
           cd aur-repo
           sed -i 's/^pkgver=.*/pkgver=${{ github.event.release.tag_name }}/' PKGBUILD
           sed -i 's/^pkgrel=.*/pkgrel=1/' PKGBUILD
-          cat PKGBUILD
+          whoami
           sed -i 's/^sha256sums=.*/'$(makepkg -g)'/' PKGBUILD
+          cat PKGBUILD
           makepkg --printsrcinfo > .SRCINFO
       - name: Push changes to AUR
         run: |
