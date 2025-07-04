@@ -1,0 +1,35 @@
+name: Bump AUR version
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up AUR keys
+        run: |
+          # Write deploy key to ~/.ssh/id_ed25519. Git will automatically
+          # use ~/.ssh/id_ed25519 to log in to github.com (see `man ssh`)
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+      - name: Clone and edit AUR repo
+        run: |
+          sudo apt install -y makepkg
+          sha=$(curl -s "https://codeload.github.com/dpnspn/aiomax/tar.gz/refs/tags/${{ github.event.release.tag_name }}" | sha256sum - | cut -d " " -f1)
+          git clone ssh://aur@aur.archlinux.org/python-aiomax-autotest.git aur-repo
+          cd aur-repo
+          sed -i 's/^pkgver=.*/pkgver=${{ github.event.release.tag_name }}/' PKGBUILD
+          sed -i 's/^pkgrel=.*/pkgrel=1/' PKGBUILD
+          sed -i 's/^sha256sums=.*/'$(makepkg -g)'/' PKGBUILD
+          makepkg --printsrcinfo > .SRCINFO
+      - name: Push changes to AUR
+        run: |
+          cd ${{ github.workspace }}/aur-repo
+          git config user.name "autobump"
+          git config user.email "no@thankyou.com"
+          git add PKGBUILD .SRCINFO
+          git commit -m "bump version to ${{ github.event.release.tag_name }}"
+          git push
