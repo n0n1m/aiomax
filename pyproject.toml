@@ -3,18 +3,18 @@ requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "aiomax"
-version = "2.7.3"
+name = "n0n1m-aiomax"
+version = "2.7.3-2"
 dependencies = [
     "aiohttp"
 ]
-dynamic = ["readme"]
 requires-python = ">= 3.9"
 authors = [
     {name = "mbutsk", email = "mbutsk@icloud.com"},
     {name = "moontr3", email = "contact@moontr3.ru"}
 ]
 description = "Asynchronous framework for Max Bot API"
+readme = {file = "pypi-description.md", content-type = "text/markdown"}
 license = "MIT"
 license-files = ["LICENSE.md"]
 keywords = [
@@ -39,6 +39,3 @@ classifiers = [
 Homepage = "https://github.com/dpnspn/aiomax"
 Docs = "https://github.com/dpnspn/aiomax/wiki"
 "Source code" = "https://github.com/dpnspn/aiomax"
-
-[tool.setuptools.dynamic]
-readme = {file = ["pypi-description.md", "README.md"], content-type = "text/markdown"}
