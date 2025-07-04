@@ -18,6 +18,7 @@ jobs:
       - name: Clone and edit AUR repo
         run: |
           sudo apt install -y makepkg
+          ssh -o StrictHostKeyChecking=accept-new aur@aur.archlinux.org help > /dev/null
           sha=$(curl -s "https://codeload.github.com/dpnspn/aiomax/tar.gz/refs/tags/${{ github.event.release.tag_name }}" | sha256sum - | cut -d " " -f1)
           git clone ssh://aur@aur.archlinux.org/python-aiomax-autotest.git aur-repo
           cd aur-repo
