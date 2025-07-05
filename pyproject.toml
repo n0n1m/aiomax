@@ -14,7 +14,7 @@ authors = [
     {name = "moontr3", email = "contact@moontr3.ru"}
 ]
 description = "Asynchronous framework for Max Bot API"
-readme = {file = "pypi-description.md", content-type = "text/markdown"}
+readme = "pypi-description.md"
 license = "MIT"
 license-files = ["LICENSE.md"]
 keywords = [
@@ -36,7 +36,6 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/dpnspn/aiomax"
 Docs = "https://github.com/dpnspn/aiomax/wiki"
 "Source code" = "https://github.com/dpnspn/aiomax"
 

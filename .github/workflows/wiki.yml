@@ -26,8 +26,6 @@ jobs:
           fetch-depth: 0
       - name: Set up deploy keys to push to remote
         run: |
-          # Write deploy key to ~/.ssh/id_ed25519. Git will automatically
-          # use ~/.ssh/id_ed25519 to log in to github.com (see `man ssh`)
           mkdir -p ~/.ssh
           echo "${{ secrets.WIKI_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519

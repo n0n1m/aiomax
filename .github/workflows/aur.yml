@@ -10,8 +10,6 @@ jobs:
     steps:
       - name: Set up AUR keys
         run: |
-          # Write deploy key to ~/.ssh/id_ed25519. Git will automatically
-          # use ~/.ssh/id_ed25519 to log in to github.com (see `man ssh`)
           mkdir -p ~/.ssh
           echo "${{ secrets.AUR_DEPLOY_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           echo "aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN
