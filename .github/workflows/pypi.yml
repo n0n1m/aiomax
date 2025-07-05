@@ -15,8 +15,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - name: Install pypa/build
-        run: python3 -m pip install build --user
+      - name: Setup for build
+        run: |
+          python3 -m pip install build --user
+          echo "${{ github.event.release.tag_name }}" > .version
       - name: Build a binary wheel and a source tarball
         run: python3 -m build
       - name: Store the distribution packages
