@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "docs/**"
+      - "!docs/README.md"
   workflow_dispatch: {}
 
 concurrency:
@@ -40,7 +41,7 @@ jobs:
           cd docs
           git config user.name "$(git -C .. log -1 --pretty=%an)"
           git config user.email "$(git -C .. log -1 --pretty=%ae)"
-          git update-index --skip-worktree README.md
+          rm README.md
           git add -A
           git commit -m "${{ github.event.head_commit.message }}"
           git push -f origin HEAD:master
