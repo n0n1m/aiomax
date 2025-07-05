@@ -40,7 +40,7 @@ jobs:
           cd docs
           git config user.name "$(git -C .. log -1 --pretty=%an)"
           git config user.email "$(git -C .. log -1 --pretty=%ae)"
-          git add -A
           git update-index --skip-worktree README.md
+          git add -A
           git commit -m "${{ github.event.head_commit.message }}"
           git push -f origin HEAD:master
