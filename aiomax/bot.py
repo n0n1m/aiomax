@@ -767,13 +767,11 @@ class Bot(Router):
                 
                 if check_name not in self.commands:
                     bot_logger.debug(f"Command \"{name}\" not handled")
-                    return
+                    continue
 
                 if len(self.commands[check_name]) == 0:
                     bot_logger.debug(f"Command \"{name}\" not handled")
-                    return
-
-                block = False
+                    continue
                 
                 for i in self.commands[check_name]:
                     kwargs = utils.context_kwargs(i.call, cursor=cursor)
