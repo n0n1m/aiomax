@@ -87,6 +87,8 @@ async def get_exception(response: aiohttp.ClientResponse):
         return exceptions.InvalidToken()
     if text == "attachment.not.ready" or description == "Key: errors.process.attachment.video.not.processed":
         return exceptions.AttachmentNotReady()
+    if text == "chat.not.found":
+        return exceptions.ChatNotFound(description)
     
     if description:
         return Exception(f"Unknown error: {text}: {description}")

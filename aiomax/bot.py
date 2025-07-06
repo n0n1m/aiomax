@@ -752,9 +752,12 @@ class Bot(Router):
                 if len(message.body.text) <= len(prefix):
                     continue
 
-                prefix = prefix if self.case_sensitive else prefix.lower()
-                if not message.body.text.startswith(prefix):
-                    continue
+                if self.case_sensitive:
+                    if not message.body.text.startswith(prefix):
+                        continue
+                else:
+                    if not message.body.text.lower().startswith(prefix.lower()):
+                        continue
 
                 command = message.body.text[len(prefix):]
                 name = command.split()[0]
