@@ -890,6 +890,18 @@ class Handler:
         if self.deco_filter:
             return [self.deco_filter, *self.router_filters]
         return self.router_filters
+    
+
+class MessageHandler(Handler):
+    def __init__(
+        self,
+        call: Callable,
+        deco_filter: "Callable | None" = None,
+        router_filters: List[Callable] = [],
+        detect_commands: bool = False
+    ):
+        super().__init__(call, deco_filter, router_filters)
+        self.detect_commands: bool = detect_commands
 
 
 class Image:

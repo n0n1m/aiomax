@@ -135,7 +135,7 @@ t
 
     # decorators
 
-    def on_message(self, *filters: "Callable | str | None", mode: str = 'and'):
+    def on_message(self, *filters: "Callable | str | None", mode: str = 'and', detect_commands: bool = False):
         '''
         Decorator for receiving messages.
         '''
@@ -143,7 +143,11 @@ t
             new_filter = self.wrap_filters(filters, mode=mode)
 
             self._handlers["message_created"].append(
-                Handler(call=func, deco_filter=new_filter, router_filters=self.filters['message_created'])
+                MessageHandler(
+                    call=func, deco_filter=new_filter,
+                    router_filters=self.filters['message_created'],
+                    detect_commands=detect_commands
+                )
             )
             return func
         return decorator

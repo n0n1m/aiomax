@@ -744,6 +744,7 @@ class Bot(Router):
                 else [self.command_prefixes]
             prefixes = list(prefixes)
             handled = False
+            block = False
 
             if self.mention_prefix:
                 prefixes.extend([f'@{self.username} {i}' for i in prefixes])
@@ -784,13 +785,14 @@ class Bot(Router):
                         block = True
 
                 bot_logger.debug(f"Command \"{name}\" handled")
-                if block:
-                    return
-
+            
             # handling
             handled = False
 
             for handler in self.handlers['message_created']:
+                if not handler.detect_commands and block:
+                    continue
+
                 filters = [filter(message) for filter in handler.filters]
 
                 if all(filters):
