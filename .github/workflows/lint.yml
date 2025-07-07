@@ -1,4 +1,4 @@
-name: CI
+name: ruff
 
 on:
   push
@@ -7,6 +7,7 @@ jobs:
   ruff:
     name: Run Ruff
     runs-on: ubuntu-latest
+    permissions: write-all
 
     steps:
     - uses: actions/checkout@v4
