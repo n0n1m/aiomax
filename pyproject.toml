@@ -28,6 +28,8 @@ select = [
   "ASYNC"
 ]
 
+ignore = ["UP037"]
+
 fixable = ["ALL"]
 
 [tool.ruff.format]
@@ -37,7 +39,8 @@ indent-style = "space"
 [project]
 name = "aiomax"
 dependencies = [
-    "aiohttp"
+    "aiohttp",
+    "aiofiles"
 ]
 dynamic = ["version"]
 requires-python = ">= 3.9"
