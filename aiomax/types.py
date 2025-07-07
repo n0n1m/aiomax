@@ -1,5 +1,5 @@
 from . import utils
-from typing import *
+from typing import List, Literal, Callable, Dict
 from . import buttons
 
 

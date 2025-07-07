@@ -1,4 +1,4 @@
-from typing import *
+from typing import List, Callable, Literal
 
 from aiomax.types import Attachment
 from . import buttons

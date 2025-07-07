@@ -1,4 +1,4 @@
-from typing import *
+from typing import Any
 
 class FSMStorage:
     def __init__(self):

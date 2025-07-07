@@ -1,4 +1,4 @@
-from typing import *
+from typing import List, Literal
 
 
 class Button:
@@ -163,19 +163,19 @@ class ChatButton(Button):
         '''
         super().__init__('chat', text)
         self.title: str = title
-        self.description: "str | None" = description
-        self.payload: "str | None" = payload
-        self.uuid: "int | None" = uuid
+        self.description: str | None = description
+        self.payload: str | None = payload
+        self.uuid: int | None = uuid
 
     
     @staticmethod
     def from_json(data: dict) -> "ChatButton":
         return ChatButton(
             data['text'],
-            data.get('chat_title', None),
-            data.get('chat_description', None),
-            data.get('start_payload', None),
-            data.get('uuid', None)
+            data.get('chat_title'),
+            data.get('chat_description'),
+            data.get('start_payload'),
+            data.get('uuid')
         )
     
     

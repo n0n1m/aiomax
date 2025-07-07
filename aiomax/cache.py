@@ -1,5 +1,5 @@
-from typing import *
-from . import types
+from typing import Dict
+from .types import Message
 
 
 class MessageCache:
@@ -10,10 +10,10 @@ class MessageCache:
         :param max_size: Maximum number of messages to store
         '''
         self.max_size: int = max_size
-        self.messages: Dict[str, types.Message] = {}
+        self.messages: Dict[str, Message] = {}
 
 
-    def get_message(self, id: str) -> "types.Message | None":
+    def get_message(self, id: str) -> "Message | None":
         '''
         Returns a message by ID. None if message wasnt cached
 
@@ -22,7 +22,7 @@ class MessageCache:
         return self.messages.get(id, None)
     
 
-    def add_message(self, message: types.Message):
+    def add_message(self, message: Message):
         '''
         Caches a message.
 

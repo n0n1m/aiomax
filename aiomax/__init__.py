@@ -1,9 +1,5 @@
+from . import buttons, exceptions, filters, fsm, utils
 from .bot import *
+from .cache import *
 from .router import *
 from .types import *
-from . import buttons
-from . import utils
-from . import filters
-from .cache import *
-from . import fsm
-from . import exceptions

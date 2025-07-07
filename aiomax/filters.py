@@ -1,6 +1,5 @@
-from . import types
 import re
-from typing import *
+from typing import Any
 
 
 def normalize_filter(filter_):

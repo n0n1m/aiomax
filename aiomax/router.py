@@ -1,11 +1,12 @@
 
-from copy import deepcopy
-from typing import *
-from .types import *
-from .cache import *
-from .filters import equals, normalize_filter
-
 import logging
+from copy import deepcopy
+from typing import Callable, Tuple
+
+from .cache import *
+from .filters import normalize_filter
+from .types import CommandHandler, Handler, List, MessageHandler
+
 bot_logger = logging.getLogger("aiomax.bot")
 
 
@@ -35,7 +36,7 @@ t
         self._commands: dict[str, List[CommandHandler]] = {} # commands in this router
         self.case_sensitive: bool = case_sensitive
         self.parent = None # Parent bot of this router
-        self.routers: List["Router"] = []
+        self.routers: List[Router] = []
         self.filters: Dict[str, List[Callable]] = {
             'message_created': [],
             'message_edited': [],
@@ -105,7 +106,7 @@ t
     
 
     @property
-    def bot(self) -> "Bot":
+    def bot(self):
         '''
         Returns the bot this router is attached to.
         '''

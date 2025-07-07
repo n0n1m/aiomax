@@ -2,6 +2,38 @@
 requires = ["setuptools >= 77.0.3", "setuptools-git-versioning>=2.0"]
 build-backend = "setuptools.build_meta"
 
+[dependency-groups]
+lint = [
+    "ruff"
+]
+
+[tool.ruff]
+include = [
+    "aiomax/**.py",
+    "pyproject.toml",
+]
+fix = true
+line-length = 79
+indent-width = 4
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "B",
+  "I",
+  "UP",
+  "SIM",
+  "ASYNC"
+]
+
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
 [project]
 name = "aiomax"
 dependencies = [

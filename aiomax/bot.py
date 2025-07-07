@@ -1,15 +1,35 @@
 import asyncio
-from typing import *
-import aiohttp
-
-from . import utils
-from .types import *
-from .cache import *
-from . import fsm
-from .router import *
-from . import exceptions
-
 import logging
+from collections.abc import AsyncIterator
+from typing import IO, BinaryIO, List, Literal
+
+import aiohttp
+import buttons
+
+from . import exceptions, fsm, utils
+from .cache import MessageCache
+from .router import Router
+from .types import (
+    Attachment,
+    AudioAttachment,
+    BotCommand,
+    BotStartPayload,
+    Callback,
+    Chat,
+    ChatCreatePayload,
+    ChatMembershipPayload,
+    ChatTitleEditPayload,
+    CommandContext,
+    FileAttachment,
+    ImageRequestPayload,
+    Message,
+    MessageDeletePayload,
+    PhotoAttachment,
+    User,
+    UserMembershipPayload,
+    VideoAttachment,
+)
+
 bot_logger = logging.getLogger("aiomax.bot")
 
 class Bot(Router):
@@ -37,19 +57,19 @@ class Bot(Router):
         self.session = None
         self.polling = False
 
-        self.command_prefixes: "str | List[str]" = command_prefixes
+        self.command_prefixes: str | List[str] = command_prefixes
         self.mention_prefix: bool = mention_prefix
-        self.default_format: "str | None" = default_format
-        self.cache: "MessageCache | None" = MessageCache(max_messages_cached)\
+        self.default_format: str | None = default_format
+        self.cache: MessageCache | None = MessageCache(max_messages_cached)\
             if max_messages_cached > 0 else None
         
-        self.id: "int | None" = None
-        self.username: "str | None" = None
-        self.name: "str | None" = None
-        self.description: "str | None" = None
+        self.id: int | None = None
+        self.username: str | None = None
+        self.name: str | None = None
+        self.description: str | None = None
         self.bot_commands: List[BotCommand] = None
 
-        self.marker: "int | None" = None
+        self.marker: int | None = None
 
         self.storage = fsm.FSMStorage()
 
@@ -160,7 +180,7 @@ class Bot(Router):
         '''
         Returns info about the bot.
         '''
-        response = await self.get(f"https://botapi.max.ru/me")
+        response = await self.get("https://botapi.max.ru/me")
         user = await response.json()
         user = User.from_json(user)
 
@@ -203,7 +223,7 @@ class Bot(Router):
         }
         payload = {k: v for k, v in payload.items() if v}
 
-        response = await self.patch(f"https://botapi.max.ru/me", json=payload)
+        response = await self.patch("https://botapi.max.ru/me", json=payload)
         data = await response.json()
     
         # caching info
@@ -234,7 +254,7 @@ class Bot(Router):
                 "marker": marker,
             }
             params = {k: v for k, v in params.items() if v}
-            response = await self.get(f"https://botapi.max.ru/chats", params=params)
+            response = await self.get("https://botapi.max.ru/chats", params=params)
             data = await response.json()
         
             for chat in data['chats']:
@@ -602,7 +622,7 @@ class Bot(Router):
 
         try:
             response = await self.post(
-                f"https://botapi.max.ru/messages", params=params, json=body
+                "https://botapi.max.ru/messages", params=params, json=body
             )
             json = await response.json()
             if not json.get('success', True):
@@ -647,7 +667,7 @@ class Bot(Router):
 
         try:
             response = await self.put(
-                f"https://botapi.max.ru/messages", params=params, json=body
+                "https://botapi.max.ru/messages", params=params, json=body
             )
             json = await response.json()
             if not json.get('success', True):
@@ -675,7 +695,7 @@ class Bot(Router):
         }
 
         response = await self.delete(
-            f"https://botapi.max.ru/messages", params=params
+            "https://botapi.max.ru/messages", params=params
         )
         
         json = await response.json()
@@ -714,7 +734,7 @@ class Bot(Router):
         payload = {k: v for k, v in payload.items() if v}
 
         response = await self.get(
-            f"https://botapi.max.ru/updates", params=payload
+            "https://botapi.max.ru/updates", params=payload
         )
         json = await response.json()
         if 'marker' in json:
@@ -732,7 +752,7 @@ class Bot(Router):
         if update_type == "message_created":
             message = Message.from_json(update["message"])
             message.bot = self
-            message.user_locale = update.get('user_locale', None)
+            message.user_locale = update.get('user_locale')
             cursor = fsm.FSMCursor(self.storage, message.sender.user_id)
 
             # caching
@@ -810,7 +830,7 @@ class Bot(Router):
         if update_type == 'message_edited': 
             message = Message.from_json(update["message"])
             message.bot = self
-            message.user_locale = update.get('user_locale', None)
+            message.user_locale = update.get('user_locale')
             cursor = fsm.FSMCursor(self.storage, message.sender.user_id)
 
             # caching
@@ -895,7 +915,7 @@ class Bot(Router):
             handled = False
 
             callback = Callback.from_json(
-                update['callback'], update.get('message', None), update.get('user_locale', None), self
+                update['callback'], update.get('message'), update.get('user_locale'), self
             )
 
             cursor = fsm.FSMCursor(self.storage, callback.user.user_id)
