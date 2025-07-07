@@ -1016,3 +1016,4 @@ class Bot(Router):
         Shortcut for `asyncio.run(Bot.start_polling())`
         """
         asyncio.run(self.start_polling(*args, **kwargs))
+

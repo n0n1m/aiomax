@@ -23,3 +23,16 @@ jobs:
       run: |
         ruff check
         ruff format
+    
+    - name: Verify Changed files
+      uses: tj-actions/verify-changed-files@v20
+      id: verify-changed-files
+      with:
+        files: aiomax/**
+      
+    - name: Commit changes
+      uses: iarekylew00t/verified-bot-commit@v1
+      if: steps.verify-changed-files.outputs.files_changed == 'true'
+      with:
+        message: 'Run ruff'
+        files: aiomax/**
