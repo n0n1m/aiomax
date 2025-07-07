@@ -806,15 +806,13 @@ class Bot(Router):
                 args = " ".join(command.split()[1:])
 
                 if check_name not in self.commands:
-                    bot_logger.debug(f'Command "{name}" not handled')
-                    return
+                    bot_logger.debug(f"Command \"{name}\" not handled")
+                    continue
 
                 if len(self.commands[check_name]) == 0:
-                    bot_logger.debug(f'Command "{name}" not handled')
-                    return
-
-                block = False
-
+                    bot_logger.debug(f"Command \"{name}\" not handled")
+                    continue
+                
                 for i in self.commands[check_name]:
                     kwargs = utils.context_kwargs(i.call, cursor=cursor)
                     asyncio.create_task(
