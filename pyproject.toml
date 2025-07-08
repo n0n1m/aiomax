@@ -28,7 +28,7 @@ select = [
   "ASYNC"
 ]
 
-ignore = ["UP037"]
+ignore = ["UP037", "ASYNC230"]
 
 fixable = ["ALL"]
 

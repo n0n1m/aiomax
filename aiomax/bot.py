@@ -521,21 +521,28 @@ class Bot(Router):
         :param data: File-like object or path to the file
         :param type: File type
         """
-        if isinstance(data, str):
-            data = open(data, "rb")
+        file = None
+        try:
+            if isinstance(data, str):
+                file = open(data, "rb") # noqa: SIM115
+                data = file
 
-        form = aiohttp.FormData()
-        form.add_field("data", data)
-        url_resp = await self.post(
-            "https://botapi.max.ru/uploads", params={"type": type}
-        )
-        url_json = await url_resp.json()
-        token_resp = await self.session.post(url_json["url"], data=form)
-        if type in {"audio", "video"}:
-            return url_json
-        token_json = await token_resp.json()
+            form = aiohttp.FormData()
+            form.add_field("data", data)
+            url_resp = await self.post(
+                "https://botapi.max.ru/uploads", params={"type": type}
+            )
+            url_json = await url_resp.json()
+            token_resp = await self.session.post(url_json["url"], data=form)
+            if type in {"audio", "video"}:
+                return url_json
+            token_json = await token_resp.json()
 
-        return token_json
+            return token_json
+        
+        finally:
+            if file:
+                file.close()
 
     async def upload_image(self, data: "BinaryIO | str") -> PhotoAttachment:
         """

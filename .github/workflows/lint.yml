@@ -22,8 +22,8 @@ jobs:
 
     - name: Run ruff
       run: |
-        ruff check
         ruff format
+        ruff check
     
     - name: Verify Changed files
       uses: tj-actions/verify-changed-files@v20
