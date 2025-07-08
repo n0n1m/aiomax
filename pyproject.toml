@@ -39,8 +39,7 @@ indent-style = "space"
 [project]
 name = "aiomax"
 dependencies = [
-    "aiohttp",
-    "aiofiles"
+    "aiohttp"
 ]
 dynamic = ["version"]
 requires-python = ">= 3.9"

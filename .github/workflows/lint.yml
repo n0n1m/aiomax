@@ -1,4 +1,4 @@
-name: ruff
+name: Lint code
 
 on:
   push
@@ -35,5 +35,5 @@ jobs:
       uses: iarekylew00t/verified-bot-commit@v1
       if: steps.verify-changed-files.outputs.files_changed == 'true'
       with:
-        message: 'Run ruff'
+        message: 'Run Ruff'
         files: aiomax/**

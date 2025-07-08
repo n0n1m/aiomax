@@ -3,10 +3,9 @@ import logging
 from collections.abc import AsyncIterator
 from typing import IO, BinaryIO, Literal
 
-import aiofiles
 import aiohttp
-import buttons
 
+from . import buttons
 from . import exceptions, fsm, utils
 from .cache import MessageCache
 from .router import Router
@@ -523,7 +522,7 @@ class Bot(Router):
         :param type: File type
         """
         if isinstance(data, str):
-            data = aiofiles.open(data, "rb")
+            data = open(data, "rb")
 
         form = aiohttp.FormData()
         form.add_field("data", data)
@@ -910,9 +909,12 @@ class Bot(Router):
             cursor = fsm.FSMCursor(self.storage, payload.user.user_id)
 
             bot_logger.debug(
-                f'User "{payload.user!r}" \
-                    changed title of chat {payload.chat_id}'
+                (
+                    f'User "{payload.user!r} '
+                    f"changed title of chat {payload.chat_id}"
+                )
             )
+
 
             for i in self.handlers[update_type]:
                 kwargs = utils.context_kwargs(i, cursor=cursor)
@@ -986,8 +988,10 @@ class Bot(Router):
             await self.get_me()
 
             bot_logger.info(
-                f"Started polling with bot \
-                    @{self.username} ({self.id}) - {self.name}"
+                (
+                    f"Started polling with bot "
+                    f"@{self.username} ({self.id}) - {self.name}"
+                )
             )
 
             # ready event

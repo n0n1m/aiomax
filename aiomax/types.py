@@ -178,7 +178,7 @@ class VideoAttachment(Attachment):
 
 class AudioAttachment(Attachment):
     def __init__(
-        self, url: str, token: str, transcription: "str | None" = None
+        self, url: "str | None" = None, token: "str | None" = None, transcription: "str | None" = None
     ):
         """
         An audio attachment. Use `token` when uploading.

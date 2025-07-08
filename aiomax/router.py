@@ -3,7 +3,7 @@ from copy import deepcopy
 from typing import Callable, Optional
 
 from .filters import normalize_filter
-from .types import CommandHandler, Handler, List, MessageHandler
+from .types import CommandHandler, Handler, MessageHandler
 
 bot_logger = logging.getLogger("aiomax.bot")
 
@@ -18,7 +18,7 @@ class Router:
         :param case_sensitive: If False the bot will respond to commands
             regardless of case
         """
-        self._handlers: dict[str, List[Handler]] = {
+        self._handlers: dict[str, list[Handler]] = {
             "message_created": [],
             "on_ready": [],
             "bot_started": [],
@@ -33,12 +33,12 @@ class Router:
             "user_removed": [],
         }  # handlers in this router
         self._commands: dict[
-            str, List[CommandHandler]
+            str, list[CommandHandler]
         ] = {}  # commands in this router
         self.case_sensitive: bool = case_sensitive
         self.parent = None  # Parent bot of this router
-        self.routers: List[Router] = []
-        self.filters: dict[str, List[Callable]] = {
+        self.routers: list[Router] = []
+        self.filters: dict[str, list[Callable]] = {
             "message_created": [],
             "message_edited": [],
             "message_removed": [],
@@ -82,7 +82,7 @@ class Router:
     # routers
 
     @property
-    def handlers(self) -> dict[str, List[Handler]]:
+    def handlers(self) -> dict[str, list[Handler]]:
         """
         Returns all handlers in this and all the child routers.
         """
@@ -95,7 +95,7 @@ class Router:
         return out
 
     @property
-    def commands(self) -> dict[str, List[CommandHandler]]:
+    def commands(self) -> dict[str, list[CommandHandler]]:
         """
         Returns all commands in this and all the child routers.
         """
@@ -311,7 +311,7 @@ class Router:
     def on_command(
         self,
         name: "str | None" = None,
-        aliases: Optional[List[str]] = None,
+        aliases: Optional[list[str]] = None,
         as_message: bool = False,
     ):
         """
