@@ -805,13 +805,13 @@ class Bot(Router):
                 args = " ".join(command.split()[1:])
 
                 if check_name not in self.commands:
-                    bot_logger.debug(f"Command \"{name}\" not handled")
+                    bot_logger.debug(f'Command "{name}" not handled')
                     continue
 
                 if len(self.commands[check_name]) == 0:
-                    bot_logger.debug(f"Command \"{name}\" not handled")
+                    bot_logger.debug(f'Command "{name}" not handled')
                     continue
-                
+
                 for i in self.commands[check_name]:
                     kwargs = utils.context_kwargs(i.call, cursor=cursor)
                     asyncio.create_task(
@@ -1020,4 +1020,3 @@ class Bot(Router):
         Shortcut for `asyncio.run(Bot.start_polling())`
         """
         asyncio.run(self.start_polling(*args, **kwargs))
-
