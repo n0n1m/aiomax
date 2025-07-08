@@ -5,8 +5,7 @@ from typing import IO, BinaryIO, Literal
 
 import aiohttp
 
-from . import buttons
-from . import exceptions, fsm, utils
+from . import buttons, exceptions, fsm, utils
 from .cache import MessageCache
 from .router import Router
 from .types import (
@@ -524,7 +523,7 @@ class Bot(Router):
         file = None
         try:
             if isinstance(data, str):
-                file = open(data, "rb") # noqa: SIM115
+                file = open(data, "rb")  # noqa: SIM115
                 data = file
 
             form = aiohttp.FormData()
@@ -539,7 +538,7 @@ class Bot(Router):
             token_json = await token_resp.json()
 
             return token_json
-        
+
         finally:
             if file:
                 file.close()
@@ -916,12 +915,11 @@ class Bot(Router):
             cursor = fsm.FSMCursor(self.storage, payload.user.user_id)
 
             bot_logger.debug(
-                (
+                
                     f'User "{payload.user!r} '
                     f"changed title of chat {payload.chat_id}"
-                )
+                
             )
-
 
             for i in self.handlers[update_type]:
                 kwargs = utils.context_kwargs(i, cursor=cursor)
@@ -995,10 +993,10 @@ class Bot(Router):
             await self.get_me()
 
             bot_logger.info(
-                (
+                
                     f"Started polling with bot "
                     f"@{self.username} ({self.id}) - {self.name}"
-                )
+                
             )
 
             # ready event
