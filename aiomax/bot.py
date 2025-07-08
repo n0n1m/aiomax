@@ -3,6 +3,7 @@ import logging
 from collections.abc import AsyncIterator
 from typing import IO, BinaryIO, Literal
 
+import aiofiles
 import aiohttp
 
 from . import buttons, exceptions, fsm, utils
@@ -520,28 +521,25 @@ class Bot(Router):
         :param data: File-like object or path to the file
         :param type: File type
         """
-        file = None
-        try:
-            if isinstance(data, str):
-                file = open(data, "rb")  # noqa: SIM115
-                data = file
+        if isinstance(data, str):
+            async with aiofiles.open(data, "rb") as f: 
+                data = await f.read()
 
-            form = aiohttp.FormData()
-            form.add_field("data", data)
-            url_resp = await self.post(
-                "https://botapi.max.ru/uploads", params={"type": type}
-            )
-            url_json = await url_resp.json()
-            token_resp = await self.session.post(url_json["url"], data=form)
-            if type in {"audio", "video"}:
-                return url_json
-            token_json = await token_resp.json()
+        form = aiohttp.FormData()
+        form.add_field("data", data)
 
-            return token_json
+        url_resp = await self.post(
+            "https://botapi.max.ru/uploads", params={"type": type}
+        )
+        url_json = await url_resp.json()
+        token_resp = await self.session.post(url_json["url"], data=form)
 
-        finally:
-            if file:
-                file.close()
+        if type in {"audio", "video"}:
+            return url_json
+
+        token_json = await token_resp.json()
+        return token_json
+
 
     async def upload_image(self, data: "BinaryIO | str") -> PhotoAttachment:
         """
@@ -915,10 +913,8 @@ class Bot(Router):
             cursor = fsm.FSMCursor(self.storage, payload.user.user_id)
 
             bot_logger.debug(
-                
-                    f'User "{payload.user!r} '
-                    f"changed title of chat {payload.chat_id}"
-                
+                f'User "{payload.user!r} '
+                f"changed title of chat {payload.chat_id}"       
             )
 
             for i in self.handlers[update_type]:
@@ -993,10 +989,8 @@ class Bot(Router):
             await self.get_me()
 
             bot_logger.info(
-                
-                    f"Started polling with bot "
-                    f"@{self.username} ({self.id}) - {self.name}"
-                
+                f"Started polling with bot "
+                f"@{self.username} ({self.id}) - {self.name}"  
             )
 
             # ready event
