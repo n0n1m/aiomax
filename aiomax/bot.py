@@ -522,7 +522,7 @@ class Bot(Router):
         :param type: File type
         """
         if isinstance(data, str):
-            async with aiofiles.open(data, "rb") as f: 
+            async with aiofiles.open(data, "rb") as f:
                 data = await f.read()
 
         form = aiohttp.FormData()
@@ -539,7 +539,6 @@ class Bot(Router):
 
         token_json = await token_resp.json()
         return token_json
-
 
     async def upload_image(self, data: "BinaryIO | str") -> PhotoAttachment:
         """
@@ -914,7 +913,7 @@ class Bot(Router):
 
             bot_logger.debug(
                 f'User "{payload.user!r} '
-                f"changed title of chat {payload.chat_id}"       
+                f"changed title of chat {payload.chat_id}"
             )
 
             for i in self.handlers[update_type]:
@@ -990,7 +989,7 @@ class Bot(Router):
 
             bot_logger.info(
                 f"Started polling with bot "
-                f"@{self.username} ({self.id}) - {self.name}"  
+                f"@{self.username} ({self.id}) - {self.name}"
             )
 
             # ready event
