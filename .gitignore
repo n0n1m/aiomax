@@ -7,3 +7,4 @@ build
 dist/
 pypi.sh
 ignore.*
+.markdownlint.json

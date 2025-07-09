@@ -76,6 +76,9 @@ def context_kwargs(func: Callable, **kwargs):
 
 
 async def get_exception(response: aiohttp.ClientResponse):
+    if response.status in range(200, 300):
+        return None
+
     if response.content_type == "text/plain":
         text = await response.text()
         description = None

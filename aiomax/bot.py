@@ -95,10 +95,11 @@ class Bot(Router):
 
         response = await self.session.get(*args, params=params, **kwargs)
 
-        if response.status == 200:
-            return response
+        exception = await utils.get_exception(response)
 
-        raise await utils.get_exception(response)
+        if not exception:
+            return response
+        raise exception
 
     async def post(self, *args, **kwargs):
         """
@@ -114,10 +115,11 @@ class Bot(Router):
 
         response = await self.session.post(*args, params=params, **kwargs)
 
-        if response.status == 200:
-            return response
+        exception = await utils.get_exception(response)
 
-        raise await utils.get_exception(response)
+        if not exception:
+            return response
+        raise exception
 
     async def patch(self, *args, **kwargs):
         """
@@ -133,10 +135,11 @@ class Bot(Router):
 
         response = await self.session.patch(*args, params=params, **kwargs)
 
-        if response.status == 200:
-            return response
+        exception = await utils.get_exception(response)
 
-        raise await utils.get_exception(response)
+        if not exception:
+            return response
+        raise exception
 
     async def put(self, *args, **kwargs):
         """
@@ -152,10 +155,11 @@ class Bot(Router):
 
         response = await self.session.put(*args, params=params, **kwargs)
 
-        if response.status == 200:
-            return response
+        exception = await utils.get_exception(response)
 
-        raise await utils.get_exception(response)
+        if not exception:
+            return response
+        raise exception
 
     async def delete(self, *args, **kwargs):
         """
@@ -171,10 +175,11 @@ class Bot(Router):
 
         response = await self.session.delete(*args, params=params, **kwargs)
 
-        if response.status == 200:
-            return response
+        exception = await utils.get_exception(response)
 
-        raise await utils.get_exception(response)
+        if not exception:
+            return response
+        raise exception
 
     # send requests
 
@@ -235,10 +240,7 @@ class Bot(Router):
         if description:
             self.description = description
 
-        if response.status == 200:
-            return User.from_json(data)
-        else:
-            bot_logger.error(f"Failed to update bot info: {data}. ")
+        return User.from_json(data)
 
     async def get_chats(
         self, count_per_iter: int = 100
@@ -736,8 +738,7 @@ class Bot(Router):
         response = await self.get(
             f"https://botapi.max.ru/messages/{message_id}"
         )
-        if response.status != 200:
-            raise Exception(await response.text())
+
         data = await response.json()
 
         return Message.from_json(data)

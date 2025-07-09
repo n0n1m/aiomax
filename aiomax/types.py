@@ -52,8 +52,8 @@ class User:
         self.permissions: "list[str] | None" = permissions
 
     def __repr__(self):
-        return f"{type(self).__name__}(user_id={self.user_id!r}, \
-            name={self.name!r})"
+        return (f"{type(self).__name__}(user_id={self.user_id!r},"
+            "name={self.name!r})")
 
     def __eq__(self, other):
         if isinstance(other, User):
@@ -412,8 +412,8 @@ class MessageRecipient:
         self.chat_type: str = chat_type
 
     def __repr__(self):
-        return f"{type(self).__name__}(chat_id={self.chat_id!r}, \
-            chat_type={self.chat_type!r})"
+        return (f"{type(self).__name__}(chat_id={self.chat_id!r},"
+            f"chat_type={self.chat_type!r})")
 
     def __eq__(self, other):
         if isinstance(other, MessageRecipient):
@@ -1052,8 +1052,8 @@ class Chat:
         return False
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(chat_id={self.chat_id!r}, \
-            title={self.title!r})"
+        return (f"{self.__class__.__name__}(chat_id={self.chat_id!r},"
+            f"title={self.title!r})")
 
     @staticmethod
     def from_json(data: dict) -> "Chat | None":
