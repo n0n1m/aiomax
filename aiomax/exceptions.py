@@ -22,9 +22,9 @@ class ChatNotFound(AiomaxException):
     """
 
 
-class IncorrectTextSize(AiomaxException):
+class IncorrectTextLength(AiomaxException):
     """
-    Incorrect text size Exception
+    Incorrect text length Exception
     """
 
 

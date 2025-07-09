@@ -96,15 +96,19 @@ async def get_exception(response: aiohttp.ClientResponse):
 
     if text.startswith("Invalid access_token"):
         return exceptions.InvalidToken()
+    
     if (
         text == "attachment.not.ready"
         or description == "Key: errors.process.attachment.video.not.processed"
     ):
         return exceptions.AttachmentNotReady()
+    
     if text == "chat.not.found":
         return exceptions.ChatNotFound(description)
+    
     if description == "text: size must be between 0 and 4000":
-        return exceptions.IncorrectTextSize()
+        return exceptions.IncorrectTextLength()
+    
     if text == "internal.error":
         if description:
             return exceptions.InternalError(description.split()[-1])

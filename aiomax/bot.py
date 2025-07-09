@@ -618,7 +618,7 @@ class Bot(Router):
             )
         if not (chat_id is None or user_id is None):
             raise exceptions.AiomaxException(
-                "Both chat_id and user_idcannot be provided"
+                "Both chat_id and user_id cannot be provided"
             )
 
         # sending
