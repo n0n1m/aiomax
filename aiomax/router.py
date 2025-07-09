@@ -2,6 +2,7 @@ import logging
 from copy import deepcopy
 from typing import Callable, Optional
 
+from . import exceptions
 from .filters import normalize_filter
 from .types import CommandHandler, Handler, MessageHandler
 
@@ -331,7 +332,10 @@ class Router:
             if name is None:
                 command_name = func.__name__
             else:
-                assert " " not in name, "Command name cannot contain spaces"
+                if " " in name:
+                    raise exceptions.AiomaxException(f'Command name "{name}" '
+                                                     "cannot contain spaces")
+            
                 command_name = name
 
             check_name = (
@@ -345,7 +349,9 @@ class Router:
 
             # aliases
             for i in aliases:
-                assert " " not in i, "Command alias cannot contain spaces"
+                if " " in i:
+                    raise exceptions.AiomaxException(f'Command alias "{i}" '
+                                                     "cannot contain spaces")
 
                 check_name = i.lower() if not self.case_sensitive else i
                 if check_name not in self._commands:

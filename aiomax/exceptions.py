@@ -1,16 +1,41 @@
-class InvalidToken(Exception):
+class AiomaxException(Exception):
+    """
+    Default class for aiomax Exceptions
+    """
+
+class InvalidToken(AiomaxException):
     """
     Invalid token Exception
     """
 
 
-class AttachmentNotReady(Exception):
+class AttachmentNotReady(AiomaxException):
     """
     Attachment not ready Exception
     """
 
 
-class ChatNotFound(Exception):
+class ChatNotFound(AiomaxException):
     """
     Chat not found Exception
     """
+
+class IncorrectTextSize(AiomaxException):
+    """
+    Incorrect text size Exception
+    """
+
+class InternalError(AiomaxException):
+    """
+    Internal error Exception
+    """
+    def __init__(self, id: "str | None" = None):
+        self.id: str = id
+
+class UnknownErrorException(AiomaxException):
+    """
+    Unknown error Exception
+    """
+    def __init__(self, text: str, description: "str | None" = None):
+        self.text: str = text
+        self.description: str | None = description

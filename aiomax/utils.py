@@ -55,7 +55,9 @@ def get_message_body(
             attachments = [attachments]
 
         for at in attachments or []:
-            assert hasattr(at, "as_dict"), "This attachment cannot be sent"
+            if not hasattr(at, "as_dict"):
+                raise exceptions.AiomaxException("This attachment"
+                                                 "cannot be sent")
             body["attachments"].append(at.as_dict())
 
     if attachments == [] and "attachments" not in body:
@@ -100,7 +102,12 @@ async def get_exception(response: aiohttp.ClientResponse):
         return exceptions.AttachmentNotReady()
     if text == "chat.not.found":
         return exceptions.ChatNotFound(description)
+    if description == "text: size must be between 0 and 4000":
+        return exceptions.IncorrectTextSize()
+    if text == "internal.error":
+        if description:
+            return exceptions.InternalError(description.split()[-1])
+        return exceptions.InternalError()
 
-    if description:
-        return Exception(f"Unknown error: {text}: {description}")
-    return Exception(f"Unknown error: {text}")
+
+    return exceptions.UnknownErrorException(text, description)

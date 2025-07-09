@@ -612,10 +612,12 @@ class Bot(Router):
         :param attachments: List of attachments
         """
         # error checking
-        assert chat_id or user_id, "Either chat_id or user_id must be provided"
-        assert not (chat_id and user_id), (
-            "Both chat_id and user_id cannot be provided"
-        )
+        if chat_id is None and user_id is None:
+            raise exceptions.AiomaxException("Either chat_id or user_id "
+                                             "must be provided")
+        if not (chat_id is None or user_id is None):
+            raise exceptions.AiomaxException("Both chat_id and user_id"
+                                             "cannot be provided")
 
         # sending
         params = {
