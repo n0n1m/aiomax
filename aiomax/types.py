@@ -52,8 +52,10 @@ class User:
         self.permissions: "list[str] | None" = permissions
 
     def __repr__(self):
-        return (f"{type(self).__name__}(user_id={self.user_id!r},"
-            "name={self.name!r})")
+        return (
+            f"{type(self).__name__}(user_id={self.user_id!r},"
+            "name={self.name!r})"
+        )
 
     def __eq__(self, other):
         if isinstance(other, User):
@@ -412,8 +414,10 @@ class MessageRecipient:
         self.chat_type: str = chat_type
 
     def __repr__(self):
-        return (f"{type(self).__name__}(chat_id={self.chat_id!r},"
-            f"chat_type={self.chat_type!r})")
+        return (
+            f"{type(self).__name__}(chat_id={self.chat_id!r},"
+            f"chat_type={self.chat_type!r})"
+        )
 
     def __eq__(self, other):
         if isinstance(other, MessageRecipient):
@@ -989,8 +993,9 @@ class ImageRequestPayload:
         if url is None and token is None:
             raise exceptions.AiomaxException("Token or URL must be specified")
         if not (url is None or token is None):
-            raise exceptions.AiomaxException("Token and URL cannot"
-                                             "be specified at the same time")
+            raise exceptions.AiomaxException(
+                "Token and URL cannotbe specified at the same time"
+            )
 
         self.url: "str | None" = url
         self.token: "str | None" = token
@@ -1053,8 +1058,10 @@ class Chat:
         return False
 
     def __repr__(self):
-        return (f"{self.__class__.__name__}(chat_id={self.chat_id!r},"
-            f"title={self.title!r})")
+        return (
+            f"{self.__class__.__name__}(chat_id={self.chat_id!r},"
+            f"title={self.title!r})"
+        )
 
     @staticmethod
     def from_json(data: dict) -> "Chat | None":
@@ -1116,7 +1123,7 @@ class Callback:
         """
         if self.bot is None:
             return
-        
+
         if self.message is None:
             raise exceptions.AiomaxException("Original message not found")
 
@@ -1155,7 +1162,7 @@ class Callback:
         """
         if self.bot is None:
             return
-        
+
         if self.message is None:
             raise exceptions.AiomaxException("Original message not found")
 
@@ -1193,8 +1200,9 @@ class Callback:
         :param attachments: List of attachments
         """
         if notification is None and text is None or attachments is None:
-            raise exceptions.AiomaxException("Either notification, text or "
-                                             "attachments must be specified")
+            raise exceptions.AiomaxException(
+                "Either notification, text or attachments must be specified"
+            )
         body = {"notification": notification, "message": None}
         if keyboard is None and self.message is not None:
             keyboard = [

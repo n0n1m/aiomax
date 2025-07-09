@@ -333,9 +333,10 @@ class Router:
                 command_name = func.__name__
             else:
                 if " " in name:
-                    raise exceptions.AiomaxException(f'Command name "{name}" '
-                                                     "cannot contain spaces")
-            
+                    raise exceptions.AiomaxException(
+                        f'Command name "{name}" cannot contain spaces'
+                    )
+
                 command_name = name
 
             check_name = (
@@ -350,8 +351,9 @@ class Router:
             # aliases
             for i in aliases:
                 if " " in i:
-                    raise exceptions.AiomaxException(f'Command alias "{i}" '
-                                                     "cannot contain spaces")
+                    raise exceptions.AiomaxException(
+                        f'Command alias "{i}" cannot contain spaces'
+                    )
 
                 check_name = i.lower() if not self.case_sensitive else i
                 if check_name not in self._commands:
