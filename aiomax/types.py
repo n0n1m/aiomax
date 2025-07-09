@@ -1444,7 +1444,7 @@ class UserMembershipPayload:
 
     @property
     def user_id(self):
-        return self.sender.user_id
+        return self.user.user_id
 
     @staticmethod
     def from_json(data: dict) -> "UserMembershipPayload | None":
