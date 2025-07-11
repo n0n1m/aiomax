@@ -784,7 +784,7 @@ class Bot(Router):
             # handling commands
             prefixes = (
                 self.command_prefixes
-                if isinstance(self.command_prefixes, str)
+                if not isinstance(self.command_prefixes, str)
                 else [self.command_prefixes]
             )
             prefixes = list(prefixes)
