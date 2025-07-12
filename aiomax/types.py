@@ -1199,7 +1199,7 @@ class Callback:
         :param keyboard: An inline keyboard to attach to the message
         :param attachments: List of attachments
         """
-        if notification is None and text is None or attachments is None:
+        if notification is None and text is None and attachments is None:
             raise exceptions.AiomaxException(
                 "Either notification, text or attachments must be specified"
             )
