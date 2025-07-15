@@ -46,6 +46,7 @@ class UnknownErrorException(AiomaxException):
         self.text: str = text
         self.description: str | None = description
 
+
 class AccessDeniedException(AiomaxException):
     """
     Access Denied
