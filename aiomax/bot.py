@@ -872,8 +872,6 @@ class Bot(Router):
                 if all(filters):
                     kwargs = utils.context_kwargs(
                         handler.call,
-                        before=old_message,
-                        after=message,
                         cursor=cursor,
                     )
                     asyncio.create_task(
