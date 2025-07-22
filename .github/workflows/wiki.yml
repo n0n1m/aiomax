@@ -12,7 +12,6 @@ on:
 jobs:
   wiki-deploy:
     runs-on: ubuntu-latest
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up deploy keys to push to remote
