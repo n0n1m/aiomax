@@ -1,0 +1,39 @@
+name: Lint code
+
+on:
+  push
+
+jobs:
+  ruff:
+    name: Run Ruff
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+
+    - name: Install ruff
+      run: |
+        python3 -m pip install ruff
+
+    - name: Run ruff
+      run: |
+        ruff format
+        ruff check
+    
+    - name: Verify Changed files
+      uses: tj-actions/verify-changed-files@v20
+      id: verify-changed-files
+      with:
+        files: aiomax/**
+      
+    - name: Commit changes
+      uses: iarekylew00t/verified-bot-commit@v1
+      if: steps.verify-changed-files.outputs.files_changed == 'true'
+      with:
+        message: 'Run Ruff'
+        files: aiomax/**

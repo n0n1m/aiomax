@@ -5,11 +5,9 @@ on:
     paths:
       - "docs/**"
       - "!docs/README.md"
+    branches:
+      - "main"
   workflow_dispatch: {}
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
 
 jobs:
   wiki-deploy:
@@ -41,5 +39,5 @@ jobs:
           git config user.email "$(git -C .. log -1 --pretty=%ae)"
           git add -A
           git reset README.md
-          git commit -m "${{ github.event.head_commit.message }}"
+          git commit -m "$(git log -1 --pretty=format:"%s")"
           git push -f origin HEAD:master
